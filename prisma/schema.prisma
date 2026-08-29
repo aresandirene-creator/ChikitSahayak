@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Patient identification & demographics
+model Patient {
+  id          String   @id @default(cuid())
+  abhaId      String?  @unique // ABHA / ABDM ID
+  name        String
+  age         Int?
+  gender      String?  // male | female | other
+  phone       String?
+  email       String?
+  address     String?
+  language    String   @default("en") // preferred language code
+  ayushMode   Boolean  @default(false) // AYUSH / Ayurvedic history mode
+  bloodGroup  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  consents       Consent[]
+  chatMessages   ChatMessage[]
+  documents      Document[]
+  summaries      ClinicalSummary[]
+  redFlags       RedFlagAlert[]
+  abdmRecords    ABDMRecord[]
+}
+
+// Consent records (consent-based data sharing)
+model Consent {
+  id           String   @id @default(cuid())
+  patientId    String
+  patient      Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  scope        String   // history | documents | summary | abdm_share
+  granted      Boolean  @default(false)
+  grantedAt    DateTime?
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// AI Conversational history messages
+model ChatMessage {
+  id           String   @id @default(cuid())
+  patientId    String
+  patient      Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  role         String   // user | assistant | system
+  content      String
+  section      String   @default("general") // hpi | past_history | medications | allergies | family_history | ros | ayurvedic | general
+  language     String   @default("en")
+  audioPath    String?  // optional path to TTS audio
+  createdAt    DateTime @default(now())
+}
+
+// Uploaded medical documents (prescriptions, lab reports, discharge summaries)
+model Document {
+  id           String   @id @default(cuid())
+  patientId    String
+  patient      Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  fileName     String
+  fileType     String   // prescription | lab_report | discharge_summary | other
+  mimeType     String
+  fileSize     Int      @default(0)
+  dataUrl      String   // base64 data URL for storage
+  // AI-extracted structured data stored as JSON string
+  extractedData String? @default("{}") // JSON: { diagnoses, medicines, tests, procedures, ... }
+  status       String   @default("pending") // pending | analyzing | completed | failed
+  recordDate   DateTime? // date of the medical record (chronological)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// AI-generated physician-readable clinical summary
+model ClinicalSummary {
+  id           String   @id @default(cuid())
+  patientId    String
+  patient      Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  // Structured sections stored as JSON
+  sections     String   @default("{}") // JSON: { hpi, pastHistory, medications, allergies, familyHistory, ros, ayurvedic, documents, assessment }
+  freeText     String?  @default("") // overall summary markdown
+  status       String   @default("draft") // draft | confirmed | rejected | edited
+  physicianNotes String? @default("")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Red-flag symptom alerts detected during history taking
+model RedFlagAlert {
+  id           String   @id @default(cuid())
+  patientId    String
+  patient      Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  symptom      String
+  severity     String   @default("moderate") // mild | moderate | severe | critical
+  reasoning    String?  // why AI flagged this
+  acknowledged Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}
+
+// ABDM / Hospital integration records
+model ABDMRecord {
+  id           String   @id @default(cuid())
+  patientId    String
+  patient      Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  action       String   // link_abha | fetch_records | share_to_his | push_summary
+  status       String   @default("pending") // pending | success | failed
+  fhirPayload  String?  // FHIR bundle as JSON string
+  message      String?
+  createdAt    DateTime @default(now())
+}
