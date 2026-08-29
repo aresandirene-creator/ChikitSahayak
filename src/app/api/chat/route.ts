@@ -8,11 +8,11 @@ import {
 import { pickTtsVoiceForLanguage } from "@/lib/languages";
 
 // POST /api/chat — one turn of the AI history-taking conversation.
-// Body: { patientId, message, language?, section?, withAudio? }
+// Body: { patientId, encounterId?, message, language?, section?, withAudio? }
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { patientId, message, withAudio = false } = body;
+    const { patientId, encounterId, message, withAudio = false } = body;
     if (!patientId || !message) {
       return NextResponse.json({ error: "patientId and message required" }, { status: 400 });
     }
@@ -20,9 +20,9 @@ export async function POST(req: NextRequest) {
     const patient = await db.patient.findUnique({ where: { id: patientId } });
     if (!patient) return NextResponse.json({ error: "patient not found" }, { status: 404 });
 
-    // Load prior chat history
+    // Load prior chat history for THIS encounter (or all-time if no encounter)
     const priorTurns = await db.chatMessage.findMany({
-      where: { patientId },
+      where: { patientId, ...(encounterId ? { encounterId } : {}) },
       orderBy: { createdAt: "asc" },
     });
 
@@ -51,6 +51,7 @@ export async function POST(req: NextRequest) {
     await db.chatMessage.create({
       data: {
         patientId,
+        encounterId: encounterId ?? null,
         role: "user",
         content: message,
         section: body.section ?? "general",
@@ -71,6 +72,7 @@ export async function POST(req: NextRequest) {
     const saved = await db.chatMessage.create({
       data: {
         patientId,
+        encounterId: encounterId ?? null,
         role: "assistant",
         content: parsed.cleanText,
         section: parsed.section,
@@ -86,6 +88,7 @@ export async function POST(req: NextRequest) {
           db.redFlagAlert.create({
             data: {
               patientId,
+              encounterId: encounterId ?? null,
               symptom: rf.symptom,
               severity: rf.severity,
               reasoning: rf.reasoning,
@@ -108,7 +111,6 @@ export async function POST(req: NextRequest) {
     if (withAudio) {
       try {
         const voice = pickTtsVoiceForLanguage(patient.language || "en");
-        // TTS API limit is 1024 chars; truncate if needed
         const ttsText = parsed.cleanText.slice(0, 1000);
         const ttsResp = await zai.audio.tts.create({
           input: ttsText,
@@ -140,13 +142,14 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET /api/chat?patientId=xxx — fetch conversation history
+// GET /api/chat?patientId=xxx&encounterId=yyy — fetch conversation history
 export async function GET(req: NextRequest) {
   try {
     const patientId = req.nextUrl.searchParams.get("patientId");
+    const encounterId = req.nextUrl.searchParams.get("encounterId");
     if (!patientId) return NextResponse.json({ error: "patientId required" }, { status: 400 });
     const turns = await db.chatMessage.findMany({
-      where: { patientId },
+      where: { patientId, ...(encounterId ? { encounterId } : {}) },
       orderBy: { createdAt: "asc" },
     });
     return NextResponse.json({ turns });

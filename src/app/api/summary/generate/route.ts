@@ -55,20 +55,21 @@ Now produce the structured clinical summary as instructed.`;
 }
 
 // POST /api/summary/generate — generate an AI clinical summary
-// Body: { patientId }
+// Body: { patientId, encounterId? }
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { patientId } = body;
+    const { patientId, encounterId } = body;
     if (!patientId) return NextResponse.json({ error: "patientId required" }, { status: 400 });
 
     const patient = await db.patient.findUnique({ where: { id: patientId } });
     if (!patient) return NextResponse.json({ error: "patient not found" }, { status: 404 });
 
+    const enc = encounterId ? { encounterId } : {};
     const [turns, documents, redFlags] = await Promise.all([
-      db.chatMessage.findMany({ where: { patientId }, orderBy: { createdAt: "asc" } }),
-      db.document.findMany({ where: { patientId, status: "completed" }, orderBy: { recordDate: "asc" } }),
-      db.redFlagAlert.findMany({ where: { patientId }, orderBy: { createdAt: "asc" } }),
+      db.chatMessage.findMany({ where: { patientId, ...enc }, orderBy: { createdAt: "asc" } }),
+      db.document.findMany({ where: { patientId, status: "completed", ...enc }, orderBy: { recordDate: "asc" } }),
+      db.redFlagAlert.findMany({ where: { patientId, ...enc }, orderBy: { createdAt: "asc" } }),
     ]);
 
     const systemPrompt = buildSummarySystemPrompt({
@@ -176,8 +177,10 @@ export async function POST(req: NextRequest) {
       sections[k as keyof ClinicalSummarySections] = buffers[k].join("\n").trim();
     }
 
-    // Persist or update summary
-    const existing = await db.clinicalSummary.findFirst({ where: { patientId } });
+    // Persist or update summary (scoped to encounter if provided)
+    const existing = await db.clinicalSummary.findFirst({
+      where: { patientId, ...(encounterId ? { encounterId } : {}) },
+    });
     let summary;
     if (existing) {
       summary = await db.clinicalSummary.update({
@@ -192,6 +195,7 @@ export async function POST(req: NextRequest) {
       summary = await db.clinicalSummary.create({
         data: {
           patientId,
+          encounterId: encounterId ?? null,
           sections: JSON.stringify(sections),
           freeText,
           status: "draft",

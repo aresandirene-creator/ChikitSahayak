@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
-// POST /api/patient — create a patient
+// POST /api/patient — create a patient AND their first encounter
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -23,23 +23,32 @@ export async function POST(req: NextRequest) {
         ayushMode: Boolean(ayushMode),
         bloodGroup: bloodGroup ?? null,
         abhaId: abhaId ?? null,
+        encounters: { create: [{ status: "in_progress" }] },
       },
+      include: { encounters: { orderBy: { startedAt: "desc" }, take: 1 } },
     });
 
-    return NextResponse.json({ success: true, patient });
+    return NextResponse.json({
+      success: true,
+      patient,
+      encounter: patient.encounters[0],
+    });
   } catch (err) {
     console.error("POST /api/patient error:", err);
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }
 }
 
-// GET /api/patient?id=xxx — fetch a patient
+// GET /api/patient?id=xxx — fetch a patient with latest encounter
 export async function GET(req: NextRequest) {
   try {
     const id = req.nextUrl.searchParams.get("id");
     if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
 
-    const patient = await db.patient.findUnique({ where: { id } });
+    const patient = await db.patient.findUnique({
+      where: { id },
+      include: { encounters: { orderBy: { startedAt: "desc" }, take: 5 } },
+    });
     if (!patient) return NextResponse.json({ error: "not found" }, { status: 404 });
 
     return NextResponse.json({ patient });
@@ -48,7 +57,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// PATCH /api/patient?id=xxx — update fields
+// PATCH /api/patient?id=xxx — update demographics
 export async function PATCH(req: NextRequest) {
   try {
     const id = req.nextUrl.searchParams.get("id");

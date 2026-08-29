@@ -1,28 +1,7 @@
-// Supported languages for MediKiosk (Indian languages + English)
-export const LANGUAGES = [
-  { code: "en", name: "English", nativeName: "English", flag: "EN" },
-  { code: "hi", name: "Hindi", nativeName: "हिन्दी", flag: "HI" },
-  { code: "bn", name: "Bengali", nativeName: "বাংলা", flag: "BN" },
-  { code: "ta", name: "Tamil", nativeName: "தமிழ்", flag: "TA" },
-  { code: "te", name: "Telugu", nativeName: "తెలుగు", flag: "TE" },
-  { code: "mr", name: "Marathi", nativeName: "मराठी", flag: "MR" },
-  { code: "gu", name: "Gujarati", nativeName: "ગુજરાતી", flag: "GU" },
-  { code: "kn", name: "Kannada", nativeName: "ಕನ್ನಡ", flag: "KN" },
-  { code: "ml", name: "Malayalam", nativeName: "മലയാളം", flag: "ML" },
-  { code: "pa", name: "Punjabi", nativeName: "ਪੰਜਾਬੀ", flag: "PA" },
-  { code: "ur", name: "Urdu", nativeName: "اردو", flag: "UR" },
-  { code: "or", name: "Odia", nativeName: "ଓଡ଼ିଆ", flag: "OR" },
-] as const;
-
-export type LanguageCode = (typeof LANGUAGES)[number]["code"];
-
-export function getLanguageName(code: string): string {
-  return LANGUAGES.find((l) => l.code === code)?.name ?? "English";
-}
-
-export function getLanguageNativeName(code: string): string {
-  return LANGUAGES.find((l) => l.code === code)?.nativeName ?? "English";
-}
+// Shared helpers used by both backend and the chat history UI.
+// The full language catalogue lives in src/lib/i18n.ts (used by the UI and
+// the i18n hook). This file keeps backend-side helpers (TTS voice picking)
+// and the history-section catalogue used by HistoryStep.
 
 // Clinical history sections supported by MediKiosk
 export const HISTORY_SECTIONS = [

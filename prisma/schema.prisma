@@ -10,14 +10,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Patient identification & demographics
+// Patient identification & demographics. A patient can have many encounters
+// (visits / appointments). Demographics persist across encounters so a
+// returning patient can log in by phone or ABHA and skip re-entering info.
 model Patient {
   id          String   @id @default(cuid())
   abhaId      String?  @unique // ABHA / ABDM ID
   name        String
   age         Int?
-  gender      String?  // male | female | other
-  phone       String?
+  gender      String?  // male | female | other | prefer_not
+  phone       String?  // used for returning-patient login
   email       String?
   address     String?
   language    String   @default("en") // preferred language code
@@ -27,6 +29,20 @@ model Patient {
   updatedAt   DateTime @updatedAt
 
   consents       Consent[]
+  encounters     Encounter[]
+}
+
+// A single visit / appointment. Each patient gets a fresh encounter per visit
+// so chat history, documents, summary, red flags and ABDM actions are scoped
+// to the current consultation only — protecting returning-patient privacy.
+model Encounter {
+  id          String   @id @default(cuid())
+  patientId   String
+  patient     Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  status      String   @default("in_progress") // in_progress | completed
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+
   chatMessages   ChatMessage[]
   documents      Document[]
   summaries      ClinicalSummary[]
@@ -34,84 +50,95 @@ model Patient {
   abdmRecords    ABDMRecord[]
 }
 
-// Consent records (consent-based data sharing)
+// Consent records (consent-based data sharing). Each scope can be granted or
+// revoked independently so the patient controls what is stored / shared.
 model Consent {
   id           String   @id @default(cuid())
   patientId    String
   patient      Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  scope        String   // history | documents | summary | abdm_share
+  encounterId  String?  // optional: scoped to a visit
+  scope        String   // demographics | history | documents | summary | abdm_share
   granted      Boolean  @default(false)
+  retentionDays Int?    // how long the data may be retained (7 / 30 / 90 / 365)
   grantedAt    DateTime?
   notes        String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
 
-// AI Conversational history messages
+// AI Conversational history messages — scoped to an encounter
 model ChatMessage {
   id           String   @id @default(cuid())
   patientId    String
-  patient      Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  encounterId  String?
   role         String   // user | assistant | system
   content      String
   section      String   @default("general") // hpi | past_history | medications | allergies | family_history | ros | ayurvedic | general
   language     String   @default("en")
-  audioPath    String?  // optional path to TTS audio
+  audioPath    String?
   createdAt    DateTime @default(now())
+
+  encounter    Encounter? @relation(fields: [encounterId], references: [id], onDelete: Cascade)
 }
 
 // Uploaded medical documents (prescriptions, lab reports, discharge summaries)
 model Document {
   id           String   @id @default(cuid())
   patientId    String
-  patient      Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  encounterId  String?
   fileName     String
   fileType     String   // prescription | lab_report | discharge_summary | other
   mimeType     String
   fileSize     Int      @default(0)
   dataUrl      String   // base64 data URL for storage
-  // AI-extracted structured data stored as JSON string
   extractedData String? @default("{}") // JSON: { diagnoses, medicines, tests, procedures, ... }
   status       String   @default("pending") // pending | analyzing | completed | failed
-  recordDate   DateTime? // date of the medical record (chronological)
+  recordDate   DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  encounter    Encounter? @relation(fields: [encounterId], references: [id], onDelete: Cascade)
 }
 
-// AI-generated physician-readable clinical summary
+// AI-generated physician-readable clinical summary — scoped to an encounter
 model ClinicalSummary {
   id           String   @id @default(cuid())
   patientId    String
-  patient      Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  // Structured sections stored as JSON
-  sections     String   @default("{}") // JSON: { hpi, pastHistory, medications, allergies, familyHistory, ros, ayurvedic, documents, assessment }
-  freeText     String?  @default("") // overall summary markdown
+  encounterId  String?
+  sections     String   @default("{}") // JSON of structured sections
+  freeText     String?  @default("")
   status       String   @default("draft") // draft | confirmed | rejected | edited
   physicianNotes String? @default("")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  encounter    Encounter? @relation(fields: [encounterId], references: [id], onDelete: Cascade)
 }
 
-// Red-flag symptom alerts detected during history taking
+// Red-flag symptom alerts — scoped to an encounter
 model RedFlagAlert {
   id           String   @id @default(cuid())
   patientId    String
-  patient      Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  encounterId  String?
   symptom      String
   severity     String   @default("moderate") // mild | moderate | severe | critical
-  reasoning    String?  // why AI flagged this
+  reasoning    String?
   acknowledged Boolean  @default(false)
   createdAt    DateTime @default(now())
+
+  encounter    Encounter? @relation(fields: [encounterId], references: [id], onDelete: Cascade)
 }
 
-// ABDM / Hospital integration records
+// ABDM / Hospital integration records — scoped to an encounter
 model ABDMRecord {
   id           String   @id @default(cuid())
   patientId    String
-  patient      Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  encounterId  String?
   action       String   // link_abha | fetch_records | share_to_his | push_summary
   status       String   @default("pending") // pending | success | failed
-  fhirPayload  String?  // FHIR bundle as JSON string
+  fhirPayload  String?
   message      String?
   createdAt    DateTime @default(now())
+
+  encounter    Encounter? @relation(fields: [encounterId], references: [id], onDelete: Cascade)
 }

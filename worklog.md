@@ -132,3 +132,70 @@ Stage Summary:
 - Browser-verified interactivity on both desktop and mobile viewports
 - Sticky footer is sticky and pushed down naturally on long content
 - Lint clean, dev server running on port 3000, no fatal errors in dev.log
+
+---
+Task ID: v2 (MediKiosk redesign — DKMS preface, granular consent, i18n, login, auto-reset)
+Agent: main (MediKiosk architect)
+Task: Major redesign per user request: DKMS-style preface tab, proper granular consent form, full-UI i18n on language change, cleaner medical theme, privacy auto-reset after consultation, returning patient login, more graphical UI for uneducated users.
+
+Work Log:
+Schema & backend:
+- Added `Encounter` model — each visit is a fresh encounter so returning patients get a clean intake without their previous visit's chat/docs/summary loaded.
+- Added `encounterId` (nullable) to ChatMessage, Document, ClinicalSummary, RedFlagAlert, ABDMRecord.
+- Added `retentionDays` to Consent for the retention-period consent choice.
+- Added `phone` field prominently (used for returning-patient login).
+- New API: POST /api/patient/lookup — find existing patient by phone or ABHA.
+- New API: POST/PATCH /api/encounter — create new encounter (for returning login), mark encounter completed (privacy).
+- Updated /api/patient POST to also create the first encounter (nested write).
+- Updated /api/chat, /api/documents, /api/summary/generate, /api/abdm to filter by encounterId when provided.
+- Updated /api/consent to accept encounterId + retentionDays.
+
+i18n system:
+- Created src/lib/i18n.ts with a Translation interface (~160 keys covering every visible UI string) and full translations for English + Hindi, plus key-string translations for Bengali, Tamil, Telugu, Marathi, Gujarati, Kannada, Malayalam, Punjabi, Urdu, Odia (with English fallback for any missing key).
+- Created src/lib/use-i18n.ts — useI18n() hook returning { t, lang } bound to store.uiLanguage.
+- Added uiLanguage + setUiLanguage to the Zustand store; setPatient() now also switches uiLanguage to the patient's preferred language.
+- Changing the language anywhere (preface grid, header dropdown, identify-step inline grid) updates uiLanguage and the ENTIRE UI re-renders in that language instantly.
+
+New / rebuilt components:
+- PrefaceScreen (replaces WelcomeScreen) — DKMS-style two-tab choice: "I am a new patient" / "I am returning for a follow-up", full 12-language grid, feature cards, impact callout.
+- LoginStep — modal overlay for returning-patient login: phone or ABHA lookup → if found, shows confirmation → creates fresh encounter → jumps straight to consent (demographics pre-filled, identify skipped).
+- LanguageSwitcher — used in two modes: compact dropdown in header (always visible) and full grid on preface/identify.
+- IdentifyStep — rebuilt with i18n + inline language grid (12 language buttons with native script + flag). Changing language here updates the whole UI live.
+- ConsentStep — rebuilt with granular per-category consent (5 items: demographics, history, documents, summary, abdm_share) + retention period selector (7/30/90/365 days or "until I withdraw"). Allow all / Deny all optional helpers.
+- HistoryStep, DocumentsStep, SummaryStep, AbdmStep, CompleteStep, RedFlagToast, WorkflowProgress, PatientHeader — all rebuilt with i18n.
+- CompleteStep now has a 30-second privacy auto-reset countdown. On reaching zero, it calls reset() (wipes the local store) and returns to the preface — implementing "privacy after consultation: system automatically switches to new onboarding".
+
+Theme & UX:
+- Switched to a cleaner, more basic medical theme: white background, emerald/teal accent, less gradient, more flat. Removed the gradient backgrounds.
+- Header: white with emerald border-bottom. Footer: white with subtle shadow.
+- Larger touch targets (size-14 mic/send buttons, h-12/h-11 form controls, h-12 footer buttons).
+- More graphical: big icons for every section, color-coded consent items (sky/rose/emerald/amber/teal), language buttons with native-script flags.
+
+Bugs fixed during verification:
+- Prisma client needed regeneration + dev server restart after schema change (Turbopack cached stale client) → fixed by `bun run db:generate` + restart.
+- medical-prompts.ts still imported getLanguageName/getLanguageNativeName from `./languages` after I moved them to `./i18n` → fixed import.
+- ConsentStep was building the translation key dynamically (`consentItem${scope}Title`) which produced `consentItemAbdm_shareTitle` (wrong — actual key is `consentItemAbdmTitle`) → switched to explicit titleKey/descKey per item.
+- Turbopack stale cache held the old medical-prompts import error even after the file was fixed → cleared `.next` and restarted dev server.
+
+Browser-verified end-to-end:
+- Preface renders with 12-language grid + DKMS two-tab choice ✓
+- Clicked हिन्दी → entire UI (title, tabs, descriptions, feature cards) translated to Hindi instantly ✓
+- Clicked தமிழ் → UI translated to Tamil ✓
+- New patient flow: clicked "I am a new patient" → identify step with inline language grid → filled name+age → switched language to Hindi mid-step (UI translated live, form value preserved) → footer Continue created patient + encounter → consent step ✓
+- Granular consent: 5 items with correct titles (incl. "Share with ABHA / hospital HIS via ABDM" — previously showed raw key) → Allow all + Continue → history step ✓
+- AI greeted, "Welcome back to MediKiosk" for the returning-patient test ✓
+- Returning patient login: created a patient with phone 9876543210, opened login modal, entered phone, clicked Find my record → "Welcome back, Returning Patient" → Continue → created fresh encounter, skipped identify, went straight to consent → patient header showed "Returning Patient, 55y · male" ✓
+- Full flow through history → documents → summary → confirm → ABDM → complete ✓
+- Complete step: privacy auto-reset countdown started at 30, counted down, at 0 the kiosk wiped the session and returned to the preface screen (patient header gone) ✓
+- Final lint clean.
+
+Stage Summary:
+- All 7 user requirements implemented and browser-verified:
+  1. DKMS-style preface/tab screen ✓
+  2. Proper granular consent form (per-category opt-in/out + retention period) ✓
+  3. Full-UI i18n — changing language preference translates the whole UI ✓
+  4. Cleaner, more basic medical theme ✓
+  5. Privacy auto-reset after consultation (30s countdown → fresh onboarding) ✓
+  6. Returning patient login (phone/ABHA → prefill demographics → fresh encounter) ✓
+  7. More graphical UI (big icons, color-coded, large touch targets, native-script language buttons) ✓
+- Encounters model keeps each visit's data isolated for returning-patient privacy.

@@ -1,7 +1,8 @@
 "use client";
 
 import { useMediKioskStore } from "@/lib/store";
-import { STEP_ORDER, STEP_LABELS, type WorkflowStep } from "@/lib/types";
+import { useI18n } from "@/lib/use-i18n";
+import { STEP_ORDER, type WorkflowStep } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -21,15 +22,23 @@ export function WorkflowProgress() {
   const setStep = useMediKioskStore((s) => s.setStep);
   const prevStep = useMediKioskStore((s) => s.prevStep);
   const summaryStatus = useMediKioskStore((s) => s.summaryStatus);
+  const { t } = useI18n();
 
   if (step === "welcome") return null;
 
   const currentIdx = STEP_ORDER.indexOf(step);
 
-  // Gate logic: can the user advance from the current step?
-  // We keep this permissive — the actual validation happens inside each step's
-  // submit handler (which shows a toast error if validation fails). This avoids
-  // the case where the in-card Continue button is covered by the sticky footer.
+  const STEP_LABELS: Record<WorkflowStep, string> = {
+    welcome: "",
+    identify: t("stepIdentify"),
+    consent: t("stepConsent"),
+    history: t("stepHistory"),
+    documents: t("stepDocuments"),
+    summary: t("stepSummary"),
+    abdm: t("stepAbdm"),
+    complete: t("stepComplete"),
+  };
+
   const canAdvance = () => {
     switch (step) {
       case "summary":
@@ -40,19 +49,14 @@ export function WorkflowProgress() {
   };
 
   const handleContinue = () => {
-    // Tell the active step to run its submit logic (create patient, persist
-    // consents, etc.). The step is responsible for calling nextStep on success.
     window.dispatchEvent(new CustomEvent("medikiosk-continue"));
   };
 
-  // Can the user go back?
   const canGoBack = currentIdx > 0;
-
   const isLast = step === "complete";
 
   return (
-    <footer className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-emerald-100 shadow-[0_-4px_20px_-8px_rgba(16,185,129,0.18)]">
-      {/* Step pills */}
+    <footer className="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-emerald-100 shadow-[0_-4px_20px_-8px_rgba(16,185,129,0.18)]">
       <div className="max-w-6xl mx-auto px-3 sm:px-6 pt-2.5 pb-1">
         <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar">
           {STEP_ORDER.map((s, idx) => {
@@ -93,7 +97,6 @@ export function WorkflowProgress() {
         </div>
       </div>
 
-      {/* Nav buttons */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
         <Button
           variant="ghost"
@@ -102,17 +105,17 @@ export function WorkflowProgress() {
           className="text-emerald-800 hover:text-emerald-900 hover:bg-emerald-50"
         >
           <ChevronLeft className="size-4" />
-          Back
+          {t("back")}
         </Button>
 
         <div className="text-xs text-muted-foreground hidden sm:block">
           {step === "summary" && summaryStatus === "confirmed"
-            ? "Summary confirmed — continue to integration"
+            ? t("summaryStatusConfirmedDesc")
             : step === "summary"
-              ? "Review and confirm the AI summary to continue"
+              ? t("summaryNeedConfirm")
               : isLast
-                ? "Patient intake complete — ready for consultation"
-                : `Step ${currentIdx + 1} of ${STEP_ORDER.length}: ${STEP_LABELS[step]}`}
+                ? t("completeTitle")
+                : t("stepOf", { x: currentIdx + 1, y: STEP_ORDER.length }) + ": " + STEP_LABELS[step]}
         </div>
 
         {!isLast ? (
@@ -121,7 +124,7 @@ export function WorkflowProgress() {
             disabled={!canAdvance()}
             className="bg-emerald-600 hover:bg-emerald-700 text-white"
           >
-            Continue
+            {t("continue")}
             <ChevronRight className="size-4" />
           </Button>
         ) : (
@@ -129,7 +132,7 @@ export function WorkflowProgress() {
             onClick={() => setStep("welcome")}
             className="bg-emerald-600 hover:bg-emerald-700 text-white"
           >
-            New Patient
+            {t("newPatient")}
           </Button>
         )}
       </div>

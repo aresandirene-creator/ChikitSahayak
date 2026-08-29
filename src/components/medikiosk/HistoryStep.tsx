@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useMediKioskStore } from "@/lib/store";
 import { useContinueHandler } from "@/lib/use-continue-handler";
+import { useI18n } from "@/lib/use-i18n";
+import { getLanguageNativeName } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,24 +12,12 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { getLanguageName, getLanguageNativeName, HISTORY_SECTIONS } from "@/lib/languages";
+import { HISTORY_SECTIONS } from "@/lib/languages";
 import type { ChatTurn } from "@/lib/types";
 import {
-  Mic,
-  MicOff,
-  Send,
-  Volume2,
-  VolumeX,
-  Sparkles,
-  Bot,
-  User,
-  AlertTriangle,
-  Stethoscope,
-  PlayCircle,
-  StopCircle,
-  Leaf,
-  CheckCircle2,
-  Hand,
+  Mic, StopCircle, Send, Volume2, VolumeX, Sparkles, Bot, User,
+  AlertTriangle, Stethoscope, PlayCircle, Hand, CheckCircle2, Leaf,
+  MessageSquareHeart, Radio,
 } from "lucide-react";
 
 const SECTION_LABELS: Record<string, { label: string; short: string }> = Object.fromEntries(
@@ -36,6 +26,7 @@ const SECTION_LABELS: Record<string, { label: string; short: string }> = Object.
 
 export function HistoryStep() {
   const patient = useMediKioskStore((s) => s.patient);
+  const encounterId = useMediKioskStore((s) => s.encounterId);
   const turns = useMediKioskStore((s) => s.turns);
   const addTurn = useMediKioskStore((s) => s.addTurn);
   const isAiThinking = useMediKioskStore((s) => s.isAiThinking);
@@ -51,6 +42,7 @@ export function HistoryStep() {
   const voicePlaying = useMediKioskStore((s) => s.voicePlaying);
   const setVoicePlaying = useMediKioskStore((s) => s.setVoicePlaying);
   const nextStep = useMediKioskStore((s) => s.nextStep);
+  const { t } = useI18n();
 
   const [text, setText] = useState("");
   const [recording, setRecording] = useState(false);
@@ -60,30 +52,11 @@ export function HistoryStep() {
   const audioElRef = useRef<HTMLAudioElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  // Auto-scroll chat to bottom on new message
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
     }
   }, [turns.length, isAiThinking]);
-
-  // If first time entering and no turns yet, kick off the conversation
-  const kickOffConversation = async () => {
-    if (!patient || turns.length > 0 || isAiThinking) return;
-    await sendMessage("Hello, I am ready to begin sharing my health concerns.");
-  };
-
-  // Footer "Continue" → go to documents step (history can be resumed)
-  useContinueHandler(() => {
-    nextStep();
-  });
-
-  useEffect(() => {
-    // Auto-start the AI conversation when entering this step
-    if (patient && turns.length === 0 && !isAiThinking) {
-      kickOffConversation();
-    }
-  }, [patient?.id]);
 
   const playAudio = (base64: string) => {
     if (!voiceEnabled || !base64) return;
@@ -114,7 +87,6 @@ export function HistoryStep() {
     setIsAiThinking(true);
     stopAudio();
 
-    // Optimistic user turn
     const userTurn: ChatTurn = {
       id: `local-${Date.now()}`,
       role: "user",
@@ -132,6 +104,7 @@ export function HistoryStep() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           patientId: patient.id,
+          encounterId,
           message: messageText,
           withAudio: voiceEnabled,
         }),
@@ -160,11 +133,11 @@ export function HistoryStep() {
             createdAt: r.createdAt ?? new Date().toISOString(),
           }))
         );
-        toast.error(`Red-flag detected: ${data.redFlags[0].symptom}`);
+        toast.error(`${t("redFlagAlertTitle")}: ${data.redFlags[0].symptom}`);
       }
       if (data.done) {
         setHistoryComplete(true);
-        toast.success("History taking complete — you can proceed to documents");
+        toast.success(t("historyDone"));
       }
       if (voiceEnabled && data.audioBase64) {
         playAudio(data.audioBase64);
@@ -176,7 +149,21 @@ export function HistoryStep() {
     }
   };
 
-  // Voice recording
+  const kickOffConversation = async () => {
+    if (!patient || turns.length > 0 || isAiThinking) return;
+    await sendMessage("Hello, I am ready to begin sharing my health concerns.");
+  };
+
+  useContinueHandler(() => {
+    nextStep();
+  });
+
+  useEffect(() => {
+    if (patient && turns.length === 0 && !isAiThinking) {
+      kickOffConversation();
+    }
+  }, [patient?.id, encounterId]);
+
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -186,7 +173,7 @@ export function HistoryStep() {
         if (e.data.size > 0) audioChunksRef.current.push(e.data);
       };
       mr.onstop = async () => {
-        stream.getTracks().forEach((t) => t.stop());
+        stream.getTracks().forEach((tr) => tr.stop());
         const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
         await transcribeBlob(blob);
       };
@@ -223,7 +210,7 @@ export function HistoryStep() {
       const transcript = (data.text ?? "").trim();
       if (transcript) {
         setText(transcript);
-        toast.success("Transcribed — review and send");
+        toast.success("Transcribed");
       } else {
         toast.error("No speech detected");
       }
@@ -235,14 +222,10 @@ export function HistoryStep() {
   };
 
   if (!patient) {
-    return (
-      <div className="text-center py-16">
-        <p className="text-muted-foreground">Please identify the patient first.</p>
-      </div>
-    );
+    return <div className="text-center py-16 text-muted-foreground">{t("identifyTitle")}</div>;
   }
 
-  const sectionInfo = SECTION_LABELS[currentSection] ?? { label: "General intake", short: "General" };
+  const sectionInfo = SECTION_LABELS[currentSection] ?? { label: t("historyBadge"), short: "" };
 
   return (
     <div className="max-w-5xl mx-auto grid lg:grid-cols-3 gap-6">
@@ -250,22 +233,18 @@ export function HistoryStep() {
       <div className="lg:col-span-2 space-y-4">
         <div>
           <div className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-100 rounded-full px-3 py-1">
-            <Sparkles className="size-3.5" /> Step 3 · AI Conversational History
+            <Sparkles className="size-3.5" /> {t("historyBadge")}
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <h2 className="text-2xl sm:text-3xl font-bold text-emerald-900">
-              Let&apos;s talk about your health
-            </h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-emerald-900">{t("historyTitle")}</h2>
             {patient.ayushMode && (
               <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                <Leaf className="size-3 mr-1" /> AYUSH mode
+                <Leaf className="size-3 mr-1" /> AYUSH
               </Badge>
             )}
           </div>
           <p className="mt-1 text-muted-foreground">
-            MediKiosk speaks <span className="font-medium text-emerald-800">{getLanguageName(patient.language)}</span>
-            <span className="text-emerald-700/60 ml-1">({getLanguageNativeName(patient.language)})</span>. Speak or type —
-            the AI asks adaptive follow-up questions to build your history for the doctor.
+            {t("historySubtitle", { lang: getLanguageNativeName(patient.language) })}
           </p>
         </div>
 
@@ -273,7 +252,7 @@ export function HistoryStep() {
         <div className="flex items-center justify-between gap-3 rounded-xl bg-white border border-emerald-100 px-4 py-2.5 shadow-sm">
           <div className="flex items-center gap-2 min-w-0">
             <Stethoscope className="size-4 text-emerald-600 shrink-0" />
-            <div className="text-xs text-muted-foreground shrink-0">Current section:</div>
+            <div className="text-xs text-muted-foreground shrink-0">{t("historyCurrentSection")}:</div>
             <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 truncate font-medium">
               {sectionInfo.label}
             </Badge>
@@ -281,7 +260,7 @@ export function HistoryStep() {
           <div className="flex items-center gap-2 shrink-0">
             <Label htmlFor="voice-toggle" className="text-xs text-emerald-800 cursor-pointer hidden sm:flex items-center gap-1">
               {voiceEnabled ? <Volume2 className="size-3.5" /> : <VolumeX className="size-3.5" />}
-              AI voice
+              {t("historyVoiceLabel")}
             </Label>
             <Switch
               id="voice-toggle"
@@ -303,37 +282,37 @@ export function HistoryStep() {
             {turns.length === 0 && !isAiThinking && (
               <div className="h-full flex flex-col items-center justify-center text-center py-12">
                 <Bot className="size-12 text-emerald-300 mb-3" />
-                <p className="text-muted-foreground">Starting conversation…</p>
+                <p className="text-muted-foreground">{t("historyStarting")}</p>
               </div>
             )}
 
-            {turns.map((t) => (
+            {turns.map((turn) => (
               <div
-                key={t.id}
+                key={turn.id}
                 className={[
                   "flex gap-3 items-start",
-                  t.role === "user" ? "flex-row-reverse" : "",
+                  turn.role === "user" ? "flex-row-reverse" : "",
                 ].join(" ")}
               >
                 <div
                   className={[
                     "size-8 rounded-full flex items-center justify-center shrink-0",
-                    t.role === "user"
+                    turn.role === "user"
                       ? "bg-emerald-600 text-white"
                       : "bg-emerald-100 text-emerald-700 border border-emerald-200",
                   ].join(" ")}
                 >
-                  {t.role === "user" ? <User className="size-4" /> : <Bot className="size-4" />}
+                  {turn.role === "user" ? <User className="size-4" /> : <Bot className="size-4" />}
                 </div>
                 <div
                   className={[
                     "rounded-2xl px-4 py-2.5 max-w-[80%] text-sm leading-relaxed",
-                    t.role === "user"
+                    turn.role === "user"
                       ? "bg-emerald-600 text-white rounded-tr-sm"
                       : "bg-emerald-50 text-emerald-900 border border-emerald-100 rounded-tl-sm",
                   ].join(" ")}
                 >
-                  <p className="whitespace-pre-wrap">{t.content}</p>
+                  <p className="whitespace-pre-wrap">{turn.content}</p>
                 </div>
               </div>
             ))}
@@ -361,20 +340,20 @@ export function HistoryStep() {
                 onClick={recording ? stopRecording : startRecording}
                 disabled={isAiThinking || transcribing || historyComplete}
                 className={[
-                  "shrink-0 size-12 rounded-full flex items-center justify-center transition-all shadow-sm",
+                  "shrink-0 size-14 rounded-full flex items-center justify-center transition-all shadow-sm",
                   recording
                     ? "bg-red-600 text-white animate-pulse"
                     : "bg-emerald-600 text-white hover:bg-emerald-700",
                   (isAiThinking || transcribing || historyComplete) ? "opacity-50 cursor-not-allowed" : "",
                 ].join(" ")}
-                aria-label={recording ? "Stop recording" : "Start voice input"}
+                aria-label={recording ? t("historyMicStop") : t("historyMicStart")}
               >
                 {transcribing ? (
-                  <Sparkles className="size-5 animate-spin" />
+                  <Sparkles className="size-6 animate-spin" />
                 ) : recording ? (
-                  <StopCircle className="size-5" />
+                  <StopCircle className="size-6" />
                 ) : (
-                  <Mic className="size-5" />
+                  <Mic className="size-6" />
                 )}
               </button>
 
@@ -389,10 +368,10 @@ export function HistoryStep() {
                 }}
                 placeholder={
                   recording
-                    ? "Listening… tap the mic to stop"
+                    ? t("historyInputPlaceholderRecording")
                     : transcribing
-                      ? "Transcribing your speech…"
-                      : "Type your answer, or tap the mic to speak"
+                      ? t("historyInputPlaceholderTranscribing")
+                      : t("historyInputPlaceholder")
                 }
                 rows={2}
                 disabled={isAiThinking || recording || transcribing || historyComplete}
@@ -403,19 +382,19 @@ export function HistoryStep() {
                 size="lg"
                 onClick={() => sendMessage(text)}
                 disabled={!text.trim() || isAiThinking || recording || transcribing || historyComplete}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white size-12 p-0 shrink-0"
-                aria-label="Send"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white size-14 p-0 shrink-0"
+                aria-label={t("historySend")}
               >
-                <Send className="size-5" />
+                <Send className="size-6" />
               </Button>
             </div>
 
             {voicePlaying && (
               <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 rounded-lg px-3 py-1.5">
                 <Volume2 className="size-3.5 animate-pulse" />
-                AI is speaking…
+                {t("historyAiSpeaking")}
                 <button onClick={stopAudio} className="ml-auto font-medium hover:underline">
-                  Stop
+                  {t("historyAiSpeakingStop")}
                 </button>
               </div>
             )}
@@ -423,13 +402,13 @@ export function HistoryStep() {
             {historyComplete && (
               <div className="flex items-center gap-2 rounded-lg bg-emerald-100 border border-emerald-300 px-3 py-2 text-sm text-emerald-800">
                 <CheckCircle2 className="size-4" />
-                History complete. You can continue the conversation or proceed to scan documents.
+                {t("historyDoneDesc")}
                 <Button
                   size="sm"
                   onClick={nextStep}
                   className="ml-auto bg-emerald-600 hover:bg-emerald-700 text-white h-7"
                 >
-                  Continue
+                  {t("continue")}
                 </Button>
               </div>
             )}
@@ -437,7 +416,7 @@ export function HistoryStep() {
         </Card>
       </div>
 
-      {/* Side panel: red flags + tips */}
+      {/* Side panel */}
       <div className="space-y-4">
         {/* Red flags */}
         <Card className={[
@@ -447,13 +426,10 @@ export function HistoryStep() {
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <AlertTriangle className={["size-5", redFlags.length > 0 ? "text-red-600" : "text-emerald-600"].join(" ")} />
-              <h3 className="font-semibold text-emerald-900">Red-flag alerts</h3>
+              <h3 className="font-semibold text-emerald-900">{t("historyRedFlagTitle")}</h3>
             </div>
-            <p className="text-xs text-muted-foreground mb-3">
-              AI detects potentially urgent symptoms and alerts triage staff.
-            </p>
             {redFlags.length === 0 ? (
-              <div className="text-sm text-emerald-700/70 italic">No red flags detected yet.</div>
+              <div className="text-sm text-emerald-700/70 italic">{t("historyRedFlagEmpty")}</div>
             ) : (
               <div className="space-y-2 max-h-64 overflow-y-auto scrollbar-thin pr-1">
                 {redFlags.map((f) => (
@@ -462,9 +438,7 @@ export function HistoryStep() {
                       <span className="text-xs font-bold text-red-700 uppercase">{f.severity}</span>
                       <span className="text-sm font-medium text-red-900">{f.symptom}</span>
                     </div>
-                    {f.reasoning && (
-                      <p className="text-xs text-red-700/80 mt-1">{f.reasoning}</p>
-                    )}
+                    {f.reasoning && <p className="text-xs text-red-700/80 mt-1">{f.reasoning}</p>}
                   </div>
                 ))}
               </div>
@@ -477,20 +451,21 @@ export function HistoryStep() {
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <Hand className="size-5 text-emerald-700" />
-              <h3 className="font-semibold text-emerald-900">How to use this step</h3>
+              <h3 className="font-semibold text-emerald-900">{t("historyTipsTitle")}</h3>
             </div>
             <ul className="text-sm text-muted-foreground space-y-1.5 list-disc pl-5">
-              <li>Tap <Mic className="inline size-3.5 text-emerald-700" /> to <span className="font-medium text-emerald-800">speak</span> your answer — it is transcribed automatically.</li>
-              <li>Or type your answer and press Enter to send.</li>
-              <li>The AI asks one short question at a time across HPI, past history, medications, allergies, family history, ROS and social history.</li>
-              <li>Toggle the speaker to hear the AI read its questions aloud.</li>
-              <li>You can move to the next step at any time — history-taking can continue if you return.</li>
+              <li>{t("historyTips1")}</li>
+              <li>{t("historyTips2")}</li>
+              <li>{t("historyTips3")}</li>
+              <li>{t("historyTips4")}</li>
+              <li>{t("historyTips5")}</li>
             </ul>
           </CardContent>
         </Card>
 
-        <div className="text-[11px] text-muted-foreground text-center px-2">
-          MediKiosk never diagnoses. The AI only collects history for the doctor to review.
+        <div className="text-[11px] text-muted-foreground text-center px-2 flex items-center justify-center gap-1">
+          <MessageSquareHeart className="size-3" />
+          {t("historyDisclaimer")}
         </div>
       </div>
     </div>

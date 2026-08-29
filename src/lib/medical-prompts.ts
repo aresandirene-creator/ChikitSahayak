@@ -1,6 +1,6 @@
 // Medical prompts powering MediKiosk's AI history taking & summary generation
 
-import { getLanguageNativeName, getLanguageName } from "./languages";
+import { getLanguageNativeName, getLanguageName } from "./i18n";
 
 // System prompt for AI Conversational History Taking.
 // The AI behaves as a calm multilingual clinical intake assistant. It asks

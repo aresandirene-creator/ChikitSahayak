@@ -5,11 +5,11 @@ import { buildDocumentAnalysisPrompt } from "@/lib/medical-prompts";
 import type { ExtractedDocumentData } from "@/lib/types";
 
 // POST /api/documents/analyze — VLM-powered document digitization.
-// Body: { patientId, fileName, mimeType, dataUrl, fileType? }
+// Body: { patientId, encounterId?, fileName, mimeType, dataUrl, fileType? }
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { patientId, fileName, mimeType, dataUrl, fileType } = body;
+    const { patientId, encounterId, fileName, mimeType, dataUrl, fileType } = body;
     if (!patientId || !fileName || !dataUrl) {
       return NextResponse.json({ error: "patientId, fileName, dataUrl required" }, { status: 400 });
     }
@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
     const doc = await db.document.create({
       data: {
         patientId,
+        encounterId: encounterId ?? null,
         fileName,
         fileType: fileType ?? "other",
         mimeType: mimeType ?? "image/jpeg",
@@ -106,13 +107,14 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET /api/documents?patientId=xxx — list documents for a patient
+// GET /api/documents?patientId=xxx&encounterId=yyy — list documents
 export async function GET(req: NextRequest) {
   try {
     const patientId = req.nextUrl.searchParams.get("patientId");
+    const encounterId = req.nextUrl.searchParams.get("encounterId");
     if (!patientId) return NextResponse.json({ error: "patientId required" }, { status: 400 });
     const docs = await db.document.findMany({
-      where: { patientId },
+      where: { patientId, ...(encounterId ? { encounterId } : {}) },
       orderBy: { recordDate: "asc" },
     });
     return NextResponse.json({

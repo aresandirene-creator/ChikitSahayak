@@ -9,6 +9,9 @@ import type {
   RedFlag,
   ClinicalSummarySections,
 } from "./types";
+import type { LangCode } from "./i18n";
+
+type PrefaceTab = "new" | "returning" | null;
 
 interface MediKioskState {
   // Workflow
@@ -17,13 +20,28 @@ interface MediKioskState {
   nextStep: () => void;
   prevStep: () => void;
 
+  // Preface tab (DKMS-style)
+  prefaceTab: PrefaceTab;
+  setPrefaceTab: (t: PrefaceTab) => void;
+
+  // UI language (i18n) — when changed, the whole UI re-renders
+  uiLanguage: LangCode;
+  setUiLanguage: (l: LangCode) => void;
+
   // Patient
   patient: PatientInfo | null;
   setPatient: (p: PatientInfo | null) => void;
 
+  // Encounter (visit) — each new intake gets a fresh encounter so the
+  // patient's previous visit data is not loaded for the current session.
+  encounterId: string | null;
+  setEncounterId: (id: string | null) => void;
+
   // Consent
   consents: Record<string, boolean>;
   setConsent: (scope: string, granted: boolean) => void;
+  retentionDays: number | null;
+  setRetentionDays: (d: number | null) => void;
 
   // Chat
   turns: ChatTurn[];
@@ -88,6 +106,10 @@ interface MediKioskState {
   setAbdmRecords: (r: MediKioskState["abdmRecords"]) => void;
   addAbdmRecord: (r: { id: string; action: string; status: string; message?: string; createdAt: string }) => void;
 
+  // Auto-reset countdown for privacy (seconds remaining before wipe)
+  resetCountdown: number | null;
+  setResetCountdown: (n: number | null) => void;
+
   // Reset full session
   reset: () => void;
 }
@@ -106,11 +128,27 @@ export const useMediKioskStore = create<MediKioskState>((set, get) => ({
     if (idx > 0) set({ step: order[idx - 1] });
   },
 
+  prefaceTab: null,
+  setPrefaceTab: (t) => set({ prefaceTab: t }),
+
+  uiLanguage: "en",
+  setUiLanguage: (l) => set({ uiLanguage: l }),
+
   patient: null,
-  setPatient: (p) => set({ patient: p }),
+  setPatient: (p) =>
+    set((st) => ({
+      patient: p,
+      // If patient has a language, also switch UI language to match
+      uiLanguage: p ? (p.language as LangCode) : st.uiLanguage,
+    })),
+
+  encounterId: null,
+  setEncounterId: (id) => set({ encounterId: id }),
 
   consents: {},
   setConsent: (scope, granted) => set((st) => ({ consents: { ...st.consents, [scope]: granted } })),
+  retentionDays: 90,
+  setRetentionDays: (d) => set({ retentionDays: d }),
 
   turns: [],
   setTurns: (t) => set({ turns: t }),
@@ -166,11 +204,18 @@ export const useMediKioskStore = create<MediKioskState>((set, get) => ({
   setAbdmRecords: (r) => set({ abdmRecords: r }),
   addAbdmRecord: (r) => set((st) => ({ abdmRecords: [...st.abdmRecords, r] })),
 
+  resetCountdown: null,
+  setResetCountdown: (n) => set({ resetCountdown: n }),
+
   reset: () =>
     set({
       step: "welcome",
+      prefaceTab: null,
+      // keep uiLanguage so the next patient sees the previous language first
       patient: null,
+      encounterId: null,
       consents: {},
+      retentionDays: 90,
       turns: [],
       isAiThinking: false,
       currentSection: "general",
@@ -182,5 +227,6 @@ export const useMediKioskStore = create<MediKioskState>((set, get) => ({
       summaryFreeText: "",
       summaryStatus: "draft",
       abdmRecords: [],
+      resetCountdown: null,
     }),
 }));

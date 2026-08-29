@@ -9,7 +9,7 @@ import { db } from "@/lib/db";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { patientId, action } = body;
+    const { patientId, encounterId, action } = body;
     if (!patientId || !action) {
       return NextResponse.json({ error: "patientId and action required" }, { status: 400 });
     }
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     }
 
     const record = await db.aBDMRecord.create({
-      data: { patientId, action, status, message, fhirPayload },
+      data: { patientId, encounterId: encounterId ?? null, action, status, message, fhirPayload },
     });
 
     return NextResponse.json({ success: status === "success", record, message });
@@ -77,13 +77,14 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET /api/abdm?patientId=xxx — list ABDM records
+// GET /api/abdm?patientId=xxx&encounterId=yyy — list ABDM records
 export async function GET(req: NextRequest) {
   try {
     const patientId = req.nextUrl.searchParams.get("patientId");
+    const encounterId = req.nextUrl.searchParams.get("encounterId");
     if (!patientId) return NextResponse.json({ error: "patientId required" }, { status: 400 });
     const records = await db.aBDMRecord.findMany({
-      where: { patientId },
+      where: { patientId, ...(encounterId ? { encounterId } : {}) },
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json({ records });

@@ -1,31 +1,70 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useMediKioskStore } from "@/lib/store";
+import { useI18n } from "@/lib/use-i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
-  CheckCircle2,
-  Stethoscope,
-  MessageSquareHeart,
-  FileScan,
-  ClipboardCheck,
-  Network,
-  ArrowRight,
-  Sparkles,
-  Clock,
-  Activity,
+  CheckCircle2, Stethoscope, MessageSquareHeart, FileScan, ClipboardCheck,
+  Network, ArrowRight, Sparkles, Clock, Activity, ShieldCheck, RotateCcw,
 } from "lucide-react";
+
+const RESET_SECONDS = 30;
 
 export function CompleteStep() {
   const patient = useMediKioskStore((s) => s.patient);
+  const encounterId = useMediKioskStore((s) => s.encounterId);
   const turns = useMediKioskStore((s) => s.turns);
   const documents = useMediKioskStore((s) => s.documents);
   const summaryStatus = useMediKioskStore((s) => s.summaryStatus);
   const redFlags = useMediKioskStore((s) => s.redFlags);
   const abdmRecords = useMediKioskStore((s) => s.abdmRecords);
-  const reset = useMediKioskStore((s) => s.reset);
   const setStep = useMediKioskStore((s) => s.setStep);
+  const reset = useMediKioskStore((s) => s.reset);
+  const setResetCountdown = useMediKioskStore((s) => s.setResetCountdown);
+  const { t } = useI18n();
+
+  const [countdown, setCountdown] = useState(RESET_SECONDS);
+
+  // Mark the encounter as completed on first mount, then start the
+  // auto-reset countdown for privacy.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (encounterId) {
+        try {
+          await fetch(`/api/encounter?id=${encounterId}`, { method: "PATCH" });
+        } catch (e) {
+          console.error("encounter complete failed", e);
+        }
+      }
+    })();
+    return () => { cancelled = true; void cancelled; };
+  }, [encounterId]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCountdown((c) => {
+        if (c <= 1) {
+          clearInterval(interval);
+          // Auto-reset for privacy
+          reset();
+          setStep("welcome");
+          setResetCountdown(null);
+          return 0;
+        }
+        setResetCountdown(c - 1);
+        return c - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const resetNow = () => {
+    reset();
+    setStep("welcome");
+  };
 
   const successfulAbdm = abdmRecords.filter((r) => r.status === "success").length;
   const acknowledgedFlags = redFlags.filter((f) => f.acknowledged).length;
@@ -38,11 +77,10 @@ export function CompleteStep() {
           <CheckCircle2 className="size-12" />
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold text-emerald-900">
-          Patient intake complete
+          {t("completeTitle")}
         </h1>
         <p className="mt-3 text-lg text-emerald-700/80 max-w-2xl mx-auto">
-          {patient?.name ?? "Patient"}, your structured clinical history is now ready on the doctor&apos;s consultation
-          screen. Please wait in the queue — the doctor will call you shortly.
+          {t("completeSubtitle", { name: patient?.name ?? "" })}
         </p>
       </div>
 
@@ -50,39 +88,37 @@ export function CompleteStep() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <RecapCard
           icon={Stethoscope}
-          label="Patient identified"
+          label={t("completeRecapPatient")}
           value={patient?.name ?? "—"}
           subtext={patient ? `${patient.age ? `${patient.age}y · ` : ""}${patient.gender ?? ""}` : ""}
         />
         <RecapCard
           icon={MessageSquareHeart}
-          label="History collected"
-          value={`${turns.length} turn${turns.length !== 1 ? "s" : ""}`}
-          subtext="AI adaptive history-taking"
+          label={t("completeRecapHistory")}
+          value={`${turns.length}`}
+          subtext={t("historyBadge")}
         />
         <RecapCard
           icon={FileScan}
-          label="Documents digitised"
-          value={`${documents.length} doc${documents.length !== 1 ? "s" : ""}`}
-          subtext="Chronologically organised"
+          label={t("completeRecapDocuments")}
+          value={`${documents.length}`}
         />
         <RecapCard
           icon={ClipboardCheck}
-          label="Clinical summary"
-          value={summaryStatus === "confirmed" ? "Confirmed" : summaryStatus === "draft" ? "Draft" : summaryStatus}
-          subtext="AI-generated, physician-reviewed"
+          label={t("completeRecapSummary")}
+          value={summaryStatus === "confirmed" ? t("summaryStatusConfirmed") : summaryStatus === "draft" ? t("summaryStatusDraft") : summaryStatus}
         />
         <RecapCard
           icon={Network}
-          label="HIS / ABDM actions"
-          value={`${successfulAbdm} successful`}
-          subtext="FHIR-based data sharing"
+          label={t("completeRecapAbdm")}
+          value={`${successfulAbdm}`}
+          subtext={t("abdmSuccessful")}
         />
         <RecapCard
           icon={Activity}
-          label="Red-flag alerts"
-          value={`${redFlags.length} detected`}
-          subtext={redFlags.length > 0 ? `${acknowledgedFlags} acknowledged by triage` : "All clear"}
+          label={t("completeRecapRedFlags")}
+          value={`${redFlags.length}`}
+          subtext={redFlags.length > 0 ? t("completeRecapRedFlagsAcknowledged", { n: acknowledgedFlags }) : t("completeRecapRedFlagsAllClear")}
           highlight={redFlags.length > 0}
         />
       </div>
@@ -92,28 +128,54 @@ export function CompleteStep() {
         <CardContent className="p-6">
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="size-5 text-emerald-600" />
-            <h3 className="font-semibold text-emerald-900">What happens next</h3>
+            <h3 className="font-semibold text-emerald-900">{t("completeNextTitle")}</h3>
           </div>
           <div className="space-y-3">
-            <NextRow num="1" icon={ClipboardCheck} text="Doctor reviews your AI-generated clinical history on the consultation screen." />
-            <NextRow num="2" icon={Stethoscope} text="Doctor spends the consultation time on examination, clinical reasoning and counselling." />
-            <NextRow num="3" icon={Network} text="Any new prescriptions or lab orders are added to your ABHA-linked longitudinal health record." />
+            <NextRow num="1" icon={ClipboardCheck} text={t("completeNext1")} />
+            <NextRow num="2" icon={Stethoscope} text={t("completeNext2")} />
+            <NextRow num="3" icon={Network} text={t("completeNext3")} />
           </div>
         </CardContent>
       </Card>
 
       {/* Impact stat */}
-      <Card className="bg-gradient-to-br from-emerald-600 to-teal-700 text-white border-0 shadow-xl shadow-emerald-200">
+      <Card className="bg-emerald-600 border-0 text-white shadow-xl shadow-emerald-200">
         <CardContent className="p-6">
           <div className="flex items-start gap-3">
             <Clock className="size-7 shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-lg font-bold">More consultation time for what matters</h3>
+              <h3 className="text-lg font-bold">{t("completeImpactTitle")}</h3>
               <p className="mt-1 text-emerald-50/90 text-sm leading-relaxed">
-                By shifting history-taking and document organisation to the pre-consultation stage, MediKiosk frees up
-                significant doctor time — used for examination, clinical reasoning, diagnosis, counselling and
-                treatment, not for re-collecting basic history.
+                {t("completeImpactBody")}
               </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Privacy auto-reset banner */}
+      <Card className="border-amber-200 bg-amber-50 shadow-sm">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="size-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+              <ShieldCheck className="size-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-amber-900">{t("completePrivacyTitle")}</div>
+              <p className="text-sm text-amber-800 mt-0.5">
+                {t("completePrivacyBody", { n: countdown })}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="size-12 rounded-full bg-white border-2 border-amber-300 flex items-center justify-center text-amber-800 font-bold text-lg tabular-nums">
+                {countdown}
+              </div>
+              <Button
+                onClick={resetNow}
+                className="bg-amber-600 hover:bg-amber-700 text-white"
+              >
+                <RotateCcw className="size-4" /> {t("completePrivacyResetNow")}
+              </Button>
             </div>
           </div>
         </CardContent>
@@ -127,14 +189,14 @@ export function CompleteStep() {
           onClick={() => setStep("summary")}
           className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 h-12 px-6"
         >
-          View summary
+          {t("completeViewSummary")}
         </Button>
         <Button
           size="lg"
-          onClick={reset}
+          onClick={resetNow}
           className="bg-emerald-600 hover:bg-emerald-700 text-white h-12 px-8"
         >
-          Start new patient intake
+          {t("completeNewPatient")}
           <ArrowRight className="size-4" />
         </Button>
       </div>

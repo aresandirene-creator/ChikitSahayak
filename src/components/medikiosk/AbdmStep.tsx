@@ -3,65 +3,27 @@
 import { useState } from "react";
 import { useMediKioskStore } from "@/lib/store";
 import { useContinueHandler } from "@/lib/use-continue-handler";
+import { useI18n } from "@/lib/use-i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
-  Network,
-  ShieldCheck,
-  FileDown,
-  Send,
-  Stethoscope,
-  CheckCircle2,
-  Loader2,
-  ArrowRight,
-  Fingerprint,
-  Database,
-  Activity,
-  Building2,
-  Lock,
-  ClipboardCheck,
+  Network, ShieldCheck, FileDown, Send, Stethoscope, CheckCircle2,
+  Loader2, ArrowRight, Fingerprint, Activity, ClipboardCheck, Lock,
 } from "lucide-react";
-
-const ACTIONS = [
-  {
-    key: "link_abha",
-    icon: Fingerprint,
-    title: "Link ABHA",
-    desc: "Link or generate the patient's Ayushman Bharat Health Account ID through the ABDM gateway.",
-  },
-  {
-    key: "fetch_records",
-    icon: FileDown,
-    title: "Fetch prior records",
-    desc: "With patient consent, fetch the patient's prior health records from ABDM as FHIR bundles.",
-  },
-  {
-    key: "share_to_his",
-    icon: Send,
-    title: "Share summary to HIS",
-    desc: "Push the confirmed AI clinical summary to the hospital's HIS / EMR system via interoperable FHIR.",
-  },
-  {
-    key: "push_summary",
-    icon: Stethoscope,
-    title: "Push to physician EMR",
-    desc: "Place the summary on the treating physician's consultation screen so it appears when they open the patient.",
-  },
-] as const;
 
 export function AbdmStep() {
   const patient = useMediKioskStore((s) => s.patient);
+  const encounterId = useMediKioskStore((s) => s.encounterId);
   const summaryStatus = useMediKioskStore((s) => s.summaryStatus);
   const abdmRecords = useMediKioskStore((s) => s.abdmRecords);
-  const setAbdmRecords = useMediKioskStore((s) => s.setAbdmRecords);
   const addAbdmRecord = useMediKioskStore((s) => s.addAbdmRecord);
   const setPatient = useMediKioskStore((s) => s.setPatient);
   const nextStep = useMediKioskStore((s) => s.nextStep);
+  const { t } = useI18n();
 
   const [busy, setBusy] = useState<string | null>(null);
-  const [showFhir, setShowFhir] = useState<string | null>(null);
 
   const runAction = async (action: string) => {
     if (!patient) return;
@@ -70,7 +32,7 @@ export function AbdmStep() {
       const res = await fetch("/api/abdm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ patientId: patient.id, action }),
+        body: JSON.stringify({ patientId: patient.id, encounterId, action }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error || data.message || "Action failed");
@@ -83,14 +45,30 @@ export function AbdmStep() {
         createdAt: data.record.createdAt,
       });
 
-      // If link_abha, refresh patient in store with the new ABHA
       if (action === "link_abha" && data.message?.includes("ABHA")) {
         const abhaMatch = data.message.match(/ABHA-[\w]+/);
         if (abhaMatch) {
           setPatient({ ...patient, abhaId: abhaMatch[0] });
         }
       }
-      toast.success(data.message ?? `${action} succeeded`);
+
+      // Localise the toast message based on action
+      let toastMsg = data.message ?? "";
+      if (action === "link_abha") {
+        const abhaMatch = data.message?.match(/ABHA-[\w]+/);
+        if (data.message?.startsWith("Linked ABHA")) {
+          toastMsg = t("abdmMsgLinked", { id: abhaMatch?.[0] ?? "" });
+        } else {
+          toastMsg = t("abdmMsgAlreadyLinked", { id: abhaMatch?.[0] ?? patient.abhaId ?? "" });
+        }
+      } else if (action === "fetch_records") {
+        toastMsg = t("abdmMsgFetched");
+      } else if (action === "share_to_his") {
+        toastMsg = t("abdmMsgSharedToHis");
+      } else if (action === "push_summary") {
+        toastMsg = t("abdmMsgPushedToEmr");
+      }
+      toast.success(toastMsg);
     } catch (e) {
       toast.error((e as Error).message);
       addAbdmRecord({
@@ -107,32 +85,29 @@ export function AbdmStep() {
 
   const completedActions = new Set(abdmRecords.filter((r) => r.status === "success").map((r) => r.action));
 
-  // Footer "Continue" → finish intake (go to complete step)
   useContinueHandler(() => {
     nextStep();
   });
 
   if (!patient) {
-    return (
-      <div className="text-center py-16">
-        <p className="text-muted-foreground">Please identify the patient first.</p>
-      </div>
-    );
+    return <div className="text-center py-16 text-muted-foreground">{t("identifyTitle")}</div>;
   }
+
+  const ACTIONS = [
+    { key: "link_abha", icon: Fingerprint, title: t("abdmActionLinkAbhaTitle"), desc: t("abdmActionLinkAbhaDesc"), color: "bg-sky-100 text-sky-700" },
+    { key: "fetch_records", icon: FileDown, title: t("abdmActionFetchRecordsTitle"), desc: t("abdmActionFetchRecordsDesc"), color: "bg-emerald-100 text-emerald-700" },
+    { key: "share_to_his", icon: Send, title: t("abdmActionShareToHisTitle"), desc: t("abdmActionShareToHisDesc"), color: "bg-amber-100 text-amber-700" },
+    { key: "push_summary", icon: Stethoscope, title: t("abdmActionPushToEmrTitle"), desc: t("abdmActionPushToEmrDesc"), color: "bg-teal-100 text-teal-700" },
+  ] as const;
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div>
         <div className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-100 rounded-full px-3 py-1">
-          <Network className="size-3.5" /> Step 6 · ABDM & Hospital Integration
+          <Network className="size-3.5" /> {t("abdmBadge")}
         </div>
-        <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-emerald-900">
-          Connect to ABHA, ABDM and the hospital HIS
-        </h2>
-        <p className="mt-1 text-muted-foreground">
-          With the patient&apos;s consent, MediKiosk links the ABHA, fetches prior records from ABDM as FHIR bundles,
-          and pushes the confirmed summary to the hospital HIS / EMR so the doctor sees it during consultation.
-        </p>
+        <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-emerald-900">{t("abdmTitle")}</h2>
+        <p className="mt-1 text-muted-foreground">{t("abdmSubtitle")}</p>
       </div>
 
       {/* Status cards */}
@@ -141,10 +116,10 @@ export function AbdmStep() {
           <CardContent className="p-4">
             <div className="flex items-center gap-2 text-emerald-700 mb-1">
               <Fingerprint className="size-4" />
-              <span className="text-xs font-semibold uppercase">ABHA status</span>
+              <span className="text-xs font-semibold uppercase">{t("abdmStatusAbha")}</span>
             </div>
             <div className="text-sm font-medium text-emerald-900 truncate">
-              {patient.abhaId ? patient.abhaId : "Not linked"}
+              {patient.abhaId ? patient.abhaId : t("abdmAbhaNotLinked")}
             </div>
           </CardContent>
         </Card>
@@ -152,10 +127,10 @@ export function AbdmStep() {
           <CardContent className="p-4">
             <div className="flex items-center gap-2 text-emerald-700 mb-1">
               <ClipboardCheck className="size-4" />
-              <span className="text-xs font-semibold uppercase">Summary status</span>
+              <span className="text-xs font-semibold uppercase">{t("abdmStatusSummary")}</span>
             </div>
             <div className="text-sm font-medium text-emerald-900">
-              {summaryStatus === "confirmed" ? "Confirmed & ready" : summaryStatus === "draft" ? "Draft" : summaryStatus}
+              {summaryStatus === "confirmed" ? t("abdmSummaryConfirmed") : t("abdmSummaryDraft")}
             </div>
           </CardContent>
         </Card>
@@ -163,10 +138,10 @@ export function AbdmStep() {
           <CardContent className="p-4">
             <div className="flex items-center gap-2 text-emerald-700 mb-1">
               <Activity className="size-4" />
-              <span className="text-xs font-semibold uppercase">Integration actions</span>
+              <span className="text-xs font-semibold uppercase">{t("abdmStatusActions")}</span>
             </div>
             <div className="text-sm font-medium text-emerald-900">
-              {abdmRecords.filter((r) => r.status === "success").length} successful
+              {abdmRecords.filter((r) => r.status === "success").length} {t("abdmSuccessful")}
             </div>
           </CardContent>
         </Card>
@@ -174,10 +149,10 @@ export function AbdmStep() {
 
       {/* Action grid */}
       <div className="grid sm:grid-cols-2 gap-4">
-        {ACTIONS.map(({ key, icon: Icon, title, desc }) => {
+        {ACTIONS.map(({ key, icon: Icon, title, desc, color }) => {
           const done = completedActions.has(key);
           const isBusy = busy === key;
-          const disabled = isBusy || (key === "share_to_his" && summaryStatus !== "confirmed") || (key === "push_summary" && summaryStatus !== "confirmed");
+          const disabled = isBusy || ((key === "share_to_his" || key === "push_summary") && summaryStatus !== "confirmed");
           return (
             <Card
               key={key}
@@ -190,7 +165,7 @@ export function AbdmStep() {
                 <div className="flex items-start gap-3">
                   <div className={[
                     "size-11 rounded-xl flex items-center justify-center shrink-0",
-                    done ? "bg-emerald-600 text-white" : "bg-emerald-100 text-emerald-700",
+                    done ? "bg-emerald-600 text-white" : color,
                   ].join(" ")}>
                     {done ? <CheckCircle2 className="size-5" /> : <Icon className="size-5" />}
                   </div>
@@ -205,16 +180,16 @@ export function AbdmStep() {
                         className="bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
                       >
                         {isBusy ? (
-                          <><Loader2 className="size-3.5 animate-spin" /> Running…</>
+                          <><Loader2 className="size-3.5 animate-spin" /> {t("abdmActionRunning")}</>
                         ) : done ? (
-                          <><CheckCircle2 className="size-3.5" /> Re-run</>
+                          <><CheckCircle2 className="size-3.5" /> {t("abdmActionRerun")}</>
                         ) : (
-                          <><Icon className="size-3.5" /> Run</>
+                          <><Icon className="size-3.5" /> {t("abdmActionRun")}</>
                         )}
                       </Button>
-                      {key === "share_to_his" && summaryStatus !== "confirmed" && (
+                      {(key === "share_to_his" || key === "push_summary") && summaryStatus !== "confirmed" && (
                         <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-[10px]">
-                          Confirm summary first
+                          {t("abdmNeedConfirmSummary")}
                         </Badge>
                       )}
                     </div>
@@ -230,14 +205,14 @@ export function AbdmStep() {
       <Card className="border-emerald-100 shadow-sm">
         <CardHeader>
           <CardTitle className="text-base font-semibold text-emerald-900 flex items-center gap-2">
-            <Activity className="size-4 text-emerald-600" /> Integration activity log
+            <Activity className="size-4 text-emerald-600" /> {t("abdmActivityTitle")}
           </CardTitle>
-          <CardDescription>FHIR exchange & ABDM consent artefact history for this patient.</CardDescription>
+          <CardDescription>{t("abdmActivityDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           {abdmRecords.length === 0 ? (
             <div className="text-sm text-muted-foreground italic py-6 text-center">
-              No integration actions yet. Run one of the actions above to begin.
+              {t("abdmActivityEmpty")}
             </div>
           ) : (
             <div className="space-y-2 max-h-80 overflow-y-auto scrollbar-thin">
@@ -270,15 +245,11 @@ export function AbdmStep() {
         </CardContent>
       </Card>
 
-      {/* Privacy callout */}
       <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 flex items-start gap-3 text-sm text-emerald-800">
         <ShieldCheck className="size-5 shrink-0 text-emerald-600" />
         <div>
-          <p className="font-semibold">Consent-based data sharing with privacy & security controls</p>
-          <p className="text-emerald-700/80 mt-1">
-            All ABDM exchanges use the National Health Authority&apos;s consent artefact flow. The patient can revoke
-            consent at any time. FHIR R4 is used for interoperability with hospital HIS / EMR systems.
-          </p>
+          <p className="font-semibold">{t("abdmPrivacyTitle")}</p>
+          <p className="text-emerald-700/80 mt-1">{t("abdmPrivacyBody")}</p>
         </div>
       </div>
 
@@ -288,7 +259,7 @@ export function AbdmStep() {
           onClick={nextStep}
           className="bg-emerald-600 hover:bg-emerald-700 text-white h-12 px-8"
         >
-          Finish intake
+          {t("abdmFinish")}
           <ArrowRight className="size-4" />
         </Button>
       </div>
