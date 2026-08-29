@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMediKioskStore } from "@/lib/store";
 import { useContinueHandler } from "@/lib/use-continue-handler";
 import { useI18n } from "@/lib/use-i18n";
+import { useUiMode } from "@/lib/use-ui-mode";
 import { getLanguageNativeName } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { HISTORY_SECTIONS } from "@/lib/languages";
+import { QuickSymptomPanel } from "@/components/medikiosk/QuickSymptomPanel";
 import type { ChatTurn } from "@/lib/types";
 import {
   Mic, StopCircle, Send, Volume2, VolumeX, Sparkles, Bot, User,
@@ -43,6 +45,7 @@ export function HistoryStep() {
   const setVoicePlaying = useMediKioskStore((s) => s.setVoicePlaying);
   const nextStep = useMediKioskStore((s) => s.nextStep);
   const { t } = useI18n();
+  const { graphical } = useUiMode();
 
   const [text, setText] = useState("");
   const [recording, setRecording] = useState(false);
@@ -232,11 +235,11 @@ export function HistoryStep() {
       {/* Main chat column */}
       <div className="lg:col-span-2 space-y-4">
         <div>
-          <div className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-100 rounded-full px-3 py-1">
+          <div className="inline-flex items-center gap-2 text-xs font-semibold text-sky-700 bg-sky-100 rounded-full px-3 py-1">
             <Sparkles className="size-3.5" /> {t("historyBadge")}
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <h2 className="text-2xl sm:text-3xl font-bold text-emerald-900">{t("historyTitle")}</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-sky-900">{t("historyTitle")}</h2>
             {patient.ayushMode && (
               <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
                 <Leaf className="size-3 mr-1" /> AYUSH
@@ -249,16 +252,16 @@ export function HistoryStep() {
         </div>
 
         {/* Section indicator + voice toggle */}
-        <div className="flex items-center justify-between gap-3 rounded-xl bg-white border border-emerald-100 px-4 py-2.5 shadow-sm">
+        <div className="flex items-center justify-between gap-3 rounded-xl bg-white border border-sky-100 px-4 py-2.5 shadow-sm">
           <div className="flex items-center gap-2 min-w-0">
-            <Stethoscope className="size-4 text-emerald-600 shrink-0" />
+            <Stethoscope className="size-4 text-sky-600 shrink-0" />
             <div className="text-xs text-muted-foreground shrink-0">{t("historyCurrentSection")}:</div>
-            <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 truncate font-medium">
+            <Badge className="bg-sky-100 text-sky-800 border-sky-200 truncate font-medium">
               {sectionInfo.label}
             </Badge>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <Label htmlFor="voice-toggle" className="text-xs text-emerald-800 cursor-pointer hidden sm:flex items-center gap-1">
+            <Label htmlFor="voice-toggle" className="text-xs text-sky-800 cursor-pointer hidden sm:flex items-center gap-1">
               {voiceEnabled ? <Volume2 className="size-3.5" /> : <VolumeX className="size-3.5" />}
               {t("historyVoiceLabel")}
             </Label>
@@ -274,14 +277,14 @@ export function HistoryStep() {
         </div>
 
         {/* Chat scroll area */}
-        <Card className="border-emerald-100 shadow-sm flex flex-col">
+        <Card className="border-sky-100 shadow-sm flex flex-col">
           <div
             ref={scrollRef}
             className="flex-1 overflow-y-auto scrollbar-thin max-h-[55vh] min-h-[280px] p-4 space-y-3"
           >
             {turns.length === 0 && !isAiThinking && (
               <div className="h-full flex flex-col items-center justify-center text-center py-12">
-                <Bot className="size-12 text-emerald-300 mb-3" />
+                <Bot className="size-12 text-sky-300 mb-3" />
                 <p className="text-muted-foreground">{t("historyStarting")}</p>
               </div>
             )}
@@ -296,20 +299,22 @@ export function HistoryStep() {
               >
                 <div
                   className={[
-                    "size-8 rounded-full flex items-center justify-center shrink-0",
+                    "rounded-full flex items-center justify-center shrink-0",
+                    graphical ? "size-12" : "size-8",
                     turn.role === "user"
-                      ? "bg-emerald-600 text-white"
-                      : "bg-emerald-100 text-emerald-700 border border-emerald-200",
+                      ? "bg-sky-600 text-white"
+                      : "bg-sky-100 text-sky-700 border border-sky-200",
                   ].join(" ")}
                 >
-                  {turn.role === "user" ? <User className="size-4" /> : <Bot className="size-4" />}
+                  {turn.role === "user" ? <User className={graphical ? "size-7" : "size-4"} /> : <Bot className={graphical ? "size-7" : "size-4"} />}
                 </div>
                 <div
                   className={[
-                    "rounded-2xl px-4 py-2.5 max-w-[80%] text-sm leading-relaxed",
+                    "rounded-2xl px-4 py-2.5 max-w-[80%] leading-relaxed",
+                    graphical ? "text-base" : "text-sm",
                     turn.role === "user"
-                      ? "bg-emerald-600 text-white rounded-tr-sm"
-                      : "bg-emerald-50 text-emerald-900 border border-emerald-100 rounded-tl-sm",
+                      ? "bg-sky-600 text-white rounded-tr-sm"
+                      : "bg-sky-50 text-sky-900 border border-sky-100 rounded-tl-sm",
                   ].join(" ")}
                 >
                   <p className="whitespace-pre-wrap">{turn.content}</p>
@@ -319,14 +324,14 @@ export function HistoryStep() {
 
             {isAiThinking && (
               <div className="flex gap-3 items-start">
-                <div className="size-8 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0">
-                  <Bot className="size-4" />
+                <div className={["rounded-full bg-sky-100 text-sky-700 border border-sky-200 flex items-center justify-center shrink-0", graphical ? "size-12" : "size-8"].join(" ")}>
+                  <Bot className={graphical ? "size-7" : "size-4"} />
                 </div>
-                <div className="rounded-2xl px-4 py-3 bg-emerald-50 border border-emerald-100 rounded-tl-sm">
+                <div className="rounded-2xl px-4 py-3 bg-sky-50 border border-sky-100 rounded-tl-sm">
                   <div className="flex gap-1.5">
-                    <span className="size-2 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <span className="size-2 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <span className="size-2 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                    <span className="size-2 rounded-full bg-sky-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="size-2 rounded-full bg-sky-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="size-2 rounded-full bg-sky-400 animate-bounce" style={{ animationDelay: "300ms" }} />
                   </div>
                 </div>
               </div>
@@ -334,7 +339,15 @@ export function HistoryStep() {
           </div>
 
           {/* Input area */}
-          <CardContent className="border-t border-emerald-100 p-3 space-y-2">
+          <CardContent className="border-t border-sky-100 p-3 space-y-2">
+            {/* Graphical mode: quick-symptom tap panel (shows big body-part
+                icons the patient can tap instead of typing) */}
+            {graphical && (
+              <QuickSymptomPanel
+                onPick={(msg) => sendMessage(msg)}
+                disabled={isAiThinking || recording || transcribing || historyComplete}
+              />
+            )}
             <div className="flex items-end gap-2">
               <button
                 onClick={recording ? stopRecording : startRecording}
@@ -343,7 +356,7 @@ export function HistoryStep() {
                   "shrink-0 size-14 rounded-full flex items-center justify-center transition-all shadow-sm",
                   recording
                     ? "bg-red-600 text-white animate-pulse"
-                    : "bg-emerald-600 text-white hover:bg-emerald-700",
+                    : "bg-sky-600 text-white hover:bg-sky-700",
                   (isAiThinking || transcribing || historyComplete) ? "opacity-50 cursor-not-allowed" : "",
                 ].join(" ")}
                 aria-label={recording ? t("historyMicStop") : t("historyMicStart")}
@@ -375,14 +388,14 @@ export function HistoryStep() {
                 }
                 rows={2}
                 disabled={isAiThinking || recording || transcribing || historyComplete}
-                className="flex-1 resize-none border-emerald-200 focus-visible:ring-emerald-500/30"
+                className="flex-1 resize-none border-sky-200 focus-visible:ring-sky-500/30"
               />
 
               <Button
                 size="lg"
                 onClick={() => sendMessage(text)}
                 disabled={!text.trim() || isAiThinking || recording || transcribing || historyComplete}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white size-14 p-0 shrink-0"
+                className="bg-sky-600 hover:bg-sky-700 text-white size-14 p-0 shrink-0"
                 aria-label={t("historySend")}
               >
                 <Send className="size-6" />
@@ -390,7 +403,7 @@ export function HistoryStep() {
             </div>
 
             {voicePlaying && (
-              <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 rounded-lg px-3 py-1.5">
+              <div className="flex items-center gap-2 text-xs text-sky-700 bg-sky-50 rounded-lg px-3 py-1.5">
                 <Volume2 className="size-3.5 animate-pulse" />
                 {t("historyAiSpeaking")}
                 <button onClick={stopAudio} className="ml-auto font-medium hover:underline">
@@ -400,13 +413,13 @@ export function HistoryStep() {
             )}
 
             {historyComplete && (
-              <div className="flex items-center gap-2 rounded-lg bg-emerald-100 border border-emerald-300 px-3 py-2 text-sm text-emerald-800">
+              <div className="flex items-center gap-2 rounded-lg bg-sky-100 border border-sky-300 px-3 py-2 text-sm text-sky-800">
                 <CheckCircle2 className="size-4" />
                 {t("historyDoneDesc")}
                 <Button
                   size="sm"
                   onClick={nextStep}
-                  className="ml-auto bg-emerald-600 hover:bg-emerald-700 text-white h-7"
+                  className="ml-auto bg-sky-600 hover:bg-sky-700 text-white h-7"
                 >
                   {t("continue")}
                 </Button>
@@ -421,15 +434,15 @@ export function HistoryStep() {
         {/* Red flags */}
         <Card className={[
           "border-2 shadow-sm",
-          redFlags.length > 0 ? "border-red-200 bg-red-50/30" : "border-emerald-100",
+          redFlags.length > 0 ? "border-red-200 bg-red-50/30" : "border-sky-100",
         ].join(" ")}>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <AlertTriangle className={["size-5", redFlags.length > 0 ? "text-red-600" : "text-emerald-600"].join(" ")} />
-              <h3 className="font-semibold text-emerald-900">{t("historyRedFlagTitle")}</h3>
+              <AlertTriangle className={["size-5", redFlags.length > 0 ? "text-red-600" : "text-sky-600"].join(" ")} />
+              <h3 className="font-semibold text-sky-900">{t("historyRedFlagTitle")}</h3>
             </div>
             {redFlags.length === 0 ? (
-              <div className="text-sm text-emerald-700/70 italic">{t("historyRedFlagEmpty")}</div>
+              <div className="text-sm text-sky-700/70 italic">{t("historyRedFlagEmpty")}</div>
             ) : (
               <div className="space-y-2 max-h-64 overflow-y-auto scrollbar-thin pr-1">
                 {redFlags.map((f) => (
@@ -447,11 +460,11 @@ export function HistoryStep() {
         </Card>
 
         {/* Tips */}
-        <Card className="border-emerald-100 bg-emerald-50/40 shadow-sm">
+        <Card className="border-sky-100 bg-sky-50/40 shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Hand className="size-5 text-emerald-700" />
-              <h3 className="font-semibold text-emerald-900">{t("historyTipsTitle")}</h3>
+              <Hand className="size-5 text-sky-700" />
+              <h3 className="font-semibold text-sky-900">{t("historyTipsTitle")}</h3>
             </div>
             <ul className="text-sm text-muted-foreground space-y-1.5 list-disc pl-5">
               <li>{t("historyTips1")}</li>

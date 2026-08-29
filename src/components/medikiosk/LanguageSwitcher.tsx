@@ -25,17 +25,17 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
       <div className="relative">
         <button
           onClick={() => setOpen((v) => !v)}
-          className="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white hover:bg-emerald-50 px-3 py-1.5 text-sm text-emerald-800 transition-colors"
+          className="flex items-center gap-1.5 rounded-full border border-sky-200 bg-white hover:bg-sky-50 px-3 py-1.5 text-sm text-sky-800 transition-colors"
           aria-label={t("prefaceLanguagePrompt")}
         >
-          <Globe className="size-4 text-emerald-600" />
+          <Globe className="size-4 text-sky-600" />
           <span className="font-medium">{current.nativeName}</span>
-          <svg viewBox="0 0 12 12" className="size-3 text-emerald-600"><path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" /></svg>
+          <svg viewBox="0 0 12 12" className="size-3 text-sky-600"><path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" /></svg>
         </button>
         {open && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-            <div className="absolute right-0 mt-1 z-50 w-56 max-h-72 overflow-y-auto rounded-xl border border-emerald-200 bg-white shadow-lg scrollbar-thin">
+            <div className="absolute right-0 mt-1 z-50 w-56 max-h-72 overflow-y-auto rounded-xl border border-sky-200 bg-white shadow-lg scrollbar-thin">
               {LANGUAGES.map((l) => (
                 <button
                   key={l.code}
@@ -44,15 +44,15 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
                     setOpen(false);
                   }}
                   className={[
-                    "w-full flex items-center justify-between gap-2 px-3 py-2 text-sm hover:bg-emerald-50 transition-colors text-left",
-                    l.code === uiLanguage ? "bg-emerald-50 text-emerald-800 font-semibold" : "text-emerald-900",
+                    "w-full flex items-center justify-between gap-2 px-3 py-2 text-sm hover:bg-sky-50 transition-colors text-left",
+                    l.code === uiLanguage ? "bg-sky-50 text-sky-800 font-semibold" : "text-sky-900",
                   ].join(" ")}
                 >
                   <span>
                     <span className="font-medium">{l.nativeName}</span>
-                    <span className="text-xs text-emerald-600 ml-2">({l.name})</span>
+                    <span className="text-xs text-sky-600 ml-2">({l.name})</span>
                   </span>
-                  {l.code === uiLanguage && <Check className="size-4 text-emerald-600" />}
+                  {l.code === uiLanguage && <Check className="size-4 text-sky-600" />}
                 </button>
               ))}
             </div>
@@ -72,13 +72,13 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
           className={[
             "flex flex-col items-center justify-center gap-1 rounded-xl border px-3 py-3 transition-all",
             l.code === uiLanguage
-              ? "border-emerald-500 bg-emerald-50 text-emerald-800 shadow-sm"
-              : "border-emerald-200 bg-white text-emerald-700 hover:border-emerald-400 hover:bg-emerald-50/50",
+              ? "border-sky-500 bg-sky-50 text-sky-800 shadow-sm"
+              : "border-sky-200 bg-white text-sky-700 hover:border-sky-400 hover:bg-sky-50/50",
           ].join(" ")}
         >
           <span className="text-lg font-bold leading-none">{l.flag}</span>
           <span className="text-sm font-medium leading-tight">{l.nativeName}</span>
-          <span className="text-[10px] text-emerald-500 leading-tight">{l.name}</span>
+          <span className="text-[10px] text-sky-500 leading-tight">{l.name}</span>
         </button>
       ))}
     </div>

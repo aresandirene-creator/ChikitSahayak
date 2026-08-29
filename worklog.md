@@ -199,3 +199,44 @@ Stage Summary:
   6. Returning patient login (phone/ABHA → prefill demographics → fresh encounter) ✓
   7. More graphical UI (big icons, color-coded, large touch targets, native-script language buttons) ✓
 - Encounters model keeps each visit's data isolated for returning-patient privacy.
+
+---
+Task ID: v3 (Normal/Graphical mode toggle + medical theme)
+Agent: main (MediKiosk architect)
+Task: Add Normal/Graphical UI mode toggle on the preface (graphical = picture-based, text substituted with graphics) and change the color theme to a proper medical look (medical blue + white + red cross).
+
+Work Log:
+- Added `uiMode: "normal" | "graphical"` to the Zustand store with setUiMode. Persists across patients (kept through reset()).
+- Created src/lib/use-ui-mode.ts — useUiMode() hook returning { graphical, uiMode, setUiMode }.
+- Created src/components/medikiosk/ModeToggle.tsx — a two-option toggle (Normal with Type icon / Graphical with ImageIcon) shown on the preface.
+- Added a compact mode toggle button to the header (next to the language switcher) so the user can switch modes from ANY step, not just the preface. Shows "Graphical" when in normal mode and "Normal" when in graphical mode.
+- Added i18n keys: modeToggleTitle, modeToggleDesc, modeNormal, modeNormalDesc, modeGraphical, modeGraphicalDesc, historyQuickSymptoms (English + Hindi).
+- Created src/components/medikiosk/QuickSymptomPanel.tsx — graphical-mode-only panel with 13 big body-part/symptom icons (Head, Chest, Stomach, Fever, Breath, Eye, Ear, Bones, Mind, Sugar, BP, Meds, Other). Tapping one sends a pre-formed short message to the AI so uneducated users can communicate without typing or speaking.
+- Medical theme: replaced `emerald` → `sky` (medical blue) across ALL medikiosk components (13 files) + page.tsx via sed. Sky-600 = primary, sky-700 = hover, sky-100/50 = light backgrounds, sky-200/300 = borders.
+- Updated the MediKiosk logo from a plus-circle to a proper **medical cross** (filled SVG path forming the classic medical cross shape).
+- Graphical mode rendering applied to:
+  - PrefaceScreen: hides subtitle, tab descriptions, feature cards, impact callout; tab icons become size-20 (vs size-14); tab padding doubles (p-8/p-10 vs p-6).
+  - IdentifyStep: gender dropdown is replaced by 4 big icon buttons (Mars=Male, Venus=Female, CircleUser=Other/Prefer not) with color-coded backgrounds.
+  - ConsentStep: consent item icons grow from size-9 → size-14, icon glyphs size-5 → size-8, long descriptions are HIDDEN (only title + badge shown), title font becomes text-lg.
+  - HistoryStep: chat avatars grow size-8 → size-12 (icons size-4 → size-7), chat text size-sm → text-base, QuickSymptomPanel appears above the input.
+  - CompleteStep: RecapCards switch to a centered big-icon layout (size-12 icon tile + big value + small label).
+- Bug fixed: QuickSymptomPanel imported `Headache` from lucide-react which doesn't exist → replaced with `Frown` (verified all other icons exist via node script).
+
+Browser-verified end-to-end:
+- Preface shows Normal/Graphical toggle ✓
+- Clicked Graphical → subtitle, feature cards, tab descriptions all hidden; just big tab pictures remain ✓
+- Clicked "I am a new patient" in graphical mode → identify step showed gender as 4 big icon buttons (Male/Female/Other/Prefer) ✓
+- Filled form → consent step with big size-14 icons, descriptions hidden ✓
+- Allow all + Continue → history step with QuickSymptomPanel (Head/Chest/Stomach/Fever/Breath icon buttons) ✓
+- AI greeted; tapped "Chest" → sent "I have chest pain" → AI replied with follow-up ("when did this chest pain start?") ✓
+- Clicked "Normal" in header → quick symptom panel disappeared, chat avatars shrunk back to size-8 ✓
+- Clicked "Graphical" in header → quick symptom panel reappeared ✓
+- Medical theme: sky-600 primary buttons + medical cross logo confirmed via DOM inspection ✓
+- Lint clean, dev server compiles, chat API 200 ✓
+
+Stage Summary:
+- Normal/Graphical mode toggle on preface + header ✓
+- Graphical mode substitutes text with big pictures/icons across every step ✓
+- Quick symptom tap panel makes the chat usable for uneducated users ✓
+- Medical blue + white + red-cross theme applied throughout ✓
+- Mode persists across patients (privacy reset keeps uiMode) ✓

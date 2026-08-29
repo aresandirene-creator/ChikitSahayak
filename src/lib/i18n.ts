@@ -72,6 +72,14 @@ export interface Translation {
   prefaceFeature4Desc: string;
   prefaceWorkflowLabel: string;
 
+  // UI mode (normal vs graphical)
+  modeToggleTitle: string;
+  modeToggleDesc: string;
+  modeNormal: string;
+  modeNormalDesc: string;
+  modeGraphical: string;
+  modeGraphicalDesc: string;
+
   // Returning patient login
   loginTitle: string;
   loginSubtitle: string;
@@ -178,6 +186,7 @@ export interface Translation {
   historyTips3: string;
   historyTips4: string;
   historyTips5: string;
+  historyQuickSymptoms: string;
   historyDisclaimer: string;
 
   // Documents step
@@ -372,6 +381,13 @@ const en: Translation = {
   prefaceFeature4Desc: "Your records follow you, with your consent.",
   prefaceWorkflowLabel: "Your visit",
 
+  modeToggleTitle: "How should this kiosk look?",
+  modeToggleDesc: "Choose your preferred way to use MediKiosk. You can change this any time.",
+  modeNormal: "Normal",
+  modeNormalDesc: "Text with details — for readers.",
+  modeGraphical: "Graphical",
+  modeGraphicalDesc: "Big pictures, less text — easy for everyone.",
+
   loginTitle: "Welcome back",
   loginSubtitle: "Enter the phone number or ABHA you used last time. We'll fetch your details so you don't have to re-enter them.",
   loginFieldPhone: "Phone number",
@@ -475,6 +491,7 @@ const en: Translation = {
   historyTips3: "The AI asks one short question at a time across your symptoms, past history, medicines, allergies, family history and lifestyle.",
   historyTips4: "Toggle the speaker to hear the AI read its questions aloud.",
   historyTips5: "You can move to the next step at any time — history-taking can continue if you return.",
+  historyQuickSymptoms: "Tap where it hurts",
 
   documentsBadge: "Step 4 · Scan Documents",
   documentsTitle: "Scan your old medical papers",
@@ -654,6 +671,13 @@ const hi: Partial<Translation> = {
   prefaceFeature4Title: "एबीएचए और अस्पताल लिंक",
   prefaceFeature4Desc: "आपकी सहमति से आपके रिकॉर्ड आपके साथ।",
   prefaceWorkflowLabel: "आपका दौरा",
+
+  modeToggleTitle: "यह कियोस्क कैसा दिखे?",
+  modeToggleDesc: "मेडिकियोस्क का उपयोग करने का अपना तरीका चुनें। आप इसे कभी भी बदल सकते हैं।",
+  modeNormal: "सामान्य",
+  modeNormalDesc: "विवरण के साथ पाठ — पढ़ने वालों के लिए।",
+  modeGraphical: "चित्रात्मक",
+  modeGraphicalDesc: "बड़े चित्र, कम पाठ — सबके लिए आसान।",
   loginTitle: "वापसी पर स्वागत है",
   loginSubtitle: "पिछली बार जो फ़ोन नंबर या एबीएचए इस्तेमाल किया था वह दर्ज करें। हम आपकी जानकारी ला देंगे ताकि आपको फिर से भरनी न पड़े।",
   loginFieldPhone: "फ़ोन नंबर",
@@ -754,6 +778,7 @@ const hi: Partial<Translation> = {
   historyTips3: "एआई लक्षण, पूर्व इतिहास, दवाएँ, एलर्जी, पारिवारिक इतिहास और जीवनशैली में एक समय पर एक सवाल पूछता है।",
   historyTips4: "एआई के प्रश्न सुनने के लिए स्पीकर टॉगल करें।",
   historyTips5: "आप किसी भी समय अगले चरण पर जा सकते हैं — इतिहास लेना आपके लौटने पर जारी रह सकता है।",
+  historyQuickSymptoms: "जहाँ दर्द है वहाँ टैप करें",
   documentsBadge: "चरण 4 · दस्तावेज़ स्कैन",
   documentsTitle: "अपने पुराने चिकित्सा कागज़ स्कैन करें",
   documentsSubtitle: "पुराने पर्चे, लैब रिपोर्ट और डिस्चार्ज सारांश की फ़ोटो अपलोड करें। मेडिकियोस्क किसी भी भारतीय भाषा में उन्हें पढ़ता है, मुख्य जानकारी निकालता है, और तारीख़ क्रम में व्यवस्थित करता है — किसी भी असामान्य परीक्षण परिणाम को डॉक्टर के लिए चिह्नित करता है।",

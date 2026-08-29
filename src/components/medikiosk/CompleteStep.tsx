@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useMediKioskStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
+import { useUiMode } from "@/lib/use-ui-mode";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -24,6 +25,7 @@ export function CompleteStep() {
   const reset = useMediKioskStore((s) => s.reset);
   const setResetCountdown = useMediKioskStore((s) => s.setResetCountdown);
   const { t } = useI18n();
+  const { graphical } = useUiMode();
 
   const [countdown, setCountdown] = useState(RESET_SECONDS);
 
@@ -73,13 +75,13 @@ export function CompleteStep() {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Hero confirmation */}
       <div className="text-center pt-4 sm:pt-8">
-        <div className="size-20 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center mb-4 shadow-lg shadow-emerald-100">
+        <div className="size-20 rounded-full bg-sky-100 text-sky-600 mx-auto flex items-center justify-center mb-4 shadow-lg shadow-sky-100">
           <CheckCircle2 className="size-12" />
         </div>
-        <h1 className="text-3xl sm:text-4xl font-bold text-emerald-900">
+        <h1 className="text-3xl sm:text-4xl font-bold text-sky-900">
           {t("completeTitle")}
         </h1>
-        <p className="mt-3 text-lg text-emerald-700/80 max-w-2xl mx-auto">
+        <p className="mt-3 text-lg text-sky-700/80 max-w-2xl mx-auto">
           {t("completeSubtitle", { name: patient?.name ?? "" })}
         </p>
       </div>
@@ -91,28 +93,33 @@ export function CompleteStep() {
           label={t("completeRecapPatient")}
           value={patient?.name ?? "—"}
           subtext={patient ? `${patient.age ? `${patient.age}y · ` : ""}${patient.gender ?? ""}` : ""}
+          graphical={graphical}
         />
         <RecapCard
           icon={MessageSquareHeart}
           label={t("completeRecapHistory")}
           value={`${turns.length}`}
           subtext={t("historyBadge")}
+          graphical={graphical}
         />
         <RecapCard
           icon={FileScan}
           label={t("completeRecapDocuments")}
           value={`${documents.length}`}
+          graphical={graphical}
         />
         <RecapCard
           icon={ClipboardCheck}
           label={t("completeRecapSummary")}
           value={summaryStatus === "confirmed" ? t("summaryStatusConfirmed") : summaryStatus === "draft" ? t("summaryStatusDraft") : summaryStatus}
+          graphical={graphical}
         />
         <RecapCard
           icon={Network}
           label={t("completeRecapAbdm")}
           value={`${successfulAbdm}`}
           subtext={t("abdmSuccessful")}
+          graphical={graphical}
         />
         <RecapCard
           icon={Activity}
@@ -120,15 +127,16 @@ export function CompleteStep() {
           value={`${redFlags.length}`}
           subtext={redFlags.length > 0 ? t("completeRecapRedFlagsAcknowledged", { n: acknowledgedFlags }) : t("completeRecapRedFlagsAllClear")}
           highlight={redFlags.length > 0}
+          graphical={graphical}
         />
       </div>
 
       {/* What happens next */}
-      <Card className="border-emerald-100 shadow-sm">
+      <Card className="border-sky-100 shadow-sm">
         <CardContent className="p-6">
           <div className="flex items-center gap-2 mb-4">
-            <Sparkles className="size-5 text-emerald-600" />
-            <h3 className="font-semibold text-emerald-900">{t("completeNextTitle")}</h3>
+            <Sparkles className="size-5 text-sky-600" />
+            <h3 className="font-semibold text-sky-900">{t("completeNextTitle")}</h3>
           </div>
           <div className="space-y-3">
             <NextRow num="1" icon={ClipboardCheck} text={t("completeNext1")} />
@@ -139,13 +147,13 @@ export function CompleteStep() {
       </Card>
 
       {/* Impact stat */}
-      <Card className="bg-emerald-600 border-0 text-white shadow-xl shadow-emerald-200">
+      <Card className="bg-sky-600 border-0 text-white shadow-xl shadow-sky-200">
         <CardContent className="p-6">
           <div className="flex items-start gap-3">
             <Clock className="size-7 shrink-0 mt-0.5" />
             <div>
               <h3 className="text-lg font-bold">{t("completeImpactTitle")}</h3>
-              <p className="mt-1 text-emerald-50/90 text-sm leading-relaxed">
+              <p className="mt-1 text-sky-50/90 text-sm leading-relaxed">
                 {t("completeImpactBody")}
               </p>
             </div>
@@ -187,14 +195,14 @@ export function CompleteStep() {
           size="lg"
           variant="outline"
           onClick={() => setStep("summary")}
-          className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 h-12 px-6"
+          className="border-sky-300 text-sky-700 hover:bg-sky-50 h-12 px-6"
         >
           {t("completeViewSummary")}
         </Button>
         <Button
           size="lg"
           onClick={resetNow}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white h-12 px-8"
+          className="bg-sky-600 hover:bg-sky-700 text-white h-12 px-8"
         >
           {t("completeNewPatient")}
           <ArrowRight className="size-4" />
@@ -210,27 +218,47 @@ function RecapCard({
   value,
   subtext,
   highlight = false,
+  graphical = false,
 }: {
   icon: typeof Stethoscope;
   label: string;
   value: string;
   subtext?: string;
   highlight?: boolean;
+  graphical?: boolean;
 }) {
   return (
     <Card className={[
       "border shadow-sm",
-      highlight ? "border-amber-200 bg-amber-50/30" : "border-emerald-100",
+      highlight ? "border-amber-200 bg-amber-50/30" : "border-sky-100",
     ].join(" ")}>
-      <CardContent className="p-4">
-        <div className="flex items-center gap-2 mb-1">
-          <Icon className={["size-4", highlight ? "text-amber-600" : "text-emerald-600"].join(" ")} />
-          <span className="text-[11px] font-semibold uppercase text-muted-foreground tracking-wide">
-            {label}
-          </span>
-        </div>
-        <div className="text-base font-bold text-emerald-900 truncate">{value}</div>
-        {subtext && <div className="text-xs text-muted-foreground mt-0.5">{subtext}</div>}
+      <CardContent className={graphical ? "p-4 text-center" : "p-4"}>
+        {graphical ? (
+          <div className="flex flex-col items-center gap-1">
+            <div className={[
+              "size-12 rounded-xl flex items-center justify-center",
+              highlight ? "bg-amber-100 text-amber-600" : "bg-sky-100 text-sky-600",
+            ].join(" ")}>
+              <Icon className="size-7" />
+            </div>
+            <div className="text-lg font-bold text-sky-900 truncate w-full">{value}</div>
+            <div className="text-[10px] font-semibold uppercase text-muted-foreground tracking-wide">
+              {label}
+            </div>
+            {subtext && <div className="text-xs text-muted-foreground">{subtext}</div>}
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center gap-2 mb-1">
+              <Icon className={["size-4", highlight ? "text-amber-600" : "text-sky-600"].join(" ")} />
+              <span className="text-[11px] font-semibold uppercase text-muted-foreground tracking-wide">
+                {label}
+              </span>
+            </div>
+            <div className="text-base font-bold text-sky-900 truncate">{value}</div>
+            {subtext && <div className="text-xs text-muted-foreground mt-0.5">{subtext}</div>}
+          </>
+        )}
       </CardContent>
     </Card>
   );
@@ -239,12 +267,12 @@ function RecapCard({
 function NextRow({ num, icon: Icon, text }: { num: string; icon: typeof Stethoscope; text: string }) {
   return (
     <div className="flex items-start gap-3">
-      <div className="size-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold shrink-0">
+      <div className="size-7 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center text-xs font-bold shrink-0">
         {num}
       </div>
       <div className="flex items-start gap-2 pt-0.5">
-        <Icon className="size-4 text-emerald-600 shrink-0 mt-0.5" />
-        <p className="text-sm text-emerald-900">{text}</p>
+        <Icon className="size-4 text-sky-600 shrink-0 mt-0.5" />
+        <p className="text-sm text-sky-900">{text}</p>
       </div>
     </div>
   );

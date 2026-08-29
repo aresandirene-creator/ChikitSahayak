@@ -125,7 +125,7 @@ export function LoginStep() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <Card className="w-full max-w-md border-emerald-200 shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin">
+      <Card className="w-full max-w-md border-sky-200 shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin">
         <CardContent className="p-6 space-y-5">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -133,7 +133,7 @@ export function LoginStep() {
                 <LogIn className="size-6" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-emerald-900">{t("loginTitle")}</h2>
+                <h2 className="text-xl font-bold text-sky-900">{t("loginTitle")}</h2>
                 <p className="text-xs text-muted-foreground">{t("loginSubtitle")}</p>
               </div>
             </div>
@@ -150,7 +150,7 @@ export function LoginStep() {
             <>
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label htmlFor="login-phone" className="text-emerald-900 flex items-center gap-1.5">
+                  <Label htmlFor="login-phone" className="text-sky-900 flex items-center gap-1.5">
                     <Phone className="size-3.5" /> {t("loginFieldPhone")}
                   </Label>
                   <Input
@@ -158,19 +158,19 @@ export function LoginStep() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder={t("loginFieldPhonePlaceholder")}
-                    className="h-11 border-emerald-200"
+                    className="h-11 border-sky-200"
                     inputMode="tel"
                   />
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="h-px bg-emerald-200 flex-1" />
+                  <div className="h-px bg-sky-200 flex-1" />
                   <span className="text-xs text-muted-foreground font-medium">{t("loginOr")}</span>
-                  <div className="h-px bg-emerald-200 flex-1" />
+                  <div className="h-px bg-sky-200 flex-1" />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="login-abha" className="text-emerald-900 flex items-center gap-1.5">
+                  <Label htmlFor="login-abha" className="text-sky-900 flex items-center gap-1.5">
                     <ShieldCheck className="size-3.5" /> {t("loginFieldAbha")}
                   </Label>
                   <Input
@@ -178,7 +178,7 @@ export function LoginStep() {
                     value={abha}
                     onChange={(e) => setAbha(e.target.value)}
                     placeholder={t("loginFieldAbhaPlaceholder")}
-                    className="h-11 border-emerald-200"
+                    className="h-11 border-sky-200"
                   />
                 </div>
               </div>
@@ -205,13 +205,13 @@ export function LoginStep() {
               <div className="text-center">
                 <button
                   onClick={handleNewPatient}
-                  className="text-sm font-medium text-emerald-700 hover:underline"
+                  className="text-sm font-medium text-sky-700 hover:underline"
                 >
                   {t("loginStartNew")}
                 </button>
               </div>
 
-              <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2 flex items-start gap-2 text-xs text-emerald-700">
+              <div className="rounded-lg bg-sky-50 border border-sky-200 px-3 py-2 flex items-start gap-2 text-xs text-sky-700">
                 <ShieldCheck className="size-3.5 shrink-0 mt-0.5" />
                 <span>{t("loginNoRecordKept")}</span>
               </div>
@@ -219,10 +219,10 @@ export function LoginStep() {
           ) : (
             <div className="space-y-4">
               <div className="flex flex-col items-center text-center py-4">
-                <div className="size-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mb-3">
+                <div className="size-16 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mb-3">
                   <UserCheck className="size-8" />
                 </div>
-                <p className="text-lg font-bold text-emerald-900">
+                <p className="text-lg font-bold text-sky-900">
                   {t("loginFound", { name: found.name })}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">{t("loginNoRecordKept")}</p>
@@ -231,7 +231,7 @@ export function LoginStep() {
               <Button
                 onClick={handleContinue}
                 disabled={searching}
-                className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white"
+                className="w-full h-12 bg-sky-600 hover:bg-sky-700 text-white"
               >
                 {searching ? (
                   <><Loader2 className="size-4 animate-spin" /> {t("loginSearching")}</>

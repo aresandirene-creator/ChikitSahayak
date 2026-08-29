@@ -1,6 +1,8 @@
 "use client";
 
 import { useMediKioskStore } from "@/lib/store";
+import { useI18n } from "@/lib/use-i18n";
+import { useUiMode } from "@/lib/use-ui-mode";
 import { PrefaceScreen } from "@/components/medikiosk/PrefaceScreen";
 import { LoginStep } from "@/components/medikiosk/LoginStep";
 import { IdentifyStep } from "@/components/medikiosk/IdentifyStep";
@@ -14,34 +16,53 @@ import { WorkflowProgress } from "@/components/medikiosk/WorkflowProgress";
 import { PatientHeader } from "@/components/medikiosk/PatientHeader";
 import { RedFlagToast } from "@/components/medikiosk/RedFlagToast";
 import { LanguageSwitcher } from "@/components/medikiosk/LanguageSwitcher";
-import { useI18n } from "@/lib/use-i18n";
+import { Type, ImageIcon } from "lucide-react";
 
 export default function Home() {
   const step = useMediKioskStore((s) => s.step);
   const prefaceTab = useMediKioskStore((s) => s.prefaceTab);
   const { t } = useI18n();
+  const { graphical, setUiMode } = useUiMode();
 
   const showWorkflowFooter = step !== "welcome" && prefaceTab !== null;
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-foreground">
       {/* Top branding bar */}
-      <header className="sticky top-0 z-40 bg-white border-b border-emerald-100">
+      <header className="sticky top-0 z-40 bg-white border-b border-sky-100 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="size-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-sm">
-              <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 3v3M12 18v3M3 12h3M18 12h3" />
-                <circle cx="12" cy="12" r="3.2" />
+            <div className="relative size-10 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-sm">
+              {/* Medical cross */}
+              <svg viewBox="0 0 24 24" className="size-6" fill="currentColor" aria-hidden="true">
+                <path d="M9.5 2.5h5v7h7v5h-7v7h-5v-7h-7v-5h7z" />
               </svg>
+              <span className="sr-only">MediKiosk</span>
             </div>
             <div className="leading-tight">
-              <div className="font-bold text-lg text-emerald-800 tracking-tight">{t("appName")}</div>
-              <div className="text-[11px] text-emerald-600 -mt-0.5">{t("tagline")}</div>
+              <div className="font-bold text-lg text-sky-800 tracking-tight">{t("appName")}</div>
+              <div className="text-[11px] text-sky-600 -mt-0.5">{t("tagline")}</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <LanguageSwitcher compact />
+            {/* Compact mode toggle: switch between normal (text) and graphical (pictures) */}
+            <button
+              onClick={() => setUiMode(graphical ? "normal" : "graphical")}
+              className={[
+                "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
+                graphical
+                  ? "border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100"
+                  : "border-sky-200 bg-white hover:bg-sky-50 text-sky-800",
+              ].join(" ")}
+              aria-label={graphical ? t("modeNormal") : t("modeGraphical")}
+              title={graphical ? t("modeNormal") : t("modeGraphical")}
+            >
+              {graphical ? <Type className="size-4" /> : <ImageIcon className="size-4" />}
+              <span className="hidden sm:inline font-medium">
+                {graphical ? t("modeNormal") : t("modeGraphical")}
+              </span>
+            </button>
             <PatientHeader />
           </div>
         </div>

@@ -12,6 +12,7 @@ import type {
 import type { LangCode } from "./i18n";
 
 type PrefaceTab = "new" | "returning" | null;
+type UiMode = "normal" | "graphical";
 
 interface MediKioskState {
   // Workflow
@@ -23,6 +24,12 @@ interface MediKioskState {
   // Preface tab (DKMS-style)
   prefaceTab: PrefaceTab;
   setPrefaceTab: (t: PrefaceTab) => void;
+
+  // UI mode: "normal" (text-heavy) or "graphical" (icon-heavy, minimal text,
+  // designed for uneducated users). Chosen on the preface screen and applied
+  // across every step.
+  uiMode: UiMode;
+  setUiMode: (m: UiMode) => void;
 
   // UI language (i18n) — when changed, the whole UI re-renders
   uiLanguage: LangCode;
@@ -131,6 +138,9 @@ export const useMediKioskStore = create<MediKioskState>((set, get) => ({
   prefaceTab: null,
   setPrefaceTab: (t) => set({ prefaceTab: t }),
 
+  uiMode: "normal",
+  setUiMode: (m) => set({ uiMode: m }),
+
   uiLanguage: "en",
   setUiLanguage: (l) => set({ uiLanguage: l }),
 
@@ -211,7 +221,8 @@ export const useMediKioskStore = create<MediKioskState>((set, get) => ({
     set({
       step: "welcome",
       prefaceTab: null,
-      // keep uiLanguage so the next patient sees the previous language first
+      // keep uiMode + uiLanguage so the next patient sees the same
+      // accessibility settings chosen on the preface
       patient: null,
       encounterId: null,
       consents: {},
