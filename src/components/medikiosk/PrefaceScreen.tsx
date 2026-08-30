@@ -31,7 +31,7 @@ export function PrefaceScreen() {
 
   const FEATURES = [
     { icon: MessageSquareHeart, title: t("prefaceFeature1Title"), desc: t("prefaceFeature1Desc"), color: "bg-rose-50 text-rose-600" },
-    { icon: FileScan, title: t("prefaceFeature2Title"), desc: t("prefaceFeature2Desc"), color: "bg-sky-50 text-sky-600" },
+    { icon: FileScan, title: t("prefaceFeature2Title"), desc: t("prefaceFeature2Desc"), color: "bg-red-50 text-red-600" },
     { icon: ClipboardCheck, title: t("prefaceFeature3Title"), desc: t("prefaceFeature3Desc"), color: "bg-amber-50 text-amber-600" },
     { icon: Network, title: t("prefaceFeature4Title"), desc: t("prefaceFeature4Desc"), color: "bg-teal-50 text-teal-600" },
   ];
@@ -52,17 +52,17 @@ export function PrefaceScreen() {
       <section className="text-center pt-4 sm:pt-8">
         {/* Big ChikitsaHayak logo */}
         <div className="inline-flex items-center justify-center mb-5">
-          <ChikitsaHayakLogo iconSize={48} container containerClass="bg-sky-600 text-white rounded-2xl shadow-lg shadow-sky-200" />
+          <ChikitsaHayakLogo size={88} rounded />
         </div>
-        <div className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 border border-sky-200 mb-4">
-          <ChikitsaHayakLogo iconSize={14} />
+        <div className="inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 border border-red-200 mb-4">
+          <ChikitsaHayakLogo size={16} />
           {t("appName")}
         </div>
-        <h1 className="text-3xl sm:text-5xl font-bold text-sky-900 tracking-tight max-w-3xl mx-auto">
+        <h1 className="text-3xl sm:text-5xl font-bold text-red-900 tracking-tight max-w-3xl mx-auto">
           {t("prefaceWelcome")}
         </h1>
         {!graphical && (
-          <p className="mt-4 text-base sm:text-lg text-sky-700/80 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-4 text-base sm:text-lg text-red-700/80 max-w-2xl mx-auto leading-relaxed">
             {t("prefaceSubtitle")}
           </p>
         )}
@@ -70,7 +70,7 @@ export function PrefaceScreen() {
 
       {/* Language picker (full grid) */}
       <section className="max-w-3xl mx-auto">
-        <div className="text-center text-sm font-semibold text-sky-700/80 mb-3">
+        <div className="text-center text-sm font-semibold text-red-700/80 mb-3">
           {t("prefaceLanguagePrompt")}
         </div>
         <LanguageSwitcher />
@@ -86,25 +86,25 @@ export function PrefaceScreen() {
           <button
             onClick={handleNewPatient}
             className={[
-              "group text-left rounded-2xl border-2 bg-white transition-all shadow-sm hover:shadow-md focus:outline-none focus:ring-4 focus:ring-sky-200",
+              "group text-left rounded-2xl border-2 bg-white transition-all shadow-sm hover:shadow-md focus:outline-none focus:ring-4 focus:ring-red-200",
               graphical
-                ? "border-sky-300 hover:bg-sky-50 hover:border-sky-500 p-8 sm:p-10"
-                : "border-sky-300 p-6 hover:bg-sky-50 hover:border-sky-500",
+                ? "border-red-300 hover:bg-red-50 hover:border-red-500 p-8 sm:p-10"
+                : "border-red-300 p-6 hover:bg-red-50 hover:border-red-500",
             ].join(" ")}
           >
             <div className={[
-              "rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform",
+              "rounded-2xl bg-red-100 text-red-700 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform",
               graphical ? "size-20" : "size-14",
             ].join(" ")}>
               <UserPlus className={graphical ? "size-10" : "size-7"} />
             </div>
-            <h3 className={graphical ? "text-2xl font-bold text-sky-900 mb-1" : "text-xl font-bold text-sky-900 mb-1"}>
+            <h3 className={graphical ? "text-2xl font-bold text-red-900 mb-1" : "text-xl font-bold text-red-900 mb-1"}>
               {t("prefaceTabNew")}
             </h3>
             {!graphical && (
-              <p className="text-sm text-sky-700/80 leading-relaxed">{t("prefaceTabNewDesc")}</p>
+              <p className="text-sm text-red-700/80 leading-relaxed">{t("prefaceTabNewDesc")}</p>
             )}
-            <div className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-sky-700 group-hover:gap-2 transition-all">
+            <div className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-red-700 group-hover:gap-2 transition-all">
               {t("continue")}
               <ArrowRight className="size-4" />
             </div>
@@ -144,12 +144,12 @@ export function PrefaceScreen() {
       {!graphical && (
         <section className="grid sm:grid-cols-2 gap-3 max-w-4xl mx-auto">
           {FEATURES.map((f) => (
-            <div key={f.title} className="rounded-xl border border-sky-100 bg-white p-4 flex items-start gap-3 shadow-sm">
+            <div key={f.title} className="rounded-xl border border-red-100 bg-white p-4 flex items-start gap-3 shadow-sm">
               <div className={`size-10 rounded-lg ${f.color} flex items-center justify-center shrink-0`}>
                 <f.icon className="size-5" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-sky-900 text-sm">{f.title}</h3>
+                <h3 className="font-semibold text-red-900 text-sm">{f.title}</h3>
                 <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{f.desc}</p>
               </div>
             </div>
@@ -160,9 +160,9 @@ export function PrefaceScreen() {
       {/* Impact callout */}
       {!graphical && (
         <section className="max-w-4xl mx-auto">
-          <div className="rounded-2xl bg-sky-50 border border-sky-200 p-5 flex items-start gap-3">
-            <Stethoscope className="size-6 text-sky-600 shrink-0 mt-0.5" />
-            <p className="text-sm text-sky-800 leading-relaxed">
+          <div className="rounded-2xl bg-red-50 border border-red-200 p-5 flex items-start gap-3">
+            <Stethoscope className="size-6 text-red-600 shrink-0 mt-0.5" />
+            <p className="text-sm text-red-800 leading-relaxed">
               {t("completeImpactBody")}
             </p>
           </div>

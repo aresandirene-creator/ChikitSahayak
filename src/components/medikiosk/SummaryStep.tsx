@@ -145,8 +145,8 @@ export function SummaryStep() {
     return (
       <div className="max-w-3xl mx-auto">
         <div className="text-center py-20">
-          <Loader2 className="size-12 text-sky-500 animate-spin mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-sky-900">{t("summaryGenerating")}</h3>
+          <Loader2 className="size-12 text-red-500 animate-spin mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-red-900">{t("summaryGenerating")}</h3>
           <p className="text-muted-foreground mt-1">
             {t("summaryGeneratingDesc")}
           </p>
@@ -159,15 +159,15 @@ export function SummaryStep() {
     return (
       <div className="max-w-3xl mx-auto space-y-6">
         <div>
-          <div className="inline-flex items-center gap-2 text-xs font-semibold text-sky-700 bg-sky-100 rounded-full px-3 py-1">
+          <div className="inline-flex items-center gap-2 text-xs font-semibold text-red-700 bg-red-100 rounded-full px-3 py-1">
             <ClipboardCheck className="size-3.5" /> {t("summaryBadge")}
           </div>
-          <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-sky-900">{t("summaryTitle")}</h2>
+          <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-red-900">{t("summaryTitle")}</h2>
         </div>
-        <Card className="border-sky-100 shadow-sm">
+        <Card className="border-red-100 shadow-sm">
           <CardContent className="p-8 text-center">
             <p className="text-muted-foreground mb-4">{t("summaryNoHistory")}</p>
-            <Button onClick={generate} className="bg-sky-600 hover:bg-sky-700 text-white">
+            <Button onClick={generate} className="bg-red-600 hover:bg-red-700 text-white">
               <Sparkles className="size-4" /> {t("summaryTryAnyway")}
             </Button>
           </CardContent>
@@ -179,10 +179,10 @@ export function SummaryStep() {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div>
-        <div className="inline-flex items-center gap-2 text-xs font-semibold text-sky-700 bg-sky-100 rounded-full px-3 py-1">
+        <div className="inline-flex items-center gap-2 text-xs font-semibold text-red-700 bg-red-100 rounded-full px-3 py-1">
           <ClipboardCheck className="size-3.5" /> {t("summaryBadge")}
         </div>
-        <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-sky-900">{t("summaryTitle")}</h2>
+        <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-red-900">{t("summaryTitle")}</h2>
         <p className="mt-1 text-muted-foreground">{t("summarySubtitle")}</p>
       </div>
 
@@ -205,7 +205,7 @@ export function SummaryStep() {
         </Card>
       )}
 
-      <div className="flex items-center gap-3 flex-wrap rounded-xl bg-white border border-sky-100 px-4 py-3 shadow-sm">
+      <div className="flex items-center gap-3 flex-wrap rounded-xl bg-white border border-red-100 px-4 py-3 shadow-sm">
         <div className="flex items-center gap-2">
           <StatusBadge status={summaryStatus} t={t} />
           <span className="text-sm text-muted-foreground">
@@ -221,7 +221,7 @@ export function SummaryStep() {
             size="sm"
             onClick={generate}
             disabled={generating}
-            className="border-sky-300 text-sky-700 hover:bg-sky-50"
+            className="border-red-300 text-red-700 hover:bg-red-50"
           >
             <RotateCw className="size-3.5" /> {t("summaryRegenerate")}
           </Button>
@@ -231,7 +231,7 @@ export function SummaryStep() {
               size="sm"
               onClick={() => setEditing(true)}
               disabled={summaryStatus === "confirmed"}
-              className="border-sky-300 text-sky-700 hover:bg-sky-50"
+              className="border-red-300 text-red-700 hover:bg-red-50"
             >
               <Pencil className="size-3.5" /> {t("summaryEdit")}
             </Button>
@@ -239,7 +239,7 @@ export function SummaryStep() {
             <Button
               size="sm"
               onClick={handleEditSave}
-              className="bg-sky-600 hover:bg-sky-700 text-white"
+              className="bg-red-600 hover:bg-red-700 text-white"
             >
               <CheckCircle2 className="size-3.5" /> {t("summarySaveEdits")}
             </Button>
@@ -257,7 +257,7 @@ export function SummaryStep() {
             size="sm"
             onClick={handleConfirm}
             disabled={summaryStatus === "confirmed"}
-            className="bg-sky-600 hover:bg-sky-700 text-white"
+            className="bg-red-600 hover:bg-red-700 text-white"
           >
             <CheckCircle2 className="size-3.5" />
             {summaryStatus === "confirmed" ? t("summaryConfirmed") : t("summaryConfirm")}
@@ -270,7 +270,7 @@ export function SummaryStep() {
           variant={showMarkdown ? "default" : "outline"}
           size="sm"
           onClick={() => setShowMarkdown(true)}
-          className={showMarkdown ? "bg-sky-600 hover:bg-sky-700 text-white" : "border-sky-300 text-sky-700"}
+          className={showMarkdown ? "bg-red-600 hover:bg-red-700 text-white" : "border-red-300 text-red-700"}
         >
           <FileText className="size-3.5" /> {t("summaryViewStructured")}
         </Button>
@@ -278,7 +278,7 @@ export function SummaryStep() {
           variant={!showMarkdown ? "default" : "outline"}
           size="sm"
           onClick={() => setShowMarkdown(false)}
-          className={!showMarkdown ? "bg-sky-600 hover:bg-sky-700 text-white" : "border-sky-300 text-sky-700"}
+          className={!showMarkdown ? "bg-red-600 hover:bg-red-700 text-white" : "border-red-300 text-red-700"}
         >
           <ListTree className="size-3.5" /> {t("summaryViewMarkdown")}
         </Button>
@@ -289,10 +289,10 @@ export function SummaryStep() {
           {sectionsList.map(({ key, labelKey, icon: Icon }) => {
             const value = summarySections[key] ?? "Not reported.";
             return (
-              <Card key={key} className="border-sky-100 shadow-sm">
+              <Card key={key} className="border-red-100 shadow-sm">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-semibold text-sky-900 flex items-center gap-2">
-                    <Icon className="size-4 text-sky-600" />
+                  <CardTitle className="text-sm font-semibold text-red-900 flex items-center gap-2">
+                    <Icon className="size-4 text-red-600" />
                     {t(labelKey)}
                   </CardTitle>
                 </CardHeader>
@@ -302,10 +302,10 @@ export function SummaryStep() {
                       value={value}
                       onChange={(e) => updateSummarySection(key, e.target.value)}
                       rows={4}
-                      className="text-sm border-sky-200 focus-visible:ring-sky-500/30"
+                      className="text-sm border-red-200 focus-visible:ring-red-500/30"
                     />
                   ) : (
-                    <p className="text-sm text-sky-900 whitespace-pre-wrap leading-relaxed">
+                    <p className="text-sm text-red-900 whitespace-pre-wrap leading-relaxed">
                       {value}
                     </p>
                   )}
@@ -315,25 +315,25 @@ export function SummaryStep() {
           })}
         </div>
       ) : (
-        <Card className="border-sky-100 shadow-sm">
+        <Card className="border-red-100 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-sm font-semibold text-sky-900 flex items-center gap-2">
-              <FileText className="size-4 text-sky-600" /> {t("summaryViewMarkdown")}
+            <CardTitle className="text-sm font-semibold text-red-900 flex items-center gap-2">
+              <FileText className="size-4 text-red-600" /> {t("summaryViewMarkdown")}
             </CardTitle>
             <CardDescription>{t("summarySubtitle")}</CardDescription>
           </CardHeader>
           <CardContent>
-            <pre className="text-xs text-sky-900 whitespace-pre-wrap leading-relaxed bg-sky-50/40 rounded-lg p-4 max-h-[60vh] overflow-y-auto scrollbar-thin">
+            <pre className="text-xs text-red-900 whitespace-pre-wrap leading-relaxed bg-red-50/40 rounded-lg p-4 max-h-[60vh] overflow-y-auto scrollbar-thin">
               {summaryFreeText || t("summarySectionAssessment")}
             </pre>
           </CardContent>
         </Card>
       )}
 
-      <Card className="border-sky-100 shadow-sm">
+      <Card className="border-red-100 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-sm font-semibold text-sky-900 flex items-center gap-2">
-            <Pencil className="size-4 text-sky-600" /> {t("summaryNotesTitle")}
+          <CardTitle className="text-sm font-semibold text-red-900 flex items-center gap-2">
+            <Pencil className="size-4 text-red-600" /> {t("summaryNotesTitle")}
           </CardTitle>
           <CardDescription>{t("summaryNotesDesc")}</CardDescription>
         </CardHeader>
@@ -343,16 +343,16 @@ export function SummaryStep() {
             onChange={(e) => setPhysicianNotes(e.target.value)}
             placeholder={t("summaryNotesPlaceholder")}
             rows={3}
-            className="border-sky-200 focus-visible:ring-sky-500/30"
+            className="border-red-200 focus-visible:ring-red-500/30"
           />
         </CardContent>
       </Card>
 
-      <div className="rounded-xl bg-sky-50 border border-sky-200 p-4 flex items-start gap-3 text-sm text-sky-800">
-        <Lock className="size-5 shrink-0 text-sky-600" />
+      <div className="rounded-xl bg-red-50 border border-red-200 p-4 flex items-start gap-3 text-sm text-red-800">
+        <Lock className="size-5 shrink-0 text-red-600" />
         <div>
           <p className="font-semibold">{t("summaryDisclaimerTitle")}</p>
-          <p className="text-sky-700/80 mt-1">{t("summaryDisclaimerBody")}</p>
+          <p className="text-red-700/80 mt-1">{t("summaryDisclaimerBody")}</p>
         </div>
       </div>
 
@@ -361,7 +361,7 @@ export function SummaryStep() {
           <Button
             size="lg"
             onClick={nextStep}
-            className="bg-sky-600 hover:bg-sky-700 text-white h-12 px-8"
+            className="bg-red-600 hover:bg-red-700 text-white h-12 px-8"
           >
             {t("summaryContinue")}
             <ArrowRight className="size-4" />
@@ -374,7 +374,7 @@ export function SummaryStep() {
 
 function StatusBadge({ status, t }: { status: string; t: (k: never) => string }) {
   if (status === "confirmed") {
-    return <Badge className="bg-sky-100 text-sky-800 border-sky-200"><CheckCircle2 className="size-3 mr-1" /> {t("summaryStatusConfirmed")}</Badge>;
+    return <Badge className="bg-red-100 text-red-800 border-red-200"><CheckCircle2 className="size-3 mr-1" /> {t("summaryStatusConfirmed")}</Badge>;
   }
   if (status === "rejected") {
     return <Badge className="bg-red-100 text-red-800 border-red-200"><XCircle className="size-3 mr-1" /> {t("summaryStatusRejected")}</Badge>;
@@ -382,7 +382,7 @@ function StatusBadge({ status, t }: { status: string; t: (k: never) => string })
   if (status === "edited") {
     return <Badge className="bg-amber-100 text-amber-800 border-amber-200"><Pencil className="size-3 mr-1" /> {t("summaryStatusEdited")}</Badge>;
   }
-  return <Badge className="bg-sky-50 text-sky-700 border-sky-200"><Sparkles className="size-3 mr-1" /> {t("summaryStatusDraft")}</Badge>;
+  return <Badge className="bg-red-50 text-red-700 border-red-200"><Sparkles className="size-3 mr-1" /> {t("summaryStatusDraft")}</Badge>;
 }
 
 function RedFlagPill({ flag }: { flag: RedFlag }) {

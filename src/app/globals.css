@@ -134,10 +134,95 @@
     height: 6px;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: rgb(16 185 129 / 0.3);
+    background-color: rgb(239 68 68 / 0.3);
     border-radius: 9999px;
   }
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
   }
+}
+
+/* Accessibility: high-contrast mode — darker text, stronger borders */
+.ch-high-contrast {
+  --background: #ffffff;
+  --foreground: #000000;
+}
+.ch-high-contrast :where(h1, h2, h3, h4, h5, h6, p, span, label, button, a, li) {
+  color: #000000 !important;
+  font-weight: 600 !important;
+}
+.ch-high-contrast :where(button, .card, [class*="border"]) {
+  border-width: 2px !important;
+  border-color: #000000 !important;
+}
+
+/* Accessibility: reduce motion */
+.ch-reduce-motion *,
+.ch-reduce-motion *::before,
+.ch-reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+/* Smooth, human font rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Humanize UI/UX — softer, more organic feel like a human-coded product */
+@layer base {
+  /* Friendlier default border radius everywhere */
+  :root {
+    --radius: 0.875rem;
+  }
+  /* Softer shadows that feel less mechanical */
+  button,
+  [class*="card"],
+  [class*="rounded-"] {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  /* Better paragraph rhythm */
+  p {
+    line-height: 1.6;
+  }
+  /* Headings breathe a little more */
+  h1, h2, h3, h4 {
+    letter-spacing: -0.015em;
+  }
+  /* Buttons feel responsive */
+  button:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  /* Softer focus rings */
+  *:focus-visible {
+    outline: 2px solid rgb(239 68 68 / 0.5);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+/* Nicer scrollbar on the whole page */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(239 68 68 / 0.25);
+  border-radius: 999px;
+  border: 2px solid white;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(239 68 68 / 0.4);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Selection color */
+::selection {
+  background: rgb(239 68 68 / 0.2);
+  color: rgb(127 29 29 / 1);
 }

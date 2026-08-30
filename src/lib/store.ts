@@ -35,6 +35,17 @@ interface ChikitsaHayakState {
   uiLanguage: LangCode;
   setUiLanguage: (l: LangCode) => void;
 
+  // Accessibility — auto-adapts the UI based on the patient's age (bigger
+  // fonts + icons for seniors) and can be manually tuned in the settings panel.
+  fontScale: number; // 0.9 | 1.0 | 1.15 | 1.3 (compact/normal/large/extra-large)
+  setFontScale: (n: number) => void;
+  highContrast: boolean;
+  setHighContrast: (b: boolean) => void;
+  reduceMotion: boolean;
+  setReduceMotion: (b: boolean) => void;
+  // Auto-set when a patient is created: age >= 60 → extra-large, 50-59 → large, else normal
+  autoAdaptAccessibility: (age: number | undefined) => void;
+
   // Patient
   patient: PatientInfo | null;
   setPatient: (p: PatientInfo | null) => void;
@@ -138,11 +149,25 @@ export const useChikitsaHayakStore = create<ChikitsaHayakState>((set, get) => ({
   prefaceTab: null,
   setPrefaceTab: (t) => set({ prefaceTab: t }),
 
-  uiMode: "normal",
+  uiMode: "graphical",
   setUiMode: (m) => set({ uiMode: m }),
 
   uiLanguage: "en",
   setUiLanguage: (l) => set({ uiLanguage: l }),
+
+  fontScale: 1.0,
+  setFontScale: (n) => set({ fontScale: n }),
+  highContrast: false,
+  setHighContrast: (b) => set({ highContrast: b }),
+  reduceMotion: false,
+  setReduceMotion: (b) => set({ reduceMotion: b }),
+  autoAdaptAccessibility: (age) => {
+    if (age === undefined || age === null) return;
+    if (age >= 60) set({ fontScale: 1.3 });
+    else if (age >= 50) set({ fontScale: 1.15 });
+    else if (age <= 12) set({ fontScale: 1.15 }); // children also get larger UI
+    else set({ fontScale: 1.0 });
+  },
 
   patient: null,
   setPatient: (p) =>

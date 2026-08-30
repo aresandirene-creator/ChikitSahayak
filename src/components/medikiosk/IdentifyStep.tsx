@@ -24,6 +24,7 @@ export function IdentifyStep() {
   const setEncounterId = useChikitsaHayakStore((s) => s.setEncounterId);
   const setConsent = useChikitsaHayakStore((s) => s.setConsent);
   const setUiLanguage = useChikitsaHayakStore((s) => s.setUiLanguage);
+  const autoAdaptAccessibility = useChikitsaHayakStore((s) => s.autoAdaptAccessibility);
   const nextStep = useChikitsaHayakStore((s) => s.nextStep);
   const existing = useChikitsaHayakStore((s) => s.patient);
   const uiLanguage = useChikitsaHayakStore((s) => s.uiLanguage);
@@ -80,6 +81,8 @@ export function IdentifyStep() {
       setPatient(p);
       setEncounterId(data.encounter?.id ?? null);
       setUiLanguage(form.language as LangCode);
+      // Auto-adapt the UI to the patient's age (bigger fonts for seniors/children)
+      autoAdaptAccessibility(data.patient.age ?? (form.age ? Number(form.age) : undefined));
       setConsent("history", false);
       setConsent("documents", false);
       setConsent("summary", false);
@@ -98,22 +101,22 @@ export function IdentifyStep() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
-        <div className="inline-flex items-center gap-2 text-xs font-semibold text-sky-700 bg-sky-100 rounded-full px-3 py-1">
+        <div className="inline-flex items-center gap-2 text-xs font-semibold text-red-700 bg-red-100 rounded-full px-3 py-1">
           <UserRound className="size-3.5" /> {t("identifyBadge")}
         </div>
-        <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-sky-900">{t("identifyTitle")}</h2>
+        <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-red-900">{t("identifyTitle")}</h2>
         <p className="mt-1 text-muted-foreground">{t("identifySubtitle")}</p>
       </div>
 
-      <Card className="border-sky-100 shadow-sm">
+      <Card className="border-red-100 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-sky-900">{t("identifyCardTitle")}</CardTitle>
+          <CardTitle className="text-red-900">{t("identifyCardTitle")}</CardTitle>
           <CardDescription>{t("identifyCardDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor="name" className="text-sky-900">
+              <Label htmlFor="name" className="text-red-900">
                 {t("identifyName")} <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -126,7 +129,7 @@ export function IdentifyStep() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="age" className="text-sky-900">{t("identifyAge")}</Label>
+              <Label htmlFor="age" className="text-red-900">{t("identifyAge")}</Label>
               <Input
                 id="age"
                 type="number"
@@ -140,11 +143,11 @@ export function IdentifyStep() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-sky-900">{t("identifyGender")}</Label>
+              <Label className="text-red-900">{t("identifyGender")}</Label>
               {graphical ? (
                 <div className="grid grid-cols-4 gap-2">
                   {[
-                    { v: "male", icon: Mars, label: t("identifyGenderMale"), color: "bg-sky-100 text-sky-700" },
+                    { v: "male", icon: Mars, label: t("identifyGenderMale"), color: "bg-red-100 text-red-700" },
                     { v: "female", icon: Venus, label: t("identifyGenderFemale"), color: "bg-pink-100 text-pink-700" },
                     { v: "other", icon: CircleUser, label: t("identifyGenderOther"), color: "bg-violet-100 text-violet-700" },
                     { v: "prefer_not", icon: CircleUser, label: t("identifyGenderPreferNot"), color: "bg-slate-100 text-slate-600" },
@@ -156,14 +159,14 @@ export function IdentifyStep() {
                       className={[
                         "rounded-xl border-2 p-2 flex flex-col items-center gap-1 transition-all",
                         form.gender === g.v
-                          ? "border-sky-500 bg-sky-50 shadow-sm"
-                          : "border-sky-200 bg-white hover:bg-sky-50/50",
+                          ? "border-red-500 bg-red-50 shadow-sm"
+                          : "border-red-200 bg-white hover:bg-red-50/50",
                       ].join(" ")}
                     >
                       <div className={["size-10 rounded-full flex items-center justify-center", g.color].join(" ")}>
                         <g.icon className="size-6" />
                       </div>
-                      <span className="text-[10px] font-semibold text-sky-800 text-center leading-tight">{g.label}</span>
+                      <span className="text-[10px] font-semibold text-red-800 text-center leading-tight">{g.label}</span>
                     </button>
                   ))}
                 </div>
@@ -183,7 +186,7 @@ export function IdentifyStep() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="phone" className="text-sky-900 flex items-center gap-1.5">
+              <Label htmlFor="phone" className="text-red-900 flex items-center gap-1.5">
                 <Phone className="size-3.5" /> {t("identifyPhone")}
               </Label>
               <Input
@@ -196,7 +199,7 @@ export function IdentifyStep() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-sky-900 flex items-center gap-1.5">
+              <Label className="text-red-900 flex items-center gap-1.5">
                 <Droplet className="size-3.5" /> {t("identifyBloodGroup")}
               </Label>
               <Select value={form.bloodGroup} onValueChange={(v) => setForm({ ...form, bloodGroup: v })}>
@@ -212,7 +215,7 @@ export function IdentifyStep() {
             </div>
 
             <div className="space-y-1.5 sm:col-span-2">
-              <Label className="text-sky-900 flex items-center gap-1.5">
+              <Label className="text-red-900 flex items-center gap-1.5">
                 <Languages className="size-3.5" /> {t("identifyLanguage")} <span className="text-red-500">*</span>
               </Label>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
@@ -227,8 +230,8 @@ export function IdentifyStep() {
                     className={[
                       "rounded-lg border px-2 py-2 text-center transition-all",
                       form.language === l.code
-                        ? "border-sky-500 bg-sky-50 text-sky-800 font-semibold shadow-sm"
-                        : "border-sky-200 bg-white text-sky-700 hover:bg-sky-50/50",
+                        ? "border-red-500 bg-red-50 text-red-800 font-semibold shadow-sm"
+                        : "border-red-200 bg-white text-red-700 hover:bg-red-50/50",
                     ].join(" ")}
                   >
                     <div className="text-sm font-bold leading-none">{l.flag}</div>
@@ -237,12 +240,12 @@ export function IdentifyStep() {
                 ))}
               </div>
               <p className="text-[11px] text-muted-foreground mt-1">
-                {t("prefaceLanguageChanged")}: <span className="font-medium text-sky-700">{getLanguageNativeName(form.language)}</span>
+                {t("prefaceLanguageChanged")}: <span className="font-medium text-red-700">{getLanguageNativeName(form.language)}</span>
               </p>
             </div>
 
             <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor="abha" className="text-sky-900 flex items-center gap-1.5">
+              <Label htmlFor="abha" className="text-red-900 flex items-center gap-1.5">
                 <ShieldCheck className="size-3.5" /> {t("identifyAbha")}
               </Label>
               <Input
@@ -271,7 +274,7 @@ export function IdentifyStep() {
             />
           </div>
 
-          <div className="rounded-lg bg-sky-50 border border-sky-200 px-3 py-2 flex items-start gap-2 text-xs text-sky-700">
+          <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 flex items-start gap-2 text-xs text-red-700">
             <Lock className="size-3.5 shrink-0 mt-0.5" />
             <span>{t("identifyPrivacyNote")}</span>
           </div>
@@ -281,7 +284,7 @@ export function IdentifyStep() {
               size="lg"
               onClick={handleSubmit}
               disabled={submitting || !form.name.trim()}
-              className="bg-sky-600 hover:bg-sky-700 text-white h-12 px-8"
+              className="bg-red-600 hover:bg-red-700 text-white h-12 px-8"
             >
               {submitting ? t("identifySaving") : t("identifyContinue")}
               <ArrowRight className="size-4" />

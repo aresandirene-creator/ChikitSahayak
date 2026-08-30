@@ -58,7 +58,7 @@ export function WorkflowProgress() {
   const isLast = step === "complete";
 
   return (
-    <footer className="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-sky-100 shadow-[0_-4px_20px_-8px_rgba(16,185,129,0.18)]">
+    <footer className="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-red-100 shadow-[0_-4px_20px_-8px_rgba(16,185,129,0.18)]">
       <div className="max-w-6xl mx-auto px-3 sm:px-6 pt-2.5 pb-1">
         <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar">
           {STEP_ORDER.map((s, idx) => {
@@ -73,9 +73,9 @@ export function WorkflowProgress() {
                 className={[
                   "flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors whitespace-nowrap",
                   active
-                    ? "bg-sky-600 text-white shadow-sm"
+                    ? "bg-red-600 text-white shadow-sm"
                     : done
-                      ? "bg-sky-100 text-sky-800 hover:bg-sky-200"
+                      ? "bg-red-100 text-red-800 hover:bg-red-200"
                       : "bg-muted text-muted-foreground cursor-not-allowed opacity-60",
                 ].join(" ")}
                 aria-label={STEP_LABELS[s]}
@@ -84,9 +84,9 @@ export function WorkflowProgress() {
                   className={[
                     "size-5 rounded-full flex items-center justify-center text-[10px] font-bold",
                     active
-                      ? "bg-white text-sky-700"
+                      ? "bg-white text-red-700"
                       : done
-                        ? "bg-sky-600 text-white"
+                        ? "bg-red-600 text-white"
                         : "bg-muted-foreground/20 text-muted-foreground",
                   ].join(" ")}
                 >
@@ -104,7 +104,7 @@ export function WorkflowProgress() {
           variant="ghost"
           onClick={prevStep}
           disabled={!canGoBack}
-          className="text-sky-800 hover:text-sky-900 hover:bg-sky-50"
+          className="text-red-800 hover:text-red-900 hover:bg-red-50"
         >
           <ChevronLeft className="size-4" />
           {t("back")}
@@ -124,7 +124,7 @@ export function WorkflowProgress() {
           <Button
             onClick={handleContinue}
             disabled={!canAdvance()}
-            className="bg-sky-600 hover:bg-sky-700 text-white"
+            className="bg-red-600 hover:bg-red-700 text-white"
           >
             {t("continue")}
             <ChevronRight className="size-4" />
@@ -132,7 +132,7 @@ export function WorkflowProgress() {
         ) : (
           <Button
             onClick={() => setStep("welcome")}
-            className="bg-sky-600 hover:bg-sky-700 text-white"
+            className="bg-red-600 hover:bg-red-700 text-white"
           >
             {t("newPatient")}
           </Button>

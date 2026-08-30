@@ -125,18 +125,18 @@ export function DocumentsStep() {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div>
-        <div className="inline-flex items-center gap-2 text-xs font-semibold text-sky-700 bg-sky-100 rounded-full px-3 py-1">
+        <div className="inline-flex items-center gap-2 text-xs font-semibold text-red-700 bg-red-100 rounded-full px-3 py-1">
           <FileScan className="size-3.5" /> {t("documentsBadge")}
         </div>
-        <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-sky-900">{t("documentsTitle")}</h2>
+        <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-red-900">{t("documentsTitle")}</h2>
         <p className="mt-1 text-muted-foreground">{t("documentsSubtitle")}</p>
       </div>
 
-      <Card className="border-sky-100 shadow-sm">
+      <Card className="border-red-100 shadow-sm">
         <CardContent className="p-5 space-y-4">
           <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
             <div className="space-y-1.5 flex-1">
-              <Label className="text-sky-900">{t("documentsTypeLabel")}</Label>
+              <Label className="text-red-900">{t("documentsTypeLabel")}</Label>
               <Select value={selectedType} onValueChange={setSelectedType}>
                 <SelectTrigger className="h-11">
                   <SelectValue />
@@ -153,7 +153,7 @@ export function DocumentsStep() {
               size="lg"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="bg-sky-600 hover:bg-sky-700 text-white h-11"
+              className="bg-red-600 hover:bg-red-700 text-white h-11"
             >
               <UploadCloud className="size-4" />
               {uploading ? t("documentsUploadUploading") : t("documentsUploadButton")}
@@ -164,18 +164,18 @@ export function DocumentsStep() {
             htmlFor="doc-file-input"
             onDragOver={(e) => {
               e.preventDefault();
-              e.currentTarget.classList.add("border-sky-400", "bg-sky-50");
+              e.currentTarget.classList.add("border-red-400", "bg-red-50");
             }}
             onDragLeave={(e) => {
               e.preventDefault();
-              e.currentTarget.classList.remove("border-sky-400", "bg-sky-50");
+              e.currentTarget.classList.remove("border-red-400", "bg-red-50");
             }}
             onDrop={(e) => {
               e.preventDefault();
-              e.currentTarget.classList.remove("border-sky-400", "bg-sky-50");
+              e.currentTarget.classList.remove("border-red-400", "bg-red-50");
               handleFiles(e.dataTransfer.files);
             }}
-            className="block cursor-pointer rounded-xl border-2 border-dashed border-sky-200 hover:border-sky-400 hover:bg-sky-50/50 transition-colors p-8 text-center"
+            className="block cursor-pointer rounded-xl border-2 border-dashed border-red-200 hover:border-red-400 hover:bg-red-50/50 transition-colors p-8 text-center"
           >
             <input
               id="doc-file-input"
@@ -186,8 +186,8 @@ export function DocumentsStep() {
               className="hidden"
               onChange={(e) => handleFiles(e.target.files)}
             />
-            <FilePlus className="size-10 text-sky-400 mx-auto mb-2" />
-            <div className="text-sm font-medium text-sky-800">{t("documentsDropzone")}</div>
+            <FilePlus className="size-10 text-red-400 mx-auto mb-2" />
+            <div className="text-sm font-medium text-red-800">{t("documentsDropzone")}</div>
             <div className="text-xs text-muted-foreground mt-1">{t("documentsDropzoneHint")}</div>
           </label>
 
@@ -201,23 +201,23 @@ export function DocumentsStep() {
       </Card>
 
       {sortedDocs.length === 0 ? (
-        <Card className="border-dashed border-sky-200 bg-sky-50/30">
+        <Card className="border-dashed border-red-200 bg-red-50/30">
           <CardContent className="py-12 text-center">
-            <FileText className="size-12 text-sky-300 mx-auto mb-3" />
+            <FileText className="size-12 text-red-300 mx-auto mb-3" />
             <p className="text-muted-foreground">{t("documentsEmpty")}</p>
-            <Button variant="outline" onClick={nextStep} className="mt-4 border-sky-300 text-sky-700 hover:bg-sky-50">
+            <Button variant="outline" onClick={nextStep} className="mt-4 border-red-300 text-red-700 hover:bg-red-50">
               {t("documentsSkip")} <ArrowRight className="size-4" />
             </Button>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-3">
-          <div className="flex items-center gap-2 text-sm font-semibold text-sky-800">
+          <div className="flex items-center gap-2 text-sm font-semibold text-red-800">
             <CalendarDays className="size-4" />
             {t("documentsTimeline", { n: sortedDocs.length })}
           </div>
           <div className="relative pl-6">
-            <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-sky-200" />
+            <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-red-200" />
             {sortedDocs.map((doc, idx) => (
               <DocumentCard key={doc.id} doc={doc} index={idx} t={t} />
             ))}
@@ -229,7 +229,7 @@ export function DocumentsStep() {
         <Button
           size="lg"
           onClick={nextStep}
-          className="bg-sky-600 hover:bg-sky-700 text-white h-12 px-8"
+          className="bg-red-600 hover:bg-red-700 text-white h-12 px-8"
         >
           {t("documentsContinue")}
           <ArrowRight className="size-4" />
@@ -260,22 +260,22 @@ function DocumentCard({
     <div className="relative mb-4">
       <div className={[
         "absolute -left-[19px] top-3 size-5 rounded-full border-2 border-white shadow",
-        doc.status === "completed" ? "bg-sky-500" : doc.status === "analyzing" ? "bg-amber-400" : "bg-red-400",
+        doc.status === "completed" ? "bg-red-500" : doc.status === "analyzing" ? "bg-amber-400" : "bg-red-400",
       ].join(" ")} />
 
       <Card className={[
         "border shadow-sm",
-        abnormalTests.length > 0 ? "border-amber-200" : "border-sky-100",
+        abnormalTests.length > 0 ? "border-amber-200" : "border-red-100",
       ].join(" ")}>
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
-            <div className="size-10 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+            <div className="size-10 rounded-lg bg-red-100 text-red-700 flex items-center justify-center shrink-0">
               <FileText className="size-5" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-semibold text-sky-900 truncate">{doc.fileName}</h3>
-                <Badge variant="outline" className="bg-sky-50 text-sky-700 border-sky-200 text-[10px]">
+                <h3 className="font-semibold text-red-900 truncate">{doc.fileName}</h3>
+                <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 text-[10px]">
                   {fileTypeLabel}
                 </Badge>
                 {abnormalTests.length > 0 && (
@@ -312,7 +312,7 @@ function DocumentCard({
                 </Badge>
               )}
               {doc.status === "completed" && (
-                <Badge className="bg-sky-100 text-sky-800 border-sky-200">
+                <Badge className="bg-red-100 text-red-800 border-red-200">
                   <CheckCircle2 className="size-3 mr-1" /> {t("documentsStatusCompleted")}
                 </Badge>
               )}
@@ -328,10 +328,10 @@ function DocumentCard({
             <div className="mt-3 space-y-3">
               {diagnoses.length > 0 && (
                 <div>
-                  <div className="text-xs font-semibold text-sky-800 mb-1">{t("documentsExtractedDiagnoses")}</div>
+                  <div className="text-xs font-semibold text-red-800 mb-1">{t("documentsExtractedDiagnoses")}</div>
                   <div className="flex flex-wrap gap-1.5">
                     {diagnoses.map((d, i) => (
-                      <Badge key={i} variant="outline" className="bg-sky-50 text-sky-800 border-sky-200">
+                      <Badge key={i} variant="outline" className="bg-red-50 text-red-800 border-red-200">
                         {d}
                       </Badge>
                     ))}
@@ -341,13 +341,13 @@ function DocumentCard({
 
               {medicines.length > 0 && (
                 <div>
-                  <div className="text-xs font-semibold text-sky-800 mb-1 flex items-center gap-1">
+                  <div className="text-xs font-semibold text-red-800 mb-1 flex items-center gap-1">
                     <Pill className="size-3" /> {t("documentsExtractedMedicines", { n: medicines.length })}
                   </div>
                   <div className="grid sm:grid-cols-2 gap-1.5">
                     {medicines.map((m, i) => (
-                      <div key={i} className="text-xs rounded-md bg-white border border-sky-100 px-2.5 py-1.5">
-                        <span className="font-medium text-sky-900">{m.name || "—"}</span>
+                      <div key={i} className="text-xs rounded-md bg-white border border-red-100 px-2.5 py-1.5">
+                        <span className="font-medium text-red-900">{m.name || "—"}</span>
                         {m.dosage && <span className="text-muted-foreground"> · {m.dosage}</span>}
                         {m.frequency && <span className="text-muted-foreground"> · {m.frequency}</span>}
                         {m.duration && <span className="text-muted-foreground"> · {m.duration}</span>}
@@ -359,7 +359,7 @@ function DocumentCard({
 
               {tests.length > 0 && (
                 <div>
-                  <div className="text-xs font-semibold text-sky-800 mb-1 flex items-center gap-1">
+                  <div className="text-xs font-semibold text-red-800 mb-1 flex items-center gap-1">
                     <TestTube className="size-3" /> {t("documentsExtractedTests", { n: tests.length })}
                   </div>
                   <div className="grid sm:grid-cols-2 gap-1.5">
@@ -370,7 +370,7 @@ function DocumentCard({
                           "text-xs rounded-md px-2.5 py-1.5 border",
                           tt.abnormal
                             ? "bg-amber-50 border-amber-300 text-amber-900"
-                            : "bg-white border-sky-100 text-sky-900",
+                            : "bg-white border-red-100 text-red-900",
                         ].join(" ")}
                       >
                         <div className="flex items-center justify-between gap-2">
@@ -391,8 +391,8 @@ function DocumentCard({
 
               {procedures.length > 0 && (
                 <div>
-                  <div className="text-xs font-semibold text-sky-800 mb-1">{t("documentsExtractedProcedures")}</div>
-                  <ul className="text-xs text-sky-900 list-disc pl-5">
+                  <div className="text-xs font-semibold text-red-800 mb-1">{t("documentsExtractedProcedures")}</div>
+                  <ul className="text-xs text-red-900 list-disc pl-5">
                     {procedures.map((p, i) => <li key={i}>{p}</li>)}
                   </ul>
                 </div>
@@ -400,12 +400,12 @@ function DocumentCard({
 
               {vitals.length > 0 && (
                 <div>
-                  <div className="text-xs font-semibold text-sky-800 mb-1 flex items-center gap-1">
+                  <div className="text-xs font-semibold text-red-800 mb-1 flex items-center gap-1">
                     <Activity className="size-3" /> {t("documentsExtractedVitals")}
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {vitals.map((v, i) => (
-                      <Badge key={i} variant="outline" className="bg-white text-sky-800 border-sky-200">
+                      <Badge key={i} variant="outline" className="bg-white text-red-800 border-red-200">
                         {v.name}: <span className="font-medium ml-1">{v.value}</span>
                       </Badge>
                     ))}
@@ -417,7 +417,7 @@ function DocumentCard({
                 <div>
                   <button
                     onClick={() => setShowRaw((v) => !v)}
-                    className="text-xs text-sky-700 font-medium hover:underline"
+                    className="text-xs text-red-700 font-medium hover:underline"
                   >
                     {showRaw ? t("documentsExtractedRawHide") : t("documentsExtractedRawShow")}
                   </button>

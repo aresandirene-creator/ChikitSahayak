@@ -27,7 +27,7 @@ const SYMPTOMS = [
   { icon: HeartPulse, label: "Chest", color: "bg-red-50 text-red-600 hover:bg-red-100", msg: "I have chest pain" },
   { icon: Stethoscope, label: "Stomach", color: "bg-amber-50 text-amber-600 hover:bg-amber-100", msg: "I have stomach pain" },
   { icon: Thermometer, label: "Fever", color: "bg-orange-50 text-orange-600 hover:bg-orange-100", msg: "I have fever" },
-  { icon: Wind, label: "Breath", color: "bg-sky-50 text-sky-600 hover:bg-sky-100", msg: "I have difficulty breathing" },
+  { icon: Wind, label: "Breath", color: "bg-red-50 text-red-600 hover:bg-red-100", msg: "I have difficulty breathing" },
   { icon: Eye, label: "Eye", color: "bg-indigo-50 text-indigo-600 hover:bg-indigo-100", msg: "I have an eye problem" },
   { icon: Ear, label: "Ear", color: "bg-purple-50 text-purple-600 hover:bg-purple-100", msg: "I have an ear problem" },
   { icon: Bone, label: "Bones", color: "bg-slate-50 text-slate-600 hover:bg-slate-100", msg: "I have bone or joint pain" },
@@ -35,15 +35,15 @@ const SYMPTOMS = [
   { icon: Droplet, label: "Sugar", color: "bg-cyan-50 text-cyan-600 hover:bg-cyan-100", msg: "I have diabetes / high blood sugar" },
   { icon: Activity, label: "BP", color: "bg-rose-50 text-rose-600 hover:bg-rose-100", msg: "I have high blood pressure" },
   { icon: Pill, label: "Meds", color: "bg-teal-50 text-teal-600 hover:bg-teal-100", msg: "I want to tell you about my medicines" },
-  { icon: Footprints, label: "Other", color: "bg-sky-50 text-sky-600 hover:bg-sky-100", msg: "I have a different problem" },
+  { icon: Footprints, label: "Other", color: "bg-red-50 text-red-600 hover:bg-red-100", msg: "I have a different problem" },
 ];
 
 export function QuickSymptomPanel({ onPick, disabled }: QuickSymptomProps) {
   const { t } = useI18n();
 
   return (
-    <div className="rounded-xl border-2 border-sky-200 bg-sky-50/40 p-3">
-      <div className="text-xs font-semibold text-sky-700 mb-2 text-center">
+    <div className="rounded-xl border-2 border-red-200 bg-red-50/40 p-3">
+      <div className="text-xs font-semibold text-red-700 mb-2 text-center">
         {t("historyQuickSymptoms")}
       </div>
       <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">

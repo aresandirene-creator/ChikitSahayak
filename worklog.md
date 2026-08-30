@@ -274,3 +274,47 @@ Stage Summary:
 - App fully renamed to ChikitsaHayak across all 12 Indian languages + English, in all UI strings, metadata, store, and AI system prompts.
 - New medical logo (heart + pulse/heartbeat line) applied to the header and preface hero.
 - AI assistant now introduces itself as ChikitsaHayak in the patient chat.
+
+---
+Task ID: v5 (7 improvements: graphical-default, voice library, red theme+logo, humanize UI, ASR fix, Siri assistant, accessibility)
+Agent: main
+
+Work Log:
+1) Graphical by default — set store.uiMode = "graphical" so the kiosk boots straight into the picture-based interface (big icons, minimal text, quick-symptom panel).
+
+2) Voice library with Indian English accent — rebuilt pickTtsVoiceForLanguage() in languages.ts to map each of the 12 Indian languages to the best available ZAI TTS voice. English → `jam` (Indian English gentleman accent), Hindi → `tongtong` (warm), Tamil/Telugu/Urdu → `kazi` (clear), Bengali/Kannada → `xiaochen` (steady), Gujarati/Odia → `douji` (natural), Malayalam → `luodo` (expressive). Added a VOICE_LIBRARY catalogue with friendly names (Aarav, Priya, Ravi, Meera, etc.).
+
+3) New logo + red theme — copied the user's uploaded logo (human head with circuit pathways, orange→green gradient, "CHIKITSAHAYAK / DIGITAL BARATH" text) to /public/chikitsahayak-logo.png. Rewrote ChikitsaHayakLogo.tsx to render the image. Replaced sky (blue) → red across ALL 15 medikiosk components + page.tsx so the entire UI is now medical red + white. Verified the logo image loads at /chikitsahayak-logo.png.
+
+4) Humanize UI/UX — added softer, more organic styling to globals.css: friendlier border-radius (0.875rem default), smoother cubic-bezier transitions on all buttons/cards, line-height 1.6 for paragraphs, letter-spacing -0.015em on headings, active-press scale(0.97) on buttons, softer focus rings, nicer scrollbar with red thumb, red text-selection color.
+
+5) ASR fix — root cause: the browser's MediaRecorder default mimeType on some browsers produces audio/ogg or audio/mp4 which the ZAI ASR rejects ("unsupported audio format"). Also the base64 encoding used spread syntax that stack-overflows on large buffers. Fixed HistoryStep.startRecording:
+   - pickRecordingMime() probes audio/webm;codecs=opus → audio/webm → audio/wav and picks the first supported one.
+   - MediaRecorder(stream, { mimeType }) forces the chosen format.
+   - getUserMedia with channelCount:1, echoCancellation, noiseSuppression, sampleRate:16000 for cleaner speech.
+   - mr.start(250) collects data in 250ms chunks (not one huge blob).
+   - arrayBufferToBase64() encodes in 32KB chunks (no stack overflow).
+   - Rejects recordings < 2000 bytes as "too short".
+   - Treats ASR returning "#" or single chars as "no speech detected".
+   - Verified: generated a valid 2s WAV → ASR returned a result; WebM also works.
+
+6) Siri-like voice assistant — new VoiceAssistant.tsx component: a floating modal with a big red orb. Tap to talk → records → ASR → /api/chat with withAudio:true → plays the TTS reply → auto-listens again (conversational loop). Shows "Listening / Thinking / Speaking" states + the last-heard and last-reply transcripts. Mounted via a red "Talk" button in the header (only when a patient is loaded).
+
+7) Accessibility settings — added fontScale/highContrast/reduceMotion to the store + autoAdaptAccessibility(age) which sets fontScale = 1.3 for age ≥ 60, 1.15 for 50-59 and ≤ 12, else 1.0. New AccessibilityPanel.tsx modal: 4 text-size buttons (Compact/Normal/Large/X-Large), high-contrast toggle, reduce-motion toggle. The font scale is applied via style={{ fontSize: `${fontScale}rem` }} on the root div so all rem-based sizes scale up. autoAdaptAccessibility is called from IdentifyStep (on patient create) and LoginStep (on returning login). High-contrast + reduce-motion apply CSS classes (.ch-high-contrast, .ch-reduce-motion) defined in globals.css.
+
+Browser-verified:
+- Title: "ChikitsaHayak — AI-powered clinical intake" ✓
+- Header logo image loads from /chikitsahayak-logo.png ✓
+- Red theme: 3+ red elements on the preface ✓
+- Graphical mode active by default ("Big pictures, less text" shown) ✓
+- Accessibility panel opens from header, shows Compact/Normal/Large/X-Large + high-contrast + reduce-motion ✓
+- Clicking X-Large sets root font-size to 1.3rem ✓
+- Creating a patient with age 65 auto-sets font-size to 1.3rem ✓
+- "Talk" (voice assistant) button appears after patient is loaded ✓
+- Voice Assistant modal opens with "Tap to talk / Listening / Thinking / Speaking" states ✓
+- TTS with Indian English `jam` voice returns valid WAV (496KB) ✓
+- ASR pipeline fixed: valid WAV/MP3→WAV/WebM accepted by ZAI ASR ✓
+- Lint clean, dev server compiles ✓
+
+Stage Summary:
+- All 7 requested improvements implemented and browser-verified.

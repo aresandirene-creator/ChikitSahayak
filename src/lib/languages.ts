@@ -33,10 +33,51 @@ export const RED_FLAG_SYMPTOMS = [
   "paralysis",
 ];
 
-// TTS voice selection helper
+// TTS voice selection helper — maps each language to the best available
+// ZAI TTS voice. The ZAI SDK voices are mostly Mandarin-focused but several
+// are accent-neutral and work well across Indian languages. `jam` (English
+// gentleman) is used for Indian English — it has a clear, neutral accent
+// that Indian speakers are familiar with from international media.
+//
+// Available ZAI voices:
+//   tongtong  — warm/friendly (default)
+//   chuichui  — lively/cute
+//   xiaochen  — steady/professional
+//   jam       — English gentleman (Indian English accent)
+//   kazi      — clear/standard
+//   douji     — natural/fluent
+//   luodo     — expressive
+//
+// For Indian languages we use the most neutral/clear voices; the SDK does
+// not yet have native Hindi/Tamil/etc. voices, so we pick voices that are
+// intelligible and let the LLM handle the actual language text.
 export function pickTtsVoiceForLanguage(lang: string): string {
-  // The SDK voices are mostly neutral; we keep one reliable voice across languages.
-  // jam = English gentleman, tongtong = warm/friendly default
-  if (lang === "en") return "jam";
-  return "tongtong";
+  const map: Record<string, string> = {
+    en: "jam",        // Indian English → English gentleman accent
+    hi: "tongtong",   // Hindi → warm/friendly default
+    bn: "xiaochen",   // Bengali → steady
+    ta: "kazi",       // Tamil → clear/standard
+    te: "kazi",       // Telugu → clear/standard
+    mr: "tongtong",   // Marathi → warm
+    gu: "douji",      // Gujarati → natural
+    kn: "xiaochen",   // Kannada → steady
+    ml: "luodo",      // Malayalam → expressive
+    pa: "tongtong",   // Punjabi → warm
+    ur: "kazi",       // Urdu → clear
+    or: "douji",      // Odia → natural
+  };
+  return map[lang] ?? "tongtong";
 }
+
+// Voice library — full catalogue for the voice settings panel
+export const VOICE_LIBRARY = [
+  { id: "jam", name: "Indian English", desc: "Clear English gentleman accent — for English-speaking patients", lang: "en" },
+  { id: "tongtong", name: "Aarav (Warm)", desc: "Warm, friendly default voice — good for Hindi & most languages", lang: "hi" },
+  { id: "xiaochen", name: "Priya (Steady)", desc: "Steady, professional tone — Bengali, Kannada", lang: "multi" },
+  { id: "kazi", name: "Ravi (Clear)", desc: "Clear, standard pronunciation — Tamil, Telugu, Urdu", lang: "multi" },
+  { id: "douji", name: "Meera (Natural)", desc: "Natural, fluent delivery — Gujarati, Odia", lang: "multi" },
+  { id: "chuichui", name: "Lively", desc: "Lively, friendly — for children", lang: "multi" },
+  { id: "luodo", name: "Expressive", desc: "Expressive, emotive — Malayalam", lang: "multi" },
+] as const;
+
+export type VoiceId = (typeof VOICE_LIBRARY)[number]["id"];

@@ -17,17 +17,17 @@ export function PatientHeader() {
   return (
     <button
       onClick={() => setStep("identify")}
-      className="flex items-center gap-2 rounded-full bg-sky-50 hover:bg-sky-100 border border-sky-200 px-3 py-1.5 transition-colors"
+      className="flex items-center gap-2 rounded-full bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 transition-colors"
       aria-label="Patient info"
     >
-      <div className="size-7 rounded-full bg-sky-600 text-white text-xs font-bold flex items-center justify-center">
+      <div className="size-7 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center">
         {patient.name?.[0]?.toUpperCase() ?? "P"}
       </div>
       <div className="text-left leading-tight">
-        <div className="text-sm font-semibold text-sky-900 max-w-[140px] truncate">
+        <div className="text-sm font-semibold text-red-900 max-w-[140px] truncate">
           {patient.name}
         </div>
-        <div className="text-[10px] text-sky-600 -mt-0.5">
+        <div className="text-[10px] text-red-600 -mt-0.5">
           {patient.age ? `${patient.age}y · ` : ""}{patient.gender ?? "—"}
         </div>
       </div>
@@ -37,7 +37,7 @@ export function PatientHeader() {
         </Badge>
       )}
       {patient.abhaId && (
-        <ShieldCheck className="size-4 text-sky-600" />
+        <ShieldCheck className="size-4 text-red-600" />
       )}
     </button>
   );

@@ -21,8 +21,8 @@ export function ModeToggle() {
       icon: Type,
       label: t("modeNormal"),
       desc: t("modeNormalDesc"),
-      color: "bg-white text-sky-700",
-      activeColor: "border-sky-500 bg-sky-50 text-sky-800 shadow-sm",
+      color: "bg-white text-red-700",
+      activeColor: "border-red-500 bg-red-50 text-red-800 shadow-sm",
     },
     {
       key: "graphical" as const,
@@ -36,7 +36,7 @@ export function ModeToggle() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="text-center text-sm font-semibold text-sky-700/80 mb-1">
+      <div className="text-center text-sm font-semibold text-red-700/80 mb-1">
         {t("modeToggleTitle")}
       </div>
       <p className="text-center text-xs text-muted-foreground mb-3">{t("modeToggleDesc")}</p>
@@ -50,7 +50,7 @@ export function ModeToggle() {
               onClick={() => setUiMode(o.key)}
               className={[
                 "rounded-2xl border-2 p-4 flex items-center gap-3 transition-all text-left",
-                active ? o.activeColor : "border-sky-200 bg-white text-sky-700 hover:bg-sky-50/50",
+                active ? o.activeColor : "border-red-200 bg-white text-red-700 hover:bg-red-50/50",
               ].join(" ")}
               aria-pressed={active}
             >

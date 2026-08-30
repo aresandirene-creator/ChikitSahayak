@@ -16,9 +16,9 @@ import {
 } from "lucide-react";
 
 const CONSENT_ITEMS = [
-  { scope: "demographics", icon: User, color: "bg-sky-50 text-sky-700", optional: false, titleKey: "consentItemDemographicsTitle", descKey: "consentItemDemographicsDesc" },
+  { scope: "demographics", icon: User, color: "bg-red-50 text-red-700", optional: false, titleKey: "consentItemDemographicsTitle", descKey: "consentItemDemographicsDesc" },
   { scope: "history", icon: MessageSquareHeart, color: "bg-rose-50 text-rose-700", optional: false, titleKey: "consentItemHistoryTitle", descKey: "consentItemHistoryDesc" },
-  { scope: "documents", icon: FileScan, color: "bg-sky-50 text-sky-700", optional: false, titleKey: "consentItemDocumentsTitle", descKey: "consentItemDocumentsDesc" },
+  { scope: "documents", icon: FileScan, color: "bg-red-50 text-red-700", optional: false, titleKey: "consentItemDocumentsTitle", descKey: "consentItemDocumentsDesc" },
   { scope: "summary", icon: ClipboardCheck, color: "bg-amber-50 text-amber-700", optional: false, titleKey: "consentItemSummaryTitle", descKey: "consentItemSummaryDesc" },
   { scope: "abdm_share", icon: Network, color: "bg-teal-50 text-teal-700", optional: true, titleKey: "consentItemAbdmTitle", descKey: "consentItemAbdmDesc" },
 ] as const;
@@ -122,23 +122,23 @@ export function ConsentStep() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
-        <div className="inline-flex items-center gap-2 text-xs font-semibold text-sky-700 bg-sky-100 rounded-full px-3 py-1">
+        <div className="inline-flex items-center gap-2 text-xs font-semibold text-red-700 bg-red-100 rounded-full px-3 py-1">
           <ShieldCheck className="size-3.5" /> {t("consentBadge")}
         </div>
-        <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-sky-900">{t("consentTitle")}</h2>
+        <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-red-900">{t("consentTitle")}</h2>
         <p className="mt-1 text-muted-foreground">{t("consentSubtitle")}</p>
       </div>
 
       {/* Privacy & security */}
-      <Card className="border-sky-100 shadow-sm">
+      <Card className="border-red-100 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-sky-900 flex items-center gap-2 text-base">
+          <CardTitle className="text-red-900 flex items-center gap-2 text-base">
             <Lock className="size-4" /> {t("consentPrivacyTitle")}
           </CardTitle>
           <CardDescription>{t("consentPrivacyDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-start gap-2 rounded-lg bg-sky-50 border border-sky-200 px-3 py-2 text-sm text-sky-700">
+          <div className="flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
             <Info className="size-4 shrink-0 mt-0.5" />
             <span>{t("consentGranularNote")}</span>
           </div>
@@ -146,7 +146,7 @@ export function ConsentStep() {
       </Card>
 
       {/* Granular consent items */}
-      <Card className="border-sky-100 shadow-sm">
+      <Card className="border-red-100 shadow-sm">
         <CardContent className="p-4 space-y-3">
           {CONSENT_ITEMS.map((c) => {
             const granted = Boolean(consents[c.scope]);
@@ -155,24 +155,24 @@ export function ConsentStep() {
                 key={c.scope}
                 className={[
                   "rounded-xl border p-4 transition-colors",
-                  granted ? "border-sky-300 bg-sky-50/60" : "border-muted bg-white hover:bg-muted/40",
+                  granted ? "border-red-300 bg-red-50/60" : "border-muted bg-white hover:bg-muted/40",
                 ].join(" ")}
               >
                 <div className="flex items-start gap-3">
                   <div className={[
                     "rounded-lg flex items-center justify-center shrink-0",
                     graphical ? "size-14" : "size-9",
-                    granted ? "bg-sky-600 text-white" : c.color,
+                    granted ? "bg-red-600 text-white" : c.color,
                   ].join(" ")}>
                     {granted ? <CheckCircle2 className={graphical ? "size-8" : "size-5"} /> : <c.icon className={graphical ? "size-8" : "size-5"} />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Label htmlFor={`consent-${c.scope}`} className={["font-semibold text-sky-900 cursor-pointer", graphical ? "text-lg" : ""].join(" ")}>
+                      <Label htmlFor={`consent-${c.scope}`} className={["font-semibold text-red-900 cursor-pointer", graphical ? "text-lg" : ""].join(" ")}>
                         {t(c.titleKey)}
                       </Label>
                       {c.optional ? (
-                        <span className="text-[10px] font-bold uppercase tracking-wide text-sky-700 bg-sky-100 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] font-bold uppercase tracking-wide text-red-700 bg-red-100 px-1.5 py-0.5 rounded">
                           {t("optional")}
                         </span>
                       ) : (
@@ -191,7 +191,7 @@ export function ConsentStep() {
                     id={`consent-${c.scope}`}
                     checked={granted}
                     onCheckedChange={(v) => handleToggle(c.scope, Boolean(v))}
-                    className="size-6 data-[state=checked]:bg-sky-600 data-[state=checked]:border-sky-600 mt-1"
+                    className="size-6 data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600 mt-1"
                   />
                 </div>
               </div>
@@ -201,9 +201,9 @@ export function ConsentStep() {
       </Card>
 
       {/* Retention period */}
-      <Card className="border-sky-100 shadow-sm">
+      <Card className="border-red-100 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-sky-900 flex items-center gap-2 text-base">
+          <CardTitle className="text-red-900 flex items-center gap-2 text-base">
             <Clock className="size-4" /> {t("consentRetentionTitle")}
           </CardTitle>
           <CardDescription>{t("consentRetentionDesc")}</CardDescription>
@@ -218,8 +218,8 @@ export function ConsentStep() {
                 className={[
                   "rounded-xl border px-3 py-3 text-center transition-all",
                   retentionDays === opt.days
-                    ? "border-sky-500 bg-sky-50 text-sky-800 font-semibold shadow-sm"
-                    : "border-sky-200 bg-white text-sky-700 hover:bg-sky-50/50",
+                    ? "border-red-500 bg-red-50 text-red-800 font-semibold shadow-sm"
+                    : "border-red-200 bg-white text-red-700 hover:bg-red-50/50",
                 ].join(" ")}
               >
                 {t(opt.key)}
@@ -235,7 +235,7 @@ export function ConsentStep() {
           variant="outline"
           onClick={grantAll}
           disabled={saving}
-          className="border-sky-300 text-sky-700 hover:bg-sky-50"
+          className="border-red-300 text-red-700 hover:bg-red-50"
         >
           <ShieldCheck className="size-4" /> {t("consentGrantAll")}
         </Button>
@@ -251,7 +251,7 @@ export function ConsentStep() {
           size="lg"
           onClick={handleContinue}
           disabled={!allRequiredGranted}
-          className="bg-sky-600 hover:bg-sky-700 text-white h-12 px-8 sm:ml-auto"
+          className="bg-red-600 hover:bg-red-700 text-white h-12 px-8 sm:ml-auto"
         >
           {t("consentContinue")}
           <ArrowRight className="size-4" />
