@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useMediKioskStore } from "@/lib/store";
+import { useChikitsaHayakStore } from "@/lib/store";
 import { useContinueHandler } from "@/lib/use-continue-handler";
 import { useI18n } from "@/lib/use-i18n";
 import { Button } from "@/components/ui/button";
@@ -38,19 +38,19 @@ const AYUSH_SECTION: {
 } = { key: "ayurvedic", labelKey: "summarySectionAyurvedic", icon: Leaf };
 
 export function SummaryStep() {
-  const patient = useMediKioskStore((s) => s.patient);
-  const encounterId = useMediKioskStore((s) => s.encounterId);
-  const summaryId = useMediKioskStore((s) => s.summaryId);
-  const summarySections = useMediKioskStore((s) => s.summarySections);
-  const summaryFreeText = useMediKioskStore((s) => s.summaryFreeText);
-  const summaryStatus = useMediKioskStore((s) => s.summaryStatus);
-  const setSummary = useMediKioskStore((s) => s.setSummary);
-  const updateSummarySection = useMediKioskStore((s) => s.updateSummarySection);
-  const setSummaryStatus = useMediKioskStore((s) => s.setSummaryStatus);
-  const redFlags = useMediKioskStore((s) => s.redFlags);
-  const nextStep = useMediKioskStore((s) => s.nextStep);
-  const turns = useMediKioskStore((s) => s.turns);
-  const documents = useMediKioskStore((s) => s.documents);
+  const patient = useChikitsaHayakStore((s) => s.patient);
+  const encounterId = useChikitsaHayakStore((s) => s.encounterId);
+  const summaryId = useChikitsaHayakStore((s) => s.summaryId);
+  const summarySections = useChikitsaHayakStore((s) => s.summarySections);
+  const summaryFreeText = useChikitsaHayakStore((s) => s.summaryFreeText);
+  const summaryStatus = useChikitsaHayakStore((s) => s.summaryStatus);
+  const setSummary = useChikitsaHayakStore((s) => s.setSummary);
+  const updateSummarySection = useChikitsaHayakStore((s) => s.updateSummarySection);
+  const setSummaryStatus = useChikitsaHayakStore((s) => s.setSummaryStatus);
+  const redFlags = useChikitsaHayakStore((s) => s.redFlags);
+  const nextStep = useChikitsaHayakStore((s) => s.nextStep);
+  const turns = useChikitsaHayakStore((s) => s.turns);
+  const documents = useChikitsaHayakStore((s) => s.documents);
   const { t } = useI18n();
 
   const [generating, setGenerating] = useState(false);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMediKioskStore } from "@/lib/store";
+import { useChikitsaHayakStore } from "@/lib/store";
 import { useContinueHandler } from "@/lib/use-continue-handler";
 import { useI18n } from "@/lib/use-i18n";
 import { Button } from "@/components/ui/button";
@@ -14,13 +14,13 @@ import {
 } from "lucide-react";
 
 export function AbdmStep() {
-  const patient = useMediKioskStore((s) => s.patient);
-  const encounterId = useMediKioskStore((s) => s.encounterId);
-  const summaryStatus = useMediKioskStore((s) => s.summaryStatus);
-  const abdmRecords = useMediKioskStore((s) => s.abdmRecords);
-  const addAbdmRecord = useMediKioskStore((s) => s.addAbdmRecord);
-  const setPatient = useMediKioskStore((s) => s.setPatient);
-  const nextStep = useMediKioskStore((s) => s.nextStep);
+  const patient = useChikitsaHayakStore((s) => s.patient);
+  const encounterId = useChikitsaHayakStore((s) => s.encounterId);
+  const summaryStatus = useChikitsaHayakStore((s) => s.summaryStatus);
+  const abdmRecords = useChikitsaHayakStore((s) => s.abdmRecords);
+  const addAbdmRecord = useChikitsaHayakStore((s) => s.addAbdmRecord);
+  const setPatient = useChikitsaHayakStore((s) => s.setPatient);
+  const nextStep = useChikitsaHayakStore((s) => s.nextStep);
   const { t } = useI18n();
 
   const [busy, setBusy] = useState<string | null>(null);

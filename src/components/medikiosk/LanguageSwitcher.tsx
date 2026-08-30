@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMediKioskStore } from "@/lib/store";
+import { useChikitsaHayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
 import { LANGUAGES, type LangCode } from "@/lib/i18n";
 import { Globe, Check } from "lucide-react";
@@ -13,8 +13,8 @@ import { Globe, Check } from "lucide-react";
  * store, which triggers the whole kiosk UI to re-render in that language.
  */
 export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
-  const uiLanguage = useMediKioskStore((s) => s.uiLanguage);
-  const setUiLanguage = useMediKioskStore((s) => s.setUiLanguage);
+  const uiLanguage = useChikitsaHayakStore((s) => s.uiLanguage);
+  const setUiLanguage = useChikitsaHayakStore((s) => s.setUiLanguage);
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
 

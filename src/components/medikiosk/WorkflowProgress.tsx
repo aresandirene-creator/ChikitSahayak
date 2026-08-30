@@ -1,6 +1,6 @@
 "use client";
 
-import { useMediKioskStore } from "@/lib/store";
+import { useChikitsaHayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
 import { STEP_ORDER, type WorkflowStep } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -18,10 +18,10 @@ const STEP_ICONS: Record<WorkflowStep, string> = {
 };
 
 export function WorkflowProgress() {
-  const step = useMediKioskStore((s) => s.step);
-  const setStep = useMediKioskStore((s) => s.setStep);
-  const prevStep = useMediKioskStore((s) => s.prevStep);
-  const summaryStatus = useMediKioskStore((s) => s.summaryStatus);
+  const step = useChikitsaHayakStore((s) => s.step);
+  const setStep = useChikitsaHayakStore((s) => s.setStep);
+  const prevStep = useChikitsaHayakStore((s) => s.prevStep);
+  const summaryStatus = useChikitsaHayakStore((s) => s.summaryStatus);
   const { t } = useI18n();
 
   if (step === "welcome") return null;

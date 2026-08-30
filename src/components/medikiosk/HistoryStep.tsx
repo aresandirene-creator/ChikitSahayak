@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useMediKioskStore } from "@/lib/store";
+import { useChikitsaHayakStore } from "@/lib/store";
 import { useContinueHandler } from "@/lib/use-continue-handler";
 import { useI18n } from "@/lib/use-i18n";
 import { useUiMode } from "@/lib/use-ui-mode";
@@ -27,23 +27,23 @@ const SECTION_LABELS: Record<string, { label: string; short: string }> = Object.
 );
 
 export function HistoryStep() {
-  const patient = useMediKioskStore((s) => s.patient);
-  const encounterId = useMediKioskStore((s) => s.encounterId);
-  const turns = useMediKioskStore((s) => s.turns);
-  const addTurn = useMediKioskStore((s) => s.addTurn);
-  const isAiThinking = useMediKioskStore((s) => s.isAiThinking);
-  const setIsAiThinking = useMediKioskStore((s) => s.setIsAiThinking);
-  const currentSection = useMediKioskStore((s) => s.currentSection);
-  const setCurrentSection = useMediKioskStore((s) => s.setCurrentSection);
-  const historyComplete = useMediKioskStore((s) => s.historyComplete);
-  const setHistoryComplete = useMediKioskStore((s) => s.setHistoryComplete);
-  const redFlags = useMediKioskStore((s) => s.redFlags);
-  const addRedFlags = useMediKioskStore((s) => s.addRedFlags);
-  const voiceEnabled = useMediKioskStore((s) => s.voiceEnabled);
-  const setVoiceEnabled = useMediKioskStore((s) => s.setVoiceEnabled);
-  const voicePlaying = useMediKioskStore((s) => s.voicePlaying);
-  const setVoicePlaying = useMediKioskStore((s) => s.setVoicePlaying);
-  const nextStep = useMediKioskStore((s) => s.nextStep);
+  const patient = useChikitsaHayakStore((s) => s.patient);
+  const encounterId = useChikitsaHayakStore((s) => s.encounterId);
+  const turns = useChikitsaHayakStore((s) => s.turns);
+  const addTurn = useChikitsaHayakStore((s) => s.addTurn);
+  const isAiThinking = useChikitsaHayakStore((s) => s.isAiThinking);
+  const setIsAiThinking = useChikitsaHayakStore((s) => s.setIsAiThinking);
+  const currentSection = useChikitsaHayakStore((s) => s.currentSection);
+  const setCurrentSection = useChikitsaHayakStore((s) => s.setCurrentSection);
+  const historyComplete = useChikitsaHayakStore((s) => s.historyComplete);
+  const setHistoryComplete = useChikitsaHayakStore((s) => s.setHistoryComplete);
+  const redFlags = useChikitsaHayakStore((s) => s.redFlags);
+  const addRedFlags = useChikitsaHayakStore((s) => s.addRedFlags);
+  const voiceEnabled = useChikitsaHayakStore((s) => s.voiceEnabled);
+  const setVoiceEnabled = useChikitsaHayakStore((s) => s.setVoiceEnabled);
+  const voicePlaying = useChikitsaHayakStore((s) => s.voicePlaying);
+  const setVoicePlaying = useChikitsaHayakStore((s) => s.setVoicePlaying);
+  const nextStep = useChikitsaHayakStore((s) => s.nextStep);
   const { t } = useI18n();
   const { graphical } = useUiMode();
 

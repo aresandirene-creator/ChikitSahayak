@@ -3,7 +3,7 @@
 // the i18n hook). This file keeps backend-side helpers (TTS voice picking)
 // and the history-section catalogue used by HistoryStep.
 
-// Clinical history sections supported by MediKiosk
+// Clinical history sections supported by ChikitsaHayak
 export const HISTORY_SECTIONS = [
   { id: "hpi", label: "History of Present Illness (HPI)", short: "HPI" },
   { id: "past_history", label: "Past Medical History", short: "Past History" },

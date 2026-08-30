@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMediKioskStore } from "@/lib/store";
+import { useChikitsaHayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,13 +21,13 @@ import { toast } from "sonner";
  * summary are NOT loaded into this session — only demographics are reused.
  */
 export function LoginStep() {
-  const setPatient = useMediKioskStore((s) => s.setPatient);
-  const setEncounterId = useMediKioskStore((s) => s.setEncounterId);
-  const setPrefaceTab = useMediKioskStore((s) => s.setPrefaceTab);
-  const setStep = useMediKioskStore((s) => s.setStep);
-  const setUiLanguage = useMediKioskStore((s) => s.setUiLanguage);
-  const reset = useMediKioskStore((s) => s.reset);
-  const setConsent = useMediKioskStore((s) => s.setConsent);
+  const setPatient = useChikitsaHayakStore((s) => s.setPatient);
+  const setEncounterId = useChikitsaHayakStore((s) => s.setEncounterId);
+  const setPrefaceTab = useChikitsaHayakStore((s) => s.setPrefaceTab);
+  const setStep = useChikitsaHayakStore((s) => s.setStep);
+  const setUiLanguage = useChikitsaHayakStore((s) => s.setUiLanguage);
+  const reset = useChikitsaHayakStore((s) => s.reset);
+  const setConsent = useChikitsaHayakStore((s) => s.setConsent);
   const { t } = useI18n();
 
   const [phone, setPhone] = useState("");

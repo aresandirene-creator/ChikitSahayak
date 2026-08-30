@@ -1,6 +1,6 @@
 "use client";
 
-import { useMediKioskStore } from "@/lib/store";
+import { useChikitsaHayakStore } from "@/lib/store";
 
 /**
  * Returns whether the kiosk is in "graphical" mode (icon-heavy, minimal text,
@@ -8,8 +8,8 @@ import { useMediKioskStore } from "@/lib/store";
  * preface screen; applies across every step.
  */
 export function useUiMode() {
-  const uiMode = useMediKioskStore((s) => s.uiMode);
-  const setUiMode = useMediKioskStore((s) => s.setUiMode);
+  const uiMode = useChikitsaHayakStore((s) => s.uiMode);
+  const setUiMode = useChikitsaHayakStore((s) => s.setUiMode);
   const graphical = uiMode === "graphical";
   return { graphical, uiMode, setUiMode };
 }

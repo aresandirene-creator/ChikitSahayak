@@ -14,22 +14,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MediKiosk — AI-powered clinical intake",
-  description: "MediKiosk collects, organises and summarises a patient's medical history before they meet the doctor — using AI conversational history taking, multilingual document digitisation, AI-generated clinical summaries and ABDM/HIS integration.",
-  keywords: ["MediKiosk", "clinical intake", "AI healthcare", "ABDM", "ABHA", "FHIR", "Indian healthcare", "AYUSH", "electronic medical records"],
-  authors: [{ name: "MediKiosk" }],
+  title: "ChikitsaHayak — AI-powered clinical intake",
+  description: "ChikitsaHayak collects, organises and summarises a patient's medical history before they meet the doctor — using AI conversational history taking, multilingual document digitisation, AI-generated clinical summaries and ABDM/HIS integration.",
+  keywords: ["ChikitsaHayak", "clinical intake", "AI healthcare", "ABDM", "ABHA", "FHIR", "Indian healthcare", "AYUSH", "electronic medical records"],
+  authors: [{ name: "ChikitsaHayak" }],
   icons: {
     icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
   },
   openGraph: {
-    title: "MediKiosk — AI-powered clinical intake",
+    title: "ChikitsaHayak — AI-powered clinical intake",
     description: "Pre-consultation AI intake: history-taking, document digitisation, clinical summary, ABDM integration.",
-    siteName: "MediKiosk",
+    siteName: "ChikitsaHayak",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "MediKiosk",
+    title: "ChikitsaHayak",
     description: "AI-powered patient-facing clinical intake software",
   },
 };

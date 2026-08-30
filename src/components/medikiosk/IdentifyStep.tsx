@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMediKioskStore } from "@/lib/store";
+import { useChikitsaHayakStore } from "@/lib/store";
 import { useContinueHandler } from "@/lib/use-continue-handler";
 import { useI18n } from "@/lib/use-i18n";
 import { useUiMode } from "@/lib/use-ui-mode";
@@ -20,13 +20,13 @@ import {
 } from "lucide-react";
 
 export function IdentifyStep() {
-  const setPatient = useMediKioskStore((s) => s.setPatient);
-  const setEncounterId = useMediKioskStore((s) => s.setEncounterId);
-  const setConsent = useMediKioskStore((s) => s.setConsent);
-  const setUiLanguage = useMediKioskStore((s) => s.setUiLanguage);
-  const nextStep = useMediKioskStore((s) => s.nextStep);
-  const existing = useMediKioskStore((s) => s.patient);
-  const uiLanguage = useMediKioskStore((s) => s.uiLanguage);
+  const setPatient = useChikitsaHayakStore((s) => s.setPatient);
+  const setEncounterId = useChikitsaHayakStore((s) => s.setEncounterId);
+  const setConsent = useChikitsaHayakStore((s) => s.setConsent);
+  const setUiLanguage = useChikitsaHayakStore((s) => s.setUiLanguage);
+  const nextStep = useChikitsaHayakStore((s) => s.nextStep);
+  const existing = useChikitsaHayakStore((s) => s.patient);
+  const uiLanguage = useChikitsaHayakStore((s) => s.uiLanguage);
   const { t } = useI18n();
   const { graphical } = useUiMode();
 

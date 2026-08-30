@@ -14,7 +14,7 @@ import type { LangCode } from "./i18n";
 type PrefaceTab = "new" | "returning" | null;
 type UiMode = "normal" | "graphical";
 
-interface MediKioskState {
+interface ChikitsaHayakState {
   // Workflow
   step: WorkflowStep;
   setStep: (s: WorkflowStep) => void;
@@ -110,7 +110,7 @@ interface MediKioskState {
 
   // ABDM
   abdmRecords: Array<{ id: string; action: string; status: string; message?: string; createdAt: string }>;
-  setAbdmRecords: (r: MediKioskState["abdmRecords"]) => void;
+  setAbdmRecords: (r: ChikitsaHayakState["abdmRecords"]) => void;
   addAbdmRecord: (r: { id: string; action: string; status: string; message?: string; createdAt: string }) => void;
 
   // Auto-reset countdown for privacy (seconds remaining before wipe)
@@ -121,7 +121,7 @@ interface MediKioskState {
   reset: () => void;
 }
 
-export const useMediKioskStore = create<MediKioskState>((set, get) => ({
+export const useChikitsaHayakStore = create<ChikitsaHayakState>((set, get) => ({
   step: "welcome",
   setStep: (s) => set({ step: s }),
   nextStep: () => {

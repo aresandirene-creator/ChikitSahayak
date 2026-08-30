@@ -240,3 +240,37 @@ Stage Summary:
 - Quick symptom tap panel makes the chat usable for uneducated users ✓
 - Medical blue + white + red-cross theme applied throughout ✓
 - Mode persists across patients (privacy reset keeps uiMode) ✓
+
+---
+Task ID: v4 (Rename → ChikitsaHayak + new medical logo)
+Agent: main
+Task: Rename MediKiosk → ChikitsaHayak everywhere (including the AI chat system prompts) and replace the logo with a medical heart+pulse logo.
+
+Work Log:
+- Replaced `MediKiosk` → `ChikitsaHayak` across all 25 source files (case-sensitive, 148 → 156 occurrences) via sed. This also consistently renamed the store hook `useMediKioskStore` → `useChikitsaHayakStore` and state type `MediKioskState` → `ChikitsaHayakState`.
+- Renamed the custom event `medikiosk-continue` → `chikitsahayak-continue` in use-continue-handler.ts.
+- Replaced the Hindi transliteration `मेडिकियोस्क` → `चिकित्साहायक` in all 16 Hindi translation strings in i18n.ts.
+- Updated layout.tsx metadata title → "ChikitsaHayak — AI-powered clinical intake".
+- Updated i18n appName → "ChikitsaHayak" (English) and all Hindi strings now use चिकित्साहायक.
+- Updated the AI system prompts in medical-prompts.ts:
+  - History prompt: "You are ChikitsaHayak, a patient-facing clinical intake assistant..."
+  - Summary prompt: "You are ChikitsaHayak's clinical summariser..."
+  - Document VLM prompt: "You are ChikitsaHayak's document digitisation engine..."
+- Created src/components/medikiosk/ChikitsaHayakLogo.tsx — a reusable logo component rendering a filled heart with a white pulse/heartbeat (EKG) line through it (medical/healthcare symbol; "chikitsa" = treatment, "hayak" = helper in Sanskrit/Hindi). Uses inline styles for dynamic sizing so Tailwind JIT doesn't break.
+- Replaced the header medical-cross logo with the ChikitsaHayakLogo component (heart + pulse).
+- Added a big ChikitsaHayakLogo (iconSize=48 in a rounded-2xl container with shadow) to the PrefaceScreen hero, above the title.
+- Replaced the ShieldCheck badge icon on the preface with the ChikitsaHayakLogo inline.
+
+Browser-verified:
+- Page title: "ChikitsaHayak — AI-powered clinical intake" ✓
+- Header brand: "ChikitsaHayak" ✓
+- Preface hero: "Welcome to ChikitsaHayak" with big heart+pulse logo ✓
+- 3 heart logos rendered on the preface page (header + big hero + badge) ✓
+- AI chat test: "Hello, my name is ChikitsaHayak. I'm here to help collect some information for your doctor before your consultation." ✓
+- 0 remaining "MediKiosk" or "मेडिकियोस्क" occurrences anywhere in source ✓
+- Lint clean ✓
+
+Stage Summary:
+- App fully renamed to ChikitsaHayak across all 12 Indian languages + English, in all UI strings, metadata, store, and AI system prompts.
+- New medical logo (heart + pulse/heartbeat line) applied to the header and preface hero.
+- AI assistant now introduces itself as ChikitsaHayak in the patient chat.

@@ -1,8 +1,9 @@
 "use client";
 
-import { useMediKioskStore } from "@/lib/store";
+import { useChikitsaHayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
 import { useUiMode } from "@/lib/use-ui-mode";
+import { ChikitsaHayakLogo } from "@/components/medikiosk/ChikitsaHayakLogo";
 import { PrefaceScreen } from "@/components/medikiosk/PrefaceScreen";
 import { LoginStep } from "@/components/medikiosk/LoginStep";
 import { IdentifyStep } from "@/components/medikiosk/IdentifyStep";
@@ -19,8 +20,8 @@ import { LanguageSwitcher } from "@/components/medikiosk/LanguageSwitcher";
 import { Type, ImageIcon } from "lucide-react";
 
 export default function Home() {
-  const step = useMediKioskStore((s) => s.step);
-  const prefaceTab = useMediKioskStore((s) => s.prefaceTab);
+  const step = useChikitsaHayakStore((s) => s.step);
+  const prefaceTab = useChikitsaHayakStore((s) => s.prefaceTab);
   const { t } = useI18n();
   const { graphical, setUiMode } = useUiMode();
 
@@ -32,13 +33,7 @@ export default function Home() {
       <header className="sticky top-0 z-40 bg-white border-b border-sky-100 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="relative size-10 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-sm">
-              {/* Medical cross */}
-              <svg viewBox="0 0 24 24" className="size-6" fill="currentColor" aria-hidden="true">
-                <path d="M9.5 2.5h5v7h7v5h-7v7h-5v-7h-7v-5h7z" />
-              </svg>
-              <span className="sr-only">MediKiosk</span>
-            </div>
+            <ChikitsaHayakLogo iconSize={24} container />
             <div className="leading-tight">
               <div className="font-bold text-lg text-sky-800 tracking-tight">{t("appName")}</div>
               <div className="text-[11px] text-sky-600 -mt-0.5">{t("tagline")}</div>

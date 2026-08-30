@@ -12,7 +12,7 @@ function buildUserContext(
 ): string {
   const transcript = turns
     .map((t) => {
-      const who = t.role === "user" ? "Patient" : t.role === "assistant" ? "MediKiosk" : "System";
+      const who = t.role === "user" ? "Patient" : t.role === "assistant" ? "ChikitsaHayak" : "System";
       return `[${t.section}] ${who}: ${t.content}`;
     })
     .join("\n");

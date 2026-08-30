@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useMediKioskStore } from "@/lib/store";
+import { useChikitsaHayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
 import { useUiMode } from "@/lib/use-ui-mode";
 import { Button } from "@/components/ui/button";
@@ -14,16 +14,16 @@ import {
 const RESET_SECONDS = 30;
 
 export function CompleteStep() {
-  const patient = useMediKioskStore((s) => s.patient);
-  const encounterId = useMediKioskStore((s) => s.encounterId);
-  const turns = useMediKioskStore((s) => s.turns);
-  const documents = useMediKioskStore((s) => s.documents);
-  const summaryStatus = useMediKioskStore((s) => s.summaryStatus);
-  const redFlags = useMediKioskStore((s) => s.redFlags);
-  const abdmRecords = useMediKioskStore((s) => s.abdmRecords);
-  const setStep = useMediKioskStore((s) => s.setStep);
-  const reset = useMediKioskStore((s) => s.reset);
-  const setResetCountdown = useMediKioskStore((s) => s.setResetCountdown);
+  const patient = useChikitsaHayakStore((s) => s.patient);
+  const encounterId = useChikitsaHayakStore((s) => s.encounterId);
+  const turns = useChikitsaHayakStore((s) => s.turns);
+  const documents = useChikitsaHayakStore((s) => s.documents);
+  const summaryStatus = useChikitsaHayakStore((s) => s.summaryStatus);
+  const redFlags = useChikitsaHayakStore((s) => s.redFlags);
+  const abdmRecords = useChikitsaHayakStore((s) => s.abdmRecords);
+  const setStep = useChikitsaHayakStore((s) => s.setStep);
+  const reset = useChikitsaHayakStore((s) => s.reset);
+  const setResetCountdown = useChikitsaHayakStore((s) => s.setResetCountdown);
   const { t } = useI18n();
   const { graphical } = useUiMode();
 

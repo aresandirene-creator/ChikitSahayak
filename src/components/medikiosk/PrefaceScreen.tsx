@@ -1,13 +1,14 @@
 "use client";
 
-import { useMediKioskStore } from "@/lib/store";
+import { useChikitsaHayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
 import { useUiMode } from "@/lib/use-ui-mode";
+import { ChikitsaHayakLogo } from "@/components/medikiosk/ChikitsaHayakLogo";
 import { LanguageSwitcher } from "@/components/medikiosk/LanguageSwitcher";
 import { ModeToggle } from "@/components/medikiosk/ModeToggle";
 import {
   UserPlus, LogIn, MessageSquareHeart, FileScan, ClipboardCheck,
-  Network, ArrowRight, ShieldCheck, Stethoscope,
+  Network, ArrowRight, Stethoscope,
 } from "lucide-react";
 
 /**
@@ -22,9 +23,9 @@ import {
  * a text-heavy or picture-driven interface.
  */
 export function PrefaceScreen() {
-  const setPrefaceTab = useMediKioskStore((s) => s.setPrefaceTab);
-  const setStep = useMediKioskStore((s) => s.setStep);
-  const reset = useMediKioskStore((s) => s.reset);
+  const setPrefaceTab = useChikitsaHayakStore((s) => s.setPrefaceTab);
+  const setStep = useChikitsaHayakStore((s) => s.setStep);
+  const reset = useChikitsaHayakStore((s) => s.reset);
   const { t } = useI18n();
   const { graphical } = useUiMode();
 
@@ -49,8 +50,12 @@ export function PrefaceScreen() {
     <div className="space-y-8">
       {/* Hero */}
       <section className="text-center pt-4 sm:pt-8">
+        {/* Big ChikitsaHayak logo */}
+        <div className="inline-flex items-center justify-center mb-5">
+          <ChikitsaHayakLogo iconSize={48} container containerClass="bg-sky-600 text-white rounded-2xl shadow-lg shadow-sky-200" />
+        </div>
         <div className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 border border-sky-200 mb-4">
-          <ShieldCheck className="size-3.5" />
+          <ChikitsaHayakLogo iconSize={14} />
           {t("appName")}
         </div>
         <h1 className="text-3xl sm:text-5xl font-bold text-sky-900 tracking-tight max-w-3xl mx-auto">

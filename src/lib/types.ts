@@ -1,4 +1,4 @@
-// Shared TypeScript types for MediKiosk
+// Shared TypeScript types for ChikitsaHayak
 
 export interface PatientInfo {
   id: string;

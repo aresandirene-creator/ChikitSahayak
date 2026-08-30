@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useMediKioskStore } from "@/lib/store";
+import { useChikitsaHayakStore } from "@/lib/store";
 import { useContinueHandler } from "@/lib/use-continue-handler";
 import { useI18n } from "@/lib/use-i18n";
 import { Button } from "@/components/ui/button";
@@ -35,12 +35,12 @@ interface LocalDoc {
 }
 
 export function DocumentsStep() {
-  const patient = useMediKioskStore((s) => s.patient);
-  const encounterId = useMediKioskStore((s) => s.encounterId);
-  const documents = useMediKioskStore((s) => s.documents);
-  const addDocument = useMediKioskStore((s) => s.addDocument);
-  const updateDocument = useMediKioskStore((s) => s.updateDocument);
-  const nextStep = useMediKioskStore((s) => s.nextStep);
+  const patient = useChikitsaHayakStore((s) => s.patient);
+  const encounterId = useChikitsaHayakStore((s) => s.encounterId);
+  const documents = useChikitsaHayakStore((s) => s.documents);
+  const addDocument = useChikitsaHayakStore((s) => s.addDocument);
+  const updateDocument = useChikitsaHayakStore((s) => s.updateDocument);
+  const nextStep = useChikitsaHayakStore((s) => s.nextStep);
   const { t } = useI18n();
 
   const [uploading, setUploading] = useState(false);

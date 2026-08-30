@@ -18,7 +18,7 @@ export function useContinueHandler(handler: () => void | Promise<void>) {
         console.error("continue handler failed", e);
       }
     };
-    window.addEventListener("medikiosk-continue", listener);
-    return () => window.removeEventListener("medikiosk-continue", listener);
+    window.addEventListener("chikitsahayak-continue", listener);
+    return () => window.removeEventListener("chikitsahayak-continue", listener);
   });
 }

@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useMediKioskStore } from "@/lib/store";
+import { useChikitsaHayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
 import { AlertTriangle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function RedFlagToast() {
-  const redFlags = useMediKioskStore((s) => s.redFlags);
-  const acknowledgeRedFlag = useMediKioskStore((s) => s.acknowledgeRedFlag);
+  const redFlags = useChikitsaHayakStore((s) => s.redFlags);
+  const acknowledgeRedFlag = useChikitsaHayakStore((s) => s.acknowledgeRedFlag);
   const [dismissed, setDismissed] = useState<Record<string, boolean>>({});
   const { t } = useI18n();
 

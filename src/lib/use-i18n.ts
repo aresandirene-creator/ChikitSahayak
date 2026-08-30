@@ -1,6 +1,6 @@
 "use client";
 
-import { useMediKioskStore } from "@/lib/store";
+import { useChikitsaHayakStore } from "@/lib/store";
 import { translations, type LangCode } from "@/lib/i18n";
 
 /**
@@ -13,7 +13,7 @@ import { translations, type LangCode } from "@/lib/i18n";
  * Example: t("completeSubtitle", { name: patient.name })
  */
 export function useI18n() {
-  const lang = useMediKioskStore((s) => s.uiLanguage);
+  const lang = useChikitsaHayakStore((s) => s.uiLanguage);
   const dict = translations[lang] ?? translations.en;
 
   const t = (key: keyof typeof dict, vars?: Record<string, string | number>): string => {
