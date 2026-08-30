@@ -47,7 +47,7 @@ export function HistoryStep() {
   const nextStep = useChikitsaHayakStore((s) => s.nextStep);
   const { t } = useI18n();
   const { graphical } = useUiMode();
-  const { speak, cancel: cancelSpeech, speaking: speechSpeaking, hasVoices } = useSpeech();
+  const { speak, cancel: cancelSpeech, speaking: speechSpeaking } = useSpeech();
 
   const [text, setText] = useState("");
   const [recording, setRecording] = useState(false);
@@ -62,25 +62,12 @@ export function HistoryStep() {
     }
   }, [turns.length, isAiThinking]);
 
-  // Play AI reply: prefer the browser's Web Speech API (Google-quality Indian
-  // language voices, client-side). Fall back to server TTS if no system voices.
-  const playAudio = async (replyText: string, lang: string, serverAudio?: string) => {
+  // Play AI reply via the browser's Web Speech API — Google AI Studio-quality
+  // Indian-language voices (Google हिन्दी, Google தமிழ், etc.) on Chrome/Edge.
+  // Server TTS has been removed entirely; this is the only voice output path.
+  const playAudio = (replyText: string, lang: string) => {
     if (!voiceEnabled || !replyText) return;
-    if (hasVoices) {
-      speak(replyText, lang || patient?.language || "en");
-    } else if (serverAudio) {
-      // Fallback: play the server-generated TTS audio
-      try {
-        const audio = new Audio(`data:audio/wav;base64,${serverAudio}`);
-        audio.onplay = () => setVoicePlaying(true);
-        audio.onended = () => setVoicePlaying(false);
-        audio.onpause = () => setVoicePlaying(false);
-        audio.onerror = () => setVoicePlaying(false);
-        await audio.play();
-      } catch (e) {
-        console.error("fallback audio playback failed", e);
-      }
-    }
+    speak(replyText, lang || patient?.language || "en");
   };
 
   const stopAudio = () => {
@@ -117,8 +104,7 @@ export function HistoryStep() {
           patientId: patient.id,
           encounterId,
           message: messageText,
-          // Request server audio as a fallback for browsers without Web Speech voices
-          withAudio: voiceEnabled && !hasVoices,
+          // TTS is client-side via the Web Speech API — no server audio needed
         }),
       });
       const data = await res.json();
@@ -151,9 +137,9 @@ export function HistoryStep() {
         setHistoryComplete(true);
         toast.success(t("historyDone"));
       }
-      // Speak the AI reply — Web Speech API if voices available, server TTS fallback
+      // Speak the AI reply via the browser's Web Speech API (Google AI Studio voices)
       if (voiceEnabled && data.reply) {
-        playAudio(data.reply, data.language || patient.language, data.audioBase64);
+        playAudio(data.reply, data.language || patient.language);
       }
     } catch (e) {
       toast.error((e as Error).message);

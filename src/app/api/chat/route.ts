@@ -5,14 +5,14 @@ import {
   buildHistorySystemPrompt,
   parseAssistantReply,
 } from "@/lib/medical-prompts";
-import { pickTtsVoiceForLanguage } from "@/lib/languages";
 
 // POST /api/chat — one turn of the AI history-taking conversation.
-// Body: { patientId, encounterId?, message, language?, section?, withAudio? }
+// Body: { patientId, encounterId?, message }
+// TTS is handled client-side via the browser's Web Speech API.
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { patientId, encounterId, message, withAudio = false } = body;
+    const { patientId, encounterId, message } = body;
     if (!patientId || !message) {
       return NextResponse.json({ error: "patientId and message required" }, { status: 400 });
     }
@@ -106,26 +106,8 @@ export async function POST(req: NextRequest) {
       }));
     }
 
-    // Optionally generate TTS audio
-    let audioBase64: string | undefined;
-    if (withAudio) {
-      try {
-        const voice = pickTtsVoiceForLanguage(patient.language || "en");
-        const ttsText = parsed.cleanText.slice(0, 1000);
-        const ttsResp = await zai.audio.tts.create({
-          input: ttsText,
-          voice,
-          speed: 1.0,
-          response_format: "wav",
-          stream: false,
-        });
-        const arrayBuffer = await ttsResp.arrayBuffer();
-        const buffer = Buffer.from(new Uint8Array(arrayBuffer));
-        audioBase64 = buffer.toString("base64");
-      } catch (e) {
-        console.error("TTS in chat failed (non-fatal):", e);
-      }
-    }
+    // TTS is handled entirely client-side via the browser's Web Speech API
+    // (Google AI Studio-quality Indian-language voices). No server TTS.
 
     return NextResponse.json({
       reply: parsed.cleanText,
@@ -134,7 +116,6 @@ export async function POST(req: NextRequest) {
       done: parsed.done,
       redFlags: savedRedFlags,
       messageId: saved.id,
-      audioBase64,
     });
   } catch (err) {
     console.error("POST /api/chat error:", err);

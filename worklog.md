@@ -348,3 +348,30 @@ Stage Summary:
 - Complete UI/UX redesign in OMNI HD style (clean medical SaaS, deep crimson, soft shadows, gradient hero)
 - Google AI Studio-quality voices via the browser's Web Speech API (Google Indian-language voices on real browsers, server TTS fallback in headless)
 - All flows verified working end-to-end
+
+---
+Task ID: v7 (Remove server TTS — Google AI Studio voices only via Web Speech API)
+Agent: main
+
+Work Log:
+- Deleted src/app/api/tts/route.ts (the server TTS endpoint) entirely.
+- Removed the entire TTS block from src/app/api/chat/route.ts (the `if (withAudio) { zai.audio.tts.create(...) }` section). The chat response no longer returns `audioBase64`.
+- Removed the `withAudio` parameter from the chat route's request body — it's no longer needed.
+- Removed the unused `import { pickTtsVoiceForLanguage }` from chat/route.ts.
+- Removed `pickTtsVoiceForLanguage()` and `VOICE_LIBRARY` from src/lib/languages.ts (no longer used anywhere).
+- Updated HistoryStep.tsx: removed the server-TTS fallback branch from playAudio(). Now playAudio() ONLY calls speak() from the useSpeech hook — the browser's Web Speech API is the single voice path.
+- Updated HistoryStep's chat fetch to no longer send `withAudio` (the API ignores it now anyway).
+- Removed the `audioBase64?` field from the ChatResponse type in types.ts.
+- VoiceAssistant.tsx already used `withAudio: false` + Web Speech API — no changes needed.
+
+Verification:
+- `curl /api/tts` → HTTP 404 (route removed) ✓
+- `curl /api/chat` → response contains no `audioBase64` field ✓
+- grep confirms 0 references to `audio.tts`, `/api/tts`, `pickTtsVoiceForLanguage`, `withAudio` in the chat route ✓
+- The only remaining `audioBase64` references are in the ASR route (speech-to-text INPUT — the patient's mic recording), which is correct and needed.
+- Lint clean, dev server compiles.
+- Browser-verified: full flow (new patient → consent → history) works, AI greets as ChikitsaHayak, Web Speech API is available for voice output.
+
+Stage Summary:
+- Server TTS is completely removed. The browser's Web Speech API (SpeechSynthesis) is now the ONLY voice output path — Google AI Studio-quality Indian-language voices (Google हिन्दी, Google தமिल், Google తెలుగు, etc.) on Chrome/Edge, client-side, no API key, no network call.
+- All 12 Indian languages are covered by the LANG_TO_LOCALE map in use-speech.ts (en-IN, hi-IN, bn-IN, ta-IN, te-IN, mr-IN, gu-IN, kn-IN, ml-IN, pa-IN, ur-IN, or-IN).

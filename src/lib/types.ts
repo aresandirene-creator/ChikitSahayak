@@ -98,7 +98,8 @@ export interface ChatResponse {
   language: string;
   redFlags?: Array<{ symptom: string; severity: string; reasoning?: string }>;
   suggestedNextSections?: string[];
-  audioBase64?: string; // optional TTS audio (base64 wav)
+  // TTS is handled client-side via the browser's Web Speech API (Google AI
+  // Studio-quality Indian-language voices) — no server audio in the response.
 }
 
 export interface SummaryRequest {
