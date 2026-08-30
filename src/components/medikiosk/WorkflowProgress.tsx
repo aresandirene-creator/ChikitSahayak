@@ -49,7 +49,9 @@ export function WorkflowProgress() {
   };
 
   const handleContinue = () => {
-    window.dispatchEvent(new CustomEvent("medikiosk-continue"));
+    // Tell the active step to run its submit logic (create patient, persist
+    // consents, etc.). The step is responsible for calling nextStep on success.
+    window.dispatchEvent(new CustomEvent("chikitsahayak-continue"));
   };
 
   const canGoBack = currentIdx > 0;
