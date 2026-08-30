@@ -8,19 +8,13 @@ import { LanguageSwitcher } from "@/components/medikiosk/LanguageSwitcher";
 import { ModeToggle } from "@/components/medikiosk/ModeToggle";
 import {
   UserPlus, LogIn, MessageSquareHeart, FileScan, ClipboardCheck,
-  Network, ArrowRight, Stethoscope,
+  Network, ArrowRight, ShieldCheck, Stethoscope, Sparkles,
 } from "lucide-react";
 
 /**
- * DKMS-style preface screen. The patient picks one of two tabs before any
- * data is collected:
- *
- *   1. "I am a new patient"      → fresh intake
- *   2. "I am returning for a follow-up" → login modal (phone / ABHA)
- *
- * A prominent language grid lets the patient switch the whole UI language
- * before proceeding. A Normal/Graphical mode toggle lets the patient choose
- * a text-heavy or picture-driven interface.
+ * OMNI HD-style preface screen. Clean, professional medical SaaS hero with
+ * the brand logo, a welcome headline, language picker, mode toggle, and two
+ * big choice cards (New patient / Returning patient).
  */
 export function PrefaceScreen() {
   const setPrefaceTab = useChikitsaHayakStore((s) => s.setPrefaceTab);
@@ -31,7 +25,7 @@ export function PrefaceScreen() {
 
   const FEATURES = [
     { icon: MessageSquareHeart, title: t("prefaceFeature1Title"), desc: t("prefaceFeature1Desc"), color: "bg-rose-50 text-rose-600" },
-    { icon: FileScan, title: t("prefaceFeature2Title"), desc: t("prefaceFeature2Desc"), color: "bg-red-50 text-red-600" },
+    { icon: FileScan, title: t("prefaceFeature2Title"), desc: t("prefaceFeature2Desc"), color: "bg-sky-50 text-sky-600" },
     { icon: ClipboardCheck, title: t("prefaceFeature3Title"), desc: t("prefaceFeature3Desc"), color: "bg-amber-50 text-amber-600" },
     { icon: Network, title: t("prefaceFeature4Title"), desc: t("prefaceFeature4Desc"), color: "bg-teal-50 text-teal-600" },
   ];
@@ -47,124 +41,118 @@ export function PrefaceScreen() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Hero */}
-      <section className="text-center pt-4 sm:pt-8">
-        {/* Big ChikitsaHayak logo */}
-        <div className="inline-flex items-center justify-center mb-5">
-          <ChikitsaHayakLogo size={88} rounded />
+      <section className="text-center pt-6 sm:pt-12 relative">
+        <div className="bg-omni-hero rounded-3xl py-12 px-6 sm:px-12 relative overflow-hidden">
+          {/* Logo */}
+          <div className="flex justify-center mb-5">
+            <div className="size-20 sm:size-24 rounded-2xl bg-white shadow-soft-lg p-2">
+              <ChikitsaHayakLogo size={72} rounded={false} />
+            </div>
+          </div>
+
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 rounded-full bg-red-50 border border-red-200 px-4 py-1.5 text-xs font-semibold text-red-700 mb-5">
+            <ShieldCheck className="size-3.5" />
+            {t("appName")} · Digital Bharat
+          </div>
+
+          <h1 className="text-3xl sm:text-5xl font-bold text-red-950 tracking-tight max-w-3xl mx-auto leading-tight">
+            {t("prefaceWelcome")}
+          </h1>
+          {!graphical && (
+            <p className="mt-4 text-base sm:text-lg text-red-700/70 max-w-2xl mx-auto leading-relaxed">
+              {t("prefaceSubtitle")}
+            </p>
+          )}
         </div>
-        <div className="inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 border border-red-200 mb-4">
-          <ChikitsaHayakLogo size={16} />
-          {t("appName")}
-        </div>
-        <h1 className="text-3xl sm:text-5xl font-bold text-red-900 tracking-tight max-w-3xl mx-auto">
-          {t("prefaceWelcome")}
-        </h1>
-        {!graphical && (
-          <p className="mt-4 text-base sm:text-lg text-red-700/80 max-w-2xl mx-auto leading-relaxed">
-            {t("prefaceSubtitle")}
-          </p>
-        )}
       </section>
 
-      {/* Language picker (full grid) */}
+      {/* Language picker */}
       <section className="max-w-3xl mx-auto">
-        <div className="text-center text-sm font-semibold text-red-700/80 mb-3">
+        <div className="text-center text-sm font-semibold text-red-800/80 mb-3 flex items-center justify-center gap-2">
+          <Sparkles className="size-4 text-red-500" />
           {t("prefaceLanguagePrompt")}
         </div>
         <LanguageSwitcher />
       </section>
 
-      {/* Normal / Graphical mode toggle */}
-      <ModeToggle />
+      {/* Mode toggle */}
+      {!graphical && <ModeToggle />}
 
-      {/* DKMS-style two-tab choice */}
+      {/* Two choice cards — OMNI HD style */}
       <section className="max-w-4xl mx-auto">
-        <div className="grid sm:grid-cols-2 gap-4">
-          {/* New patient tab */}
+        <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
+          {/* New patient */}
           <button
             onClick={handleNewPatient}
-            className={[
-              "group text-left rounded-2xl border-2 bg-white transition-all shadow-sm hover:shadow-md focus:outline-none focus:ring-4 focus:ring-red-200",
-              graphical
-                ? "border-red-300 hover:bg-red-50 hover:border-red-500 p-8 sm:p-10"
-                : "border-red-300 p-6 hover:bg-red-50 hover:border-red-500",
-            ].join(" ")}
+            className="group relative text-left rounded-2xl border-2 border-red-200 bg-white p-6 sm:p-7 hover:border-red-500 hover:shadow-soft-lg transition-all overflow-hidden"
           >
-            <div className={[
-              "rounded-2xl bg-red-100 text-red-700 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform",
-              graphical ? "size-20" : "size-14",
-            ].join(" ")}>
-              <UserPlus className={graphical ? "size-10" : "size-7"} />
-            </div>
-            <h3 className={graphical ? "text-2xl font-bold text-red-900 mb-1" : "text-xl font-bold text-red-900 mb-1"}>
-              {t("prefaceTabNew")}
-            </h3>
-            {!graphical && (
-              <p className="text-sm text-red-700/80 leading-relaxed">{t("prefaceTabNewDesc")}</p>
-            )}
-            <div className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-red-700 group-hover:gap-2 transition-all">
-              {t("continue")}
-              <ArrowRight className="size-4" />
+            <div className="absolute top-0 right-0 size-32 bg-red-50 rounded-bl-full opacity-50 group-hover:opacity-100 transition-opacity" />
+            <div className="relative">
+              <div className="size-16 rounded-2xl bg-red-600 text-white flex items-center justify-center mb-4 shadow-soft-md group-hover:scale-105 transition-transform">
+                <UserPlus className="size-8" />
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-red-950 mb-1.5">{t("prefaceTabNew")}</h3>
+              {!graphical && <p className="text-sm text-red-700/70 leading-relaxed mb-4">{t("prefaceTabNewDesc")}</p>}
+              <div className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-600 group-hover:gap-2.5 transition-all">
+                {t("continue")}
+                <ArrowRight className="size-4" />
+              </div>
             </div>
           </button>
 
-          {/* Returning patient tab */}
+          {/* Returning patient */}
           <button
             onClick={handleReturning}
-            className={[
-              "group text-left rounded-2xl border-2 bg-white transition-all shadow-sm hover:shadow-md focus:outline-none focus:ring-4 focus:ring-teal-200",
-              graphical
-                ? "border-teal-300 hover:bg-teal-50 hover:border-teal-500 p-8 sm:p-10"
-                : "border-teal-300 p-6 hover:bg-teal-50 hover:border-teal-500",
-            ].join(" ")}
+            className="group relative text-left rounded-2xl border-2 border-teal-200 bg-white p-6 sm:p-7 hover:border-teal-500 hover:shadow-soft-lg transition-all overflow-hidden"
           >
-            <div className={[
-              "rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform",
-              graphical ? "size-20" : "size-14",
-            ].join(" ")}>
-              <LogIn className={graphical ? "size-10" : "size-7"} />
-            </div>
-            <h3 className={graphical ? "text-2xl font-bold text-teal-900 mb-1" : "text-xl font-bold text-teal-900 mb-1"}>
-              {t("prefaceTabReturning")}
-            </h3>
-            {!graphical && (
-              <p className="text-sm text-teal-700/80 leading-relaxed">{t("prefaceTabReturningDesc")}</p>
-            )}
-            <div className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-teal-700 group-hover:gap-2 transition-all">
-              {t("loginButton")}
-              <ArrowRight className="size-4" />
+            <div className="absolute top-0 right-0 size-32 bg-teal-50 rounded-bl-full opacity-50 group-hover:opacity-100 transition-opacity" />
+            <div className="relative">
+              <div className="size-16 rounded-2xl bg-teal-600 text-white flex items-center justify-center mb-4 shadow-soft-md group-hover:scale-105 transition-transform">
+                <LogIn className="size-8" />
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-teal-950 mb-1.5">{t("prefaceTabReturning")}</h3>
+              {!graphical && <p className="text-sm text-teal-700/70 leading-relaxed mb-4">{t("prefaceTabReturningDesc")}</p>}
+              <div className="inline-flex items-center gap-1.5 text-sm font-semibold text-teal-600 group-hover:gap-2.5 transition-all">
+                {t("loginButton")}
+                <ArrowRight className="size-4" />
+              </div>
             </div>
           </button>
         </div>
       </section>
 
-      {/* Feature cards — hidden in graphical mode (replaced by the big tab pictures) */}
+      {/* Feature cards */}
       {!graphical && (
-        <section className="grid sm:grid-cols-2 gap-3 max-w-4xl mx-auto">
-          {FEATURES.map((f) => (
-            <div key={f.title} className="rounded-xl border border-red-100 bg-white p-4 flex items-start gap-3 shadow-sm">
-              <div className={`size-10 rounded-lg ${f.color} flex items-center justify-center shrink-0`}>
-                <f.icon className="size-5" />
+        <section className="max-w-4xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {FEATURES.map((f) => (
+              <div
+                key={f.title}
+                className="rounded-2xl border border-red-100 bg-white p-4 shadow-soft hover:shadow-soft-md transition-shadow"
+              >
+                <div className={`size-11 rounded-xl ${f.color} flex items-center justify-center mb-3`}>
+                  <f.icon className="size-5.5" />
+                </div>
+                <h3 className="font-semibold text-sm text-red-950 mb-1">{f.title}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-red-900 text-sm">{f.title}</h3>
-                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{f.desc}</p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </section>
       )}
 
       {/* Impact callout */}
       {!graphical && (
         <section className="max-w-4xl mx-auto">
-          <div className="rounded-2xl bg-red-50 border border-red-200 p-5 flex items-start gap-3">
-            <Stethoscope className="size-6 text-red-600 shrink-0 mt-0.5" />
-            <p className="text-sm text-red-800 leading-relaxed">
-              {t("completeImpactBody")}
-            </p>
+          <div className="rounded-2xl bg-gradient-to-br from-red-600 to-red-700 text-white p-6 shadow-soft-lg flex items-start gap-4">
+            <Stethoscope className="size-7 shrink-0 mt-0.5 opacity-90" />
+            <div>
+              <h3 className="font-bold text-lg mb-1">{t("completeImpactTitle")}</h3>
+              <p className="text-sm text-red-50/90 leading-relaxed">{t("completeImpactBody")}</p>
+            </div>
           </div>
         </section>
       )}

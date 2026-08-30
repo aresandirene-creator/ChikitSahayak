@@ -39,63 +39,54 @@ export default function Home() {
   return (
     <div
       className={[
-        "min-h-screen flex flex-col bg-white text-foreground",
+        "min-h-screen flex flex-col bg-background text-foreground",
         highContrast ? "ch-high-contrast" : "",
         reduceMotion ? "ch-reduce-motion" : "",
       ].join(" ")}
-      style={{
-        // Apply the accessibility font scale globally — all rem-based sizes scale with it
-        fontSize: `${fontScale}rem`,
-      }}
+      style={{ fontSize: `${fontScale}rem` }}
     >
-      {/* Top branding bar */}
-      <header className="sticky top-0 z-40 bg-white border-b border-red-100 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <ChikitsaHayakLogo size={40} />
+      {/* OMNI HD-style top bar */}
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-red-100/80 shadow-soft">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <ChikitsaHayakLogo size={36} />
             <div className="leading-tight">
-              <div className="font-bold text-lg text-red-800 tracking-tight">{t("appName")}</div>
-              <div className="text-[11px] text-red-600 -mt-0.5">{t("tagline")}</div>
+              <div className="font-bold text-base text-red-900 tracking-tight">{t("appName")}</div>
+              <div className="text-[10px] text-red-500/80 -mt-0.5 font-medium">{t("tagline")}</div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <LanguageSwitcher compact />
-            {/* Mode toggle: switch between normal (text) and graphical (pictures) */}
+            {/* Mode toggle */}
             <button
               onClick={() => setUiMode(graphical ? "normal" : "graphical")}
-              className={[
-                "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
-                graphical
-                  ? "border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100"
-                  : "border-red-200 bg-white hover:bg-red-50 text-red-800",
-              ].join(" ")}
+              className="flex items-center gap-1.5 rounded-full border border-red-200 bg-white hover:bg-red-50 text-red-700 px-2.5 sm:px-3 py-1.5 text-xs font-medium transition-all shadow-soft"
               aria-label={graphical ? t("modeNormal") : t("modeGraphical")}
               title={graphical ? t("modeNormal") : t("modeGraphical")}
             >
-              {graphical ? <Type className="size-4" /> : <ImageIcon className="size-4" />}
-              <span className="hidden sm:inline font-medium">
-                {graphical ? t("modeNormal") : t("modeGraphical")}
-              </span>
+              {graphical ? <Type className="size-3.5" /> : <ImageIcon className="size-3.5" />}
+              <span className="hidden md:inline">{graphical ? t("modeNormal") : t("modeGraphical")}</span>
             </button>
-            {/* Accessibility settings */}
+            {/* Accessibility */}
             <button
               onClick={() => setShowAccessibility(true)}
-              className="flex items-center justify-center rounded-full border border-red-200 bg-white hover:bg-red-50 text-red-800 px-3 py-1.5 text-sm transition-colors"
+              className="flex items-center justify-center rounded-full border border-red-200 bg-white hover:bg-red-50 text-red-700 size-9 transition-all shadow-soft"
               aria-label="Accessibility settings"
               title="Accessibility settings"
             >
               <Accessibility className="size-4" />
             </button>
-            {/* Siri-like voice assistant (only when a patient is loaded) */}
+            {/* Voice assistant — Siri-like */}
             {patient && (
               <button
                 onClick={() => setShowVoiceAssistant(true)}
-                className="flex items-center gap-1.5 rounded-full bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 text-sm transition-colors shadow-sm"
+                className="flex items-center gap-1.5 rounded-full bg-red-600 hover:bg-red-700 text-white px-2.5 sm:px-3 py-1.5 text-xs font-semibold transition-all shadow-soft-md hover:shadow-glow-red"
                 aria-label="Voice assistant"
-                title="Talk to ChikitsaHayak (voice assistant)"
+                title="Talk to ChikitsaHayak"
               >
-                <Mic className="size-4" />
-                <span className="hidden sm:inline font-medium">Talk</span>
+                <Mic className="size-3.5" />
+                <span className="hidden md:inline">Talk</span>
               </button>
             )}
             <PatientHeader />
@@ -104,7 +95,7 @@ export default function Home() {
       </header>
 
       {/* Main content */}
-      <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-60">
+      <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-60">
         {step === "welcome" && <PrefaceScreen />}
         {step === "identify" && <IdentifyStep />}
         {step === "consent" && <ConsentStep />}
@@ -116,9 +107,7 @@ export default function Home() {
       </main>
 
       {/* Login step is a modal overlay on the preface */}
-      {prefaceTab === "returning" && step === "welcome" && (
-        <LoginStep />
-      )}
+      {prefaceTab === "returning" && step === "welcome" && <LoginStep />}
 
       {/* Sticky footer with workflow progress + nav */}
       {showWorkflowFooter && <WorkflowProgress />}

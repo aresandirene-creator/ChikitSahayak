@@ -3,36 +3,31 @@
 import { useEffect, useRef, useState } from "react";
 import { useChikitsaHayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
+import { useSpeech } from "@/lib/use-speech";
 import { toast } from "sonner";
 import {
-  Mic, X, Sparkles, Volume2, Loader2, Bot,
+  Mic, X, Loader2, Volume2, Bot,
 } from "lucide-react";
 
 /**
  * Siri-like voice assistant — a floating orb that the patient can tap to
- * have a voice-only conversation with the AI. Speech in → ASR → LLM → TTS →
- * audio out, hands-free. Designed for elderly/uneducated users who can't
- * type or read.
- *
- * Uses the same /api/chat endpoint as the text chat so the conversation
- * history is shared with the HistoryStep.
+ * have a voice-only conversation with the AI. Speech in (mic → ASR) →
+ * LLM chat → speech out via the browser's Web Speech API (Google-quality
+ * Indian-language voices). Hands-free, conversational loop.
  */
 export function VoiceAssistant({ onClose }: { onClose: () => void }) {
   const patient = useChikitsaHayakStore((s) => s.patient);
   const encounterId = useChikitsaHayakStore((s) => s.encounterId);
-  const uiLanguage = useChikitsaHayakStore((s) => s.uiLanguage);
   const { t } = useI18n();
+  const { speak, cancel: cancelSpeech, speaking, supported: speechSupported } = useSpeech();
 
   const [listening, setListening] = useState(false);
   const [thinking, setThinking] = useState(false);
-  const [speaking, setSpeaking] = useState(false);
   const [lastHeard, setLastHeard] = useState("");
   const [lastReply, setLastReply] = useState("");
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const audioElRef = useRef<HTMLAudioElement | null>(null);
 
-  // Auto-start listening when the panel opens
   useEffect(() => {
     startListening();
     return () => stopAll();
@@ -44,10 +39,7 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
         mediaRecorderRef.current.stop();
       }
     } catch { /* ignore */ }
-    if (audioElRef.current) {
-      audioElRef.current.pause();
-      audioElRef.current.currentTime = 0;
-    }
+    cancelSpeech();
   };
 
   const pickRecordingMime = (): string => {
@@ -73,6 +65,7 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
 
   const startListening = async () => {
     if (!patient) return;
+    cancelSpeech();
     setListening(true);
     setLastHeard("");
     try {
@@ -115,7 +108,7 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
   const transcribeAndChat = async (blob: Blob) => {
     setThinking(true);
     try {
-      // 1. ASR
+      // 1. ASR (speech-to-text via the ZAI SDK)
       const arrayBuffer = await blob.arrayBuffer();
       const base64 = arrayBufferToBase64(arrayBuffer);
       const asrRes = await fetch("/api/asr", {
@@ -133,7 +126,7 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
       }
       setLastHeard(transcript);
 
-      // 2. Chat with the AI
+      // 2. Chat with the AI (no server TTS — we'll speak it client-side)
       const chatRes = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -141,48 +134,51 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
           patientId: patient!.id,
           encounterId,
           message: transcript,
-          withAudio: true,
+          withAudio: false, // we use Web Speech API instead
         }),
       });
       const chatData = await chatRes.json();
       if (!chatRes.ok) throw new Error(chatData.error || "Chat failed");
       setLastReply(chatData.reply);
 
-      // 3. Play the TTS audio
-      if (chatData.audioBase64) {
-        setSpeaking(true);
-        const audio = audioElRef.current ?? new Audio();
-        audioElRef.current = audio;
-        audio.src = `data:audio/wav;base64,${chatData.audioBase64}`;
-        audio.onended = () => {
-          setSpeaking(false);
-          // Auto-listen again for a conversational loop
-          startListening();
-        };
-        audio.onpause = () => setSpeaking(false);
-        await audio.play();
+      // 3. Speak the reply using the browser's Web Speech API
+      //    (Google-quality Indian-language voices, client-side, no API key)
+      setThinking(false);
+      if (speechSupported && chatData.reply) {
+        speak(chatData.reply, chatData.language || patient!.language || "en");
+        // When speech ends (speaking becomes false), auto-listen again
+        // The useSpeech hook handles the speaking state
       }
     } catch (e) {
       toast.error((e as Error).message);
-    } finally {
       setThinking(false);
     }
   };
+
+  // Auto-listen again when the AI finishes speaking
+  useEffect(() => {
+    if (!speaking && lastReply && !thinking && !listening) {
+      const timer = setTimeout(() => {
+        if (patient) startListening();
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [speaking]);
 
   if (!patient) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-3xl bg-white border border-red-200 shadow-2xl overflow-hidden">
+      <div className="w-full max-w-md rounded-3xl bg-white border border-red-100 shadow-soft-lg overflow-hidden">
         {/* Header */}
-        <div className="bg-red-600 text-white px-5 py-4 flex items-center justify-between">
+        <div className="bg-gradient-to-r from-red-600 to-red-700 text-white px-5 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Volume2 className="size-5" />
-            <span className="font-bold">Voice Assistant</span>
+            <span className="font-bold text-base">Voice Assistant</span>
           </div>
           <button
             onClick={() => { stopAll(); onClose(); }}
-            className="size-8 rounded-full hover:bg-white/20 flex items-center justify-center"
+            className="size-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors"
             aria-label="Close"
           >
             <X className="size-4" />
@@ -190,56 +186,56 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Orb */}
-        <div className="p-8 flex flex-col items-center gap-4 bg-gradient-to-b from-red-50 to-white">
+        <div className="p-8 flex flex-col items-center gap-5 bg-gradient-to-b from-red-50/50 to-white">
           <button
             onClick={listening ? stopListening : startListening}
-            disabled={thinking || speaking}
+            disabled={thinking}
             className={[
-              "size-32 rounded-full flex items-center justify-center transition-all shadow-lg",
+              "size-36 rounded-full flex items-center justify-center transition-all shadow-soft-lg border-4",
               listening
-                ? "bg-red-600 text-white animate-pulse scale-110"
+                ? "bg-red-600 text-white border-red-300 animate-pulse scale-110"
                 : speaking
-                  ? "bg-red-500 text-white"
+                  ? "bg-red-500 text-white border-red-200"
                   : thinking
-                    ? "bg-red-300 text-white"
-                    : "bg-red-600 text-white hover:scale-105",
+                    ? "bg-red-200 text-red-700 border-red-100"
+                    : "bg-red-600 text-white border-red-300 hover:scale-105",
             ].join(" ")}
             aria-label={listening ? "Stop" : "Talk"}
           >
             {thinking ? (
-              <Loader2 className="size-12 animate-spin" />
+              <Loader2 className="size-14 animate-spin" />
             ) : listening ? (
-              <Mic className="size-12" />
+              <Mic className="size-14" />
             ) : speaking ? (
-              <Volume2 className="size-12" />
+              <Volume2 className="size-14" />
             ) : (
-              <Mic className="size-12" />
+              <Mic className="size-14" />
             )}
           </button>
 
           {/* Status */}
-          <div className="text-center min-h-[60px]">
+          <div className="text-center min-h-[56px]">
             {listening && (
               <>
-                <div className="font-semibold text-red-900">Listening…</div>
+                <div className="font-semibold text-red-900 text-base">Listening…</div>
                 <div className="text-xs text-muted-foreground mt-1">Tap to stop, then I'll reply</div>
               </>
             )}
             {thinking && (
               <>
-                <div className="font-semibold text-red-900">Thinking…</div>
+                <div className="font-semibold text-red-900 text-base">Thinking…</div>
                 <div className="text-xs text-muted-foreground mt-1">Understanding what you said</div>
               </>
             )}
             {speaking && (
               <>
-                <div className="font-semibold text-red-900">Speaking…</div>
+                <div className="font-semibold text-red-900 text-base">Speaking…</div>
                 <div className="text-xs text-muted-foreground mt-1">Tap the orb to interrupt</div>
               </>
             )}
             {!listening && !thinking && !speaking && (
               <>
-                <div className="font-semibold text-red-900">Tap to talk</div>
+                <div className="font-semibold text-red-900 text-base">Tap to talk</div>
                 <div className="text-xs text-muted-foreground mt-1">Hold a conversation, hands-free</div>
               </>
             )}
@@ -247,14 +243,14 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
 
           {/* Transcripts */}
           {lastHeard && (
-            <div className="w-full rounded-xl bg-red-50 border border-red-200 p-3">
-              <div className="text-[10px] font-semibold uppercase text-red-700 mb-1">You said</div>
+            <div className="w-full rounded-xl bg-red-50 border border-red-100 p-3 shadow-soft">
+              <div className="text-[10px] font-semibold uppercase text-red-600 mb-1 tracking-wide">You said</div>
               <div className="text-sm text-red-900">{lastHeard}</div>
             </div>
           )}
           {lastReply && (
-            <div className="w-full rounded-xl bg-white border border-red-100 p-3 shadow-sm">
-              <div className="text-[10px] font-semibold uppercase text-red-700 mb-1 flex items-center gap-1">
+            <div className="w-full rounded-xl bg-white border border-red-100 p-3 shadow-soft">
+              <div className="text-[10px] font-semibold uppercase text-red-600 mb-1 tracking-wide flex items-center gap-1">
                 <Bot className="size-3" /> ChikitsaHayak replied
               </div>
               <div className="text-sm text-red-900">{lastReply}</div>
@@ -263,8 +259,10 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Footer hint */}
-        <div className="bg-red-50 border-t border-red-100 px-5 py-3 text-center text-xs text-red-700">
-          Just talk naturally in your language. I'll listen, think, and reply out loud.
+        <div className="bg-red-50/50 border-t border-red-100 px-5 py-3 text-center text-xs text-red-700/80">
+          {!speechSupported
+            ? "Voice output not supported on this browser — you can still speak to me."
+            : "Just talk naturally in your language. I'll listen, think, and reply out loud."}
         </div>
       </div>
     </div>

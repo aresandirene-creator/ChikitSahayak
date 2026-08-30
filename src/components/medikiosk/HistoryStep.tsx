@@ -5,6 +5,7 @@ import { useChikitsaHayakStore } from "@/lib/store";
 import { useContinueHandler } from "@/lib/use-continue-handler";
 import { useI18n } from "@/lib/use-i18n";
 import { useUiMode } from "@/lib/use-ui-mode";
+import { useSpeech } from "@/lib/use-speech";
 import { getLanguageNativeName } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -46,13 +47,13 @@ export function HistoryStep() {
   const nextStep = useChikitsaHayakStore((s) => s.nextStep);
   const { t } = useI18n();
   const { graphical } = useUiMode();
+  const { speak, cancel: cancelSpeech, speaking: speechSpeaking, hasVoices } = useSpeech();
 
   const [text, setText] = useState("");
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const audioElRef = useRef<HTMLAudioElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -61,29 +62,36 @@ export function HistoryStep() {
     }
   }, [turns.length, isAiThinking]);
 
-  const playAudio = (base64: string) => {
-    if (!voiceEnabled || !base64) return;
-    try {
-      const audio = audioElRef.current ?? new Audio();
-      audioElRef.current = audio;
-      audio.src = `data:audio/wav;base64,${base64}`;
-      audio.onplay = () => setVoicePlaying(true);
-      audio.onended = () => setVoicePlaying(false);
-      audio.onpause = () => setVoicePlaying(false);
-      audio.onerror = () => setVoicePlaying(false);
-      audio.play().catch((e) => console.error("audio play failed", e));
-    } catch (e) {
-      console.error("audio playback error", e);
+  // Play AI reply: prefer the browser's Web Speech API (Google-quality Indian
+  // language voices, client-side). Fall back to server TTS if no system voices.
+  const playAudio = async (replyText: string, lang: string, serverAudio?: string) => {
+    if (!voiceEnabled || !replyText) return;
+    if (hasVoices) {
+      speak(replyText, lang || patient?.language || "en");
+    } else if (serverAudio) {
+      // Fallback: play the server-generated TTS audio
+      try {
+        const audio = new Audio(`data:audio/wav;base64,${serverAudio}`);
+        audio.onplay = () => setVoicePlaying(true);
+        audio.onended = () => setVoicePlaying(false);
+        audio.onpause = () => setVoicePlaying(false);
+        audio.onerror = () => setVoicePlaying(false);
+        await audio.play();
+      } catch (e) {
+        console.error("fallback audio playback failed", e);
+      }
     }
   };
 
   const stopAudio = () => {
-    if (audioElRef.current) {
-      audioElRef.current.pause();
-      audioElRef.current.currentTime = 0;
-    }
+    cancelSpeech();
     setVoicePlaying(false);
   };
+
+  // Sync the Web Speech API speaking state with the store
+  useEffect(() => {
+    setVoicePlaying(speechSpeaking);
+  }, [speechSpeaking]);
 
   const sendMessage = async (messageText: string) => {
     if (!patient || !messageText.trim() || isAiThinking) return;
@@ -109,7 +117,8 @@ export function HistoryStep() {
           patientId: patient.id,
           encounterId,
           message: messageText,
-          withAudio: voiceEnabled,
+          // Request server audio as a fallback for browsers without Web Speech voices
+          withAudio: voiceEnabled && !hasVoices,
         }),
       });
       const data = await res.json();
@@ -142,8 +151,9 @@ export function HistoryStep() {
         setHistoryComplete(true);
         toast.success(t("historyDone"));
       }
-      if (voiceEnabled && data.audioBase64) {
-        playAudio(data.audioBase64);
+      // Speak the AI reply — Web Speech API if voices available, server TTS fallback
+      if (voiceEnabled && data.reply) {
+        playAudio(data.reply, data.language || patient.language, data.audioBase64);
       }
     } catch (e) {
       toast.error((e as Error).message);
