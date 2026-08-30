@@ -191,7 +191,7 @@ export function ConsentStep() {
                     id={`consent-${c.scope}`}
                     checked={granted}
                     onCheckedChange={(v) => handleToggle(c.scope, Boolean(v))}
-                    className="size-6 data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600 mt-1"
+                    className="size-6 !border-red-900 !border-2 data-[state=checked]:bg-red-600 data-[state=checked]:!border-red-600 mt-1 shadow-sm"
                   />
                 </div>
               </div>
