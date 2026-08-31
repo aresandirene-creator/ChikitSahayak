@@ -191,6 +191,7 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
           patientId: patient.id,
           encounterId,
           message: transcript,
+          patient,
           language: uiLanguage, // current UI language so mid-process switches take effect
           withAudio: false, // we use Web Speech API for TTS
         }),
