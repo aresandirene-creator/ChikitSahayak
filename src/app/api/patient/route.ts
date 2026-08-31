@@ -38,3 +38,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }
 }
+
+// GET /api/patient?id=xxx — fetch a patient with latest encounters
+export async function GET(req: NextRequest) {
+  try {
+    const id = req.nextUrl.searchParams.get("id");
+    if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
+
+    const patient = await db.patient.findUnique({
+      where: { id },
+      include: { encounters: { orderBy: { startedAt: "desc" }, take: 5 } },
+    });
+    if (!patient) return NextResponse.json({ error: "not found" }, { status: 404 });
+
+    return NextResponse.json({ patient });
+  } catch (err) {
+    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
+  }
+}
