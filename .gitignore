@@ -40,7 +40,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# Keep the local OCR implementation tracked; only ignore local generated files.
 local-*
+!src/lib/local-ocr.ts
 .claude
 .z-ai-config
 *.log
