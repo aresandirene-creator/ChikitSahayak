@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useChikitsaHayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
 import { useUiMode } from "@/lib/use-ui-mode";
@@ -35,6 +35,14 @@ export default function Home() {
   const [showVoiceAssistant, setShowVoiceAssistant] = useState(false);
 
   const showWorkflowFooter = step !== "welcome" && prefaceTab !== null;
+
+  // Scroll to the top whenever the workflow step changes so the next page
+  // always starts at the top — not at the position the user was scrolled to
+  // on the previous step (e.g. scrolled down to reach the Continue button).
+  useEffect(() => {
+    // Respect reduced-motion preference — jump instantly instead of animating
+    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+  }, [step, prefaceTab, reduceMotion]);
 
   return (
     <div
