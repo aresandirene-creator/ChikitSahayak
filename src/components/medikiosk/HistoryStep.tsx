@@ -6,6 +6,7 @@ import { useContinueHandler } from "@/lib/use-continue-handler";
 import { useI18n } from "@/lib/use-i18n";
 import { useUiMode } from "@/lib/use-ui-mode";
 import { useSpeech } from "@/lib/use-speech";
+import { useSpeechRecognition } from "@/lib/use-speech-recognition";
 import { getLanguageNativeName } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -48,6 +49,15 @@ export function HistoryStep() {
   const { t } = useI18n();
   const { graphical } = useUiMode();
   const { speak, cancel: cancelSpeech, speaking: speechSpeaking } = useSpeech();
+  const {
+    start: startRecognition,
+    stop: stopRecognition,
+    listening: recognitionListening,
+    transcript: recognitionTranscript,
+    error: recognitionError,
+    supported: recognitionSupported,
+    clear: clearRecognition,
+  } = useSpeechRecognition();
 
   const [text, setText] = useState("");
   const [recording, setRecording] = useState(false);
@@ -199,6 +209,22 @@ export function HistoryStep() {
   };
 
   const startRecording = async () => {
+    stopAudio();
+    clearRecognition();
+
+    // PRIMARY: use the browser's SpeechRecognition API — it natively
+    // understands all 12 Indian languages (hi-IN, ta-IN, etc.) with Google's
+    // recognition quality on Chrome/Edge. The server ZAI ASR is Mandarin-
+    // focused and misrecognizes Indian speech as Chinese, so we only fall
+    // back to it when the browser doesn't support SpeechRecognition.
+    if (recognitionSupported) {
+      setRecording(true);
+      startRecognition(patient?.language || "en");
+      return;
+    }
+
+    // FALLBACK: MediaRecorder + server ZAI ASR (Mandarin-focused — may
+    // misrecognize non-English/Chinese speech). Used on Firefox etc.
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -218,7 +244,6 @@ export function HistoryStep() {
         stream.getTracks().forEach((tr) => tr.stop());
         const blobType = mime.startsWith("audio/wav") ? "audio/wav" : "audio/webm";
         const blob = new Blob(audioChunksRef.current, { type: blobType });
-        // Reject recordings shorter than 0.5s — ASR needs real speech
         if (blob.size < 2000) {
           toast.error("Recording too short — please hold the mic longer.");
           setTranscribing(false);
@@ -226,11 +251,9 @@ export function HistoryStep() {
         }
         await transcribeBlob(blob);
       };
-      // Collect data every 250ms so we don't end up with one huge chunk
       mr.start(250);
       mediaRecorderRef.current = mr;
       setRecording(true);
-      stopAudio();
     } catch (e) {
       console.error("mic error", e);
       toast.error("Microphone access failed. You can type instead.");
@@ -239,11 +262,36 @@ export function HistoryStep() {
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+    if (recognitionSupported) {
+      stopRecognition();
+    } else if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop();
     }
     setRecording(false);
   };
+
+  // When the browser SpeechRecognition produces a transcript, prefill the
+  // input box (the user reviews then taps Send).
+  useEffect(() => {
+    if (recognitionTranscript) {
+      setText(recognitionTranscript);
+      setRecording(false);
+      toast.success("Transcribed");
+    }
+  }, [recognitionTranscript]);
+
+  // Surface recognition errors
+  useEffect(() => {
+    if (recognitionError) {
+      setRecording(false);
+      toast.error(recognitionError === "no-speech" ? "No speech detected" : recognitionError);
+    }
+  }, [recognitionError]);
+
+  // Sync recognition listening state with the recording flag
+  useEffect(() => {
+    if (recognitionSupported) setRecording(recognitionListening);
+  }, [recognitionListening, recognitionSupported]);
 
   const transcribeBlob = async (blob: Blob) => {
     setTranscribing(true);

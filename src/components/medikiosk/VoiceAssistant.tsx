@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useChikitsaHayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
 import { useSpeech } from "@/lib/use-speech";
+import { useSpeechRecognition } from "@/lib/use-speech-recognition";
 import { toast } from "sonner";
 import {
   Mic, X, Loader2, Volume2, Bot,
@@ -20,6 +21,15 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
   const encounterId = useChikitsaHayakStore((s) => s.encounterId);
   const { t } = useI18n();
   const { speak, cancel: cancelSpeech, speaking, supported: speechSupported } = useSpeech();
+  const {
+    start: startRecognition,
+    stop: stopRecognition,
+    listening: recognitionListening,
+    transcript: recognitionTranscript,
+    error: recognitionError,
+    supported: recognitionSupported,
+    clear: clearRecognition,
+  } = useSpeechRecognition();
 
   const [listening, setListening] = useState(false);
   const [thinking, setThinking] = useState(false);
@@ -66,8 +76,22 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
   const startListening = async () => {
     if (!patient) return;
     cancelSpeech();
-    setListening(true);
+    clearRecognition();
     setLastHeard("");
+
+    // PRIMARY: browser SpeechRecognition — understands all 12 Indian
+    // languages natively (Google-quality on Chrome/Edge). No Chinese
+    // misrecognition. The recognized transcript triggers the chat via
+    // the recognitionTranscript effect below.
+    if (recognitionSupported) {
+      setListening(true);
+      startRecognition(patient.language || "en");
+      return;
+    }
+
+    // FALLBACK: MediaRecorder + server ZAI ASR (Mandarin-focused — may
+    // misrecognize Indian languages as Chinese). Used on Firefox etc.
+    setListening(true);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, sampleRate: 16000 },
@@ -99,16 +123,75 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
   };
 
   const stopListening = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+    if (recognitionSupported) {
+      stopRecognition();
+    } else if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop();
     }
     setListening(false);
   };
 
+  // When the browser SpeechRecognition produces a transcript, send it to
+  // the chat immediately (hands-free conversational mode).
+  useEffect(() => {
+    if (recognitionTranscript) {
+      setListening(false);
+      sendToChat(recognitionTranscript);
+    }
+  }, [recognitionTranscript]);
+
+  useEffect(() => {
+    if (recognitionError) {
+      setListening(false);
+      toast.error(recognitionError === "no-speech" ? "No speech detected" : recognitionError);
+    }
+  }, [recognitionError]);
+
+  useEffect(() => {
+    if (recognitionSupported) setListening(recognitionListening);
+  }, [recognitionListening, recognitionSupported]);
+
+  // Send a transcript to the AI chat and speak the reply. Shared by both
+  // the browser-Speech-recognition path (direct transcript) and the server-
+  // ASR fallback path (transcript from the ZAI SDK).
+  const sendToChat = async (transcript: string) => {
+    if (!patient || !transcript.trim()) return;
+    setThinking(true);
+    try {
+      setLastHeard(transcript);
+
+      // Chat with the AI (no server TTS — we speak it client-side via Web Speech)
+      const chatRes = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          patientId: patient.id,
+          encounterId,
+          message: transcript,
+          withAudio: false, // we use Web Speech API for TTS
+        }),
+      });
+      const chatData = await chatRes.json();
+      if (!chatRes.ok) throw new Error(chatData.error || "Chat failed");
+      setLastReply(chatData.reply);
+
+      // Speak the reply using the browser's Web Speech API
+      // (Google-quality Indian-language voices, client-side, no API key)
+      setThinking(false);
+      if (speechSupported && chatData.reply) {
+        speak(chatData.reply, chatData.language || patient.language || "en");
+      }
+    } catch (e) {
+      toast.error((e as Error).message);
+      setThinking(false);
+    }
+  };
+
+  // Fallback path: MediaRecorder → server ZAI ASR → sendToChat
   const transcribeAndChat = async (blob: Blob) => {
     setThinking(true);
     try {
-      // 1. ASR (speech-to-text via the ZAI SDK)
+      // 1. ASR (speech-to-text via the ZAI SDK — Mandarin-focused fallback)
       const arrayBuffer = await blob.arrayBuffer();
       const base64 = arrayBufferToBase64(arrayBuffer);
       const asrRes = await fetch("/api/asr", {
@@ -124,31 +207,7 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
         setThinking(false);
         return;
       }
-      setLastHeard(transcript);
-
-      // 2. Chat with the AI (no server TTS — we'll speak it client-side)
-      const chatRes = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          patientId: patient!.id,
-          encounterId,
-          message: transcript,
-          withAudio: false, // we use Web Speech API instead
-        }),
-      });
-      const chatData = await chatRes.json();
-      if (!chatRes.ok) throw new Error(chatData.error || "Chat failed");
-      setLastReply(chatData.reply);
-
-      // 3. Speak the reply using the browser's Web Speech API
-      //    (Google-quality Indian-language voices, client-side, no API key)
-      setThinking(false);
-      if (speechSupported && chatData.reply) {
-        speak(chatData.reply, chatData.language || patient!.language || "en");
-        // When speech ends (speaking becomes false), auto-listen again
-        // The useSpeech hook handles the speaking state
-      }
+      await sendToChat(transcript);
     } catch (e) {
       toast.error((e as Error).message);
       setThinking(false);
