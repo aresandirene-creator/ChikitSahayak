@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
         fileName: d.fileName,
         fileType: d.fileType,
         extractedData: d.extractedData,
-        recordDate: d.recordDate ? d.recordDate.toISOString() : null,
+        recordDate: d.recordDate ? new Date(d.recordDate).toISOString() : null,
       })),
       redFlags.map((f) => ({ symptom: f.symptom, severity: f.severity, reasoning: f.reasoning }))
     );
