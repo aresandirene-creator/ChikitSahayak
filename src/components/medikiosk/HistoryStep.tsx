@@ -138,6 +138,8 @@ export function HistoryStep() {
           patientId: patient.id,
           encounterId,
           message: messageText,
+          patient,
+          priorTurns: turns.map(({ role, content, section, language }) => ({ role, content, section, language })),
           // Send the CURRENT UI language so mid-process language switches
           // take effect immediately — the AI switches to the new language.
           language: uiLanguage,

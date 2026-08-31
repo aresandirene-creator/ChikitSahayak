@@ -37,8 +37,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const patient = await db.patient.findUnique({ where: { id: patientId } });
+    // Vercel functions cannot reliably use the project's local SQLite file.
+    // Prefer persistent records when available, but accept the current
+    // browser-session context for a privacy-preserving, non-persistent demo.
+    let patient = null as Awaited<ReturnType<typeof db.patient.findUnique>> | null;
+    let priorTurns: Array<{ role: string; content: string; section: string; language: string }> = [];
+    let canPersist = true;
+    try {
+      patient = await db.patient.findUnique({ where: { id: patientId } });
+      if (patient) {
+        priorTurns = await db.chatMessage.findMany({
+          where: { patientId, ...(encounterId ? { encounterId } : {}) },
+          orderBy: { createdAt: "asc" },
+        });
+      }
+    } catch {
+      canPersist = false;
+    }
+    if (!patient && body.patient) patient = body.patient;
     if (!patient) return NextResponse.json({ error: "patient not found" }, { status: 404 });
+    if (!canPersist && Array.isArray(body.priorTurns)) priorTurns = body.priorTurns;
 
     // Use the current language from the request (so mid-process language
     // switches take effect immediately). Fall back to the patient's stored
@@ -47,15 +65,9 @@ export async function POST(req: NextRequest) {
 
     // If the user switched language, update the patient record so future
     // requests (summary generation, etc.) also use the new language.
-    if (language && language !== patient.language) {
+    if (canPersist && language && language !== patient.language) {
       await db.patient.update({ where: { id: patientId }, data: { language } });
     }
-
-    // Load prior chat history for THIS encounter (or all-time if no encounter)
-    const priorTurns = await db.chatMessage.findMany({
-      where: { patientId, ...(encounterId ? { encounterId } : {}) },
-      orderBy: { createdAt: "asc" },
-    });
 
     // Build completed-sections list
     const completedSections: string[] = Array.from(
@@ -96,17 +108,11 @@ export async function POST(req: NextRequest) {
       { role: "user", content: message },
     ];
 
-    // Persist the user message
-    await db.chatMessage.create({
-      data: {
-        patientId,
-        encounterId: encounterId ?? null,
-        role: "user",
-        content: message,
-        section: body.section ?? "general",
-        language: activeLang,
-      },
-    });
+    if (canPersist) {
+      await db.chatMessage.create({
+        data: { patientId, encounterId: encounterId ?? null, role: "user", content: message, section: body.section ?? "general", language: activeLang },
+      });
+    }
 
     const prompt = messages
       .map((m) => `${m.role}: ${m.content}`)
@@ -135,20 +141,15 @@ export async function POST(req: NextRequest) {
     const parsed = parseAssistantReply(rawReply);
 
     // Persist the assistant reply (clean text only, without internal tags)
-    const saved = await db.chatMessage.create({
-      data: {
-        patientId,
-        encounterId: encounterId ?? null,
-        role: "assistant",
-        content: parsed.cleanText,
-        section: parsed.section,
-        language: activeLang,
-      },
-    });
+    const saved = canPersist
+      ? await db.chatMessage.create({
+          data: { patientId, encounterId: encounterId ?? null, role: "assistant", content: parsed.cleanText, section: parsed.section, language: activeLang },
+        })
+      : null;
 
     // Persist any red flags
     let savedRedFlags: Array<{ id: string; symptom: string; severity: string; reasoning: string | null; acknowledged: boolean; createdAt: string }> = [];
-    if (parsed.redFlags.length > 0) {
+    if (canPersist && parsed.redFlags.length > 0) {
       const created = await Promise.all(
         parsed.redFlags.map((rf) =>
           db.redFlagAlert.create({
@@ -170,6 +171,15 @@ export async function POST(req: NextRequest) {
         acknowledged: f.acknowledged,
         createdAt: f.createdAt.toISOString(),
       }));
+    } else if (parsed.redFlags.length > 0) {
+      savedRedFlags = parsed.redFlags.map((rf, index) => ({
+        id: `temporary-red-flag-${index}`,
+        symptom: rf.symptom,
+        severity: rf.severity,
+        reasoning: rf.reasoning,
+        acknowledged: false,
+        createdAt: new Date().toISOString(),
+      }));
     }
 
     // TTS is handled entirely client-side via the browser's Web Speech API
@@ -181,7 +191,7 @@ export async function POST(req: NextRequest) {
       language: activeLang,
       done: parsed.done,
       redFlags: savedRedFlags,
-      messageId: saved.id,
+      messageId: saved?.id ?? `temporary-message-${Date.now()}`,
     });
   } catch (err) {
     console.error("POST /api/chat error:", err);
