@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
   // Tesseract starts a Node worker from its package directory. Keep these
   // packages external so Next.js does not rewrite that worker path at build
   // time.
