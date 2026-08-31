@@ -122,19 +122,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }
 }
-
-// GET /api/chat?patientId=xxx&encounterId=yyy — fetch conversation history
-export async function GET(req: NextRequest) {
-  try {
-    const patientId = req.nextUrl.searchParams.get("patientId");
-    const encounterId = req.nextUrl.searchParams.get("encounterId");
-    if (!patientId) return NextResponse.json({ error: "patientId required" }, { status: 400 });
-    const turns = await db.chatMessage.findMany({
-      where: { patientId, ...(encounterId ? { encounterId } : {}) },
-      orderBy: { createdAt: "asc" },
-    });
-    return NextResponse.json({ turns });
-  } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
-  }
-}

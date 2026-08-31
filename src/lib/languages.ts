@@ -15,24 +15,6 @@ export const HISTORY_SECTIONS = [
   { id: "ayurvedic", label: "Ayurvedic History (AYUSH)", short: "AYUSH" },
 ] as const;
 
-export type HistorySection = (typeof HISTORY_SECTIONS)[number]["id"];
-
-// Common red-flag symptoms requiring triage attention
-export const RED_FLAG_SYMPTOMS = [
-  "chest pain",
-  "severe breathing difficulty",
-  "loss of consciousness",
-  "severe bleeding",
-  "stroke symptoms",
-  "suicidal thoughts",
-  "high fever with stiff neck",
-  "severe abdominal pain",
-  "coughing up blood",
-  "severe headache",
-  "seizure",
-  "paralysis",
-];
-
 // NOTE: TTS is handled entirely client-side via the browser's Web Speech API
 // (Google AI Studio-quality Indian-language voices). See src/lib/use-speech.ts.
 // No server TTS helpers are needed here.

@@ -15,7 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import type { PatientInfo } from "@/lib/types";
 import { toast } from "sonner";
 import {
-  UserRound, Phone, Droplet, Languages, Leaf, ShieldCheck, ArrowRight, Info, Lock,
+  UserRound, Phone, Droplet, Languages, Leaf, ShieldCheck, ArrowRight, Lock,
   Venus, Mars, CircleUser,
 } from "lucide-react";
 

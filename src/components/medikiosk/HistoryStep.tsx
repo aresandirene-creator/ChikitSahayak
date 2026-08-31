@@ -20,8 +20,8 @@ import { QuickSymptomPanel } from "@/components/medikiosk/QuickSymptomPanel";
 import type { ChatTurn } from "@/lib/types";
 import {
   Mic, StopCircle, Send, Volume2, VolumeX, Sparkles, Bot, User,
-  AlertTriangle, Stethoscope, PlayCircle, Hand, CheckCircle2, Leaf,
-  MessageSquareHeart, Radio,
+  AlertTriangle, Stethoscope, Hand, CheckCircle2, Leaf,
+  MessageSquareHeart,
 } from "lucide-react";
 
 const SECTION_LABELS: Record<string, { label: string; short: string }> = Object.fromEntries(

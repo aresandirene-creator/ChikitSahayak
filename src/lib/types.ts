@@ -68,66 +68,6 @@ export interface RedFlag {
   createdAt: string;
 }
 
-export interface ABDMRecord {
-  id: string;
-  action: string;
-  status: string;
-  message?: string;
-  createdAt: string;
-}
-
-export interface ConsentRecord {
-  id: string;
-  scope: string;
-  granted: boolean;
-  grantedAt?: string;
-}
-
-// API request/response shapes
-export interface ChatRequest {
-  patientId: string;
-  message: string;
-  language?: string;
-  ayushMode?: boolean;
-  section?: string;
-}
-
-export interface ChatResponse {
-  reply: string;
-  section: string;
-  language: string;
-  redFlags?: Array<{ symptom: string; severity: string; reasoning?: string }>;
-  suggestedNextSections?: string[];
-  // TTS is handled client-side via the browser's Web Speech API (Google AI
-  // Studio-quality Indian-language voices) — no server audio in the response.
-}
-
-export interface SummaryRequest {
-  patientId: string;
-}
-
-export interface SummaryResponse {
-  id: string;
-  sections: ClinicalSummarySections;
-  freeText: string;
-  redFlags: RedFlag[];
-  status: string;
-}
-
-export interface DocumentAnalyzeRequest {
-  patientId: string;
-  fileName: string;
-  mimeType: string;
-  dataUrl: string; // base64 data URL
-  fileType?: string;
-}
-
-export interface DocumentAnalyzeResponse {
-  id: string;
-  extracted: ExtractedDocumentData;
-  status: string;
-}
-
 export type WorkflowStep =
   | "welcome"
   | "identify"
@@ -137,17 +77,6 @@ export type WorkflowStep =
   | "summary"
   | "abdm"
   | "complete";
-
-export const STEP_LABELS: Record<WorkflowStep, string> = {
-  welcome: "Welcome",
-  identify: "Identify",
-  consent: "Consent",
-  history: "AI History",
-  documents: "Scan Docs",
-  summary: "AI Summary",
-  abdm: "HIS / ABHA",
-  complete: "Consultation",
-};
 
 export const STEP_ORDER: WorkflowStep[] = [
   "identify",

@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { useChikitsaHayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
-  Accessibility, X, Type, Contrast, Sparkles, Eye, User,
+  Accessibility, X, Type, Contrast, Sparkles, Eye,
 } from "lucide-react";
 
 /**

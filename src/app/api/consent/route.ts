@@ -43,15 +43,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }
 }
-
-// GET /api/consent?patientId=xxx — list consents for a patient
-export async function GET(req: NextRequest) {
-  try {
-    const patientId = req.nextUrl.searchParams.get("patientId");
-    if (!patientId) return NextResponse.json({ error: "patientId required" }, { status: 400 });
-    const consents = await db.consent.findMany({ where: { patientId } });
-    return NextResponse.json({ consents });
-  } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
-  }
-}

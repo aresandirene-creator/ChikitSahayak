@@ -375,3 +375,108 @@ Verification:
 Stage Summary:
 - Server TTS is completely removed. The browser's Web Speech API (SpeechSynthesis) is now the ONLY voice output path — Google AI Studio-quality Indian-language voices (Google हिन्दी, Google தமिल், Google తెలుగు, etc.) on Chrome/Edge, client-side, no API key, no network call.
 - All 12 Indian languages are covered by the LANG_TO_LOCALE map in use-speech.ts (en-IN, hi-IN, bn-IN, ta-IN, te-IN, mr-IN, gu-IN, kn-IN, ml-IN, pa-IN, ur-IN, or-IN).
+
+---
+Task ID: audit-unused-code
+Agent: Explore (audit)
+Task: Audit unused code for Git cleanup
+
+Work Log:
+
+1) Unused shadcn/ui components — 32 files in src/components/ui/ have ZERO direct importers anywhere in src/ (the only used ones are: button, card, input, label, select, switch, textarea, checkbox, badge — used by medikiosk components). The 32 directly-unused files:
+   accordion.tsx, alert-dialog.tsx, alert.tsx, aspect-ratio.tsx, avatar.tsx, breadcrumb.tsx, calendar.tsx, carousel.tsx, chart.tsx, collapsible.tsx, command.tsx, context-menu.tsx, drawer.tsx, dropdown-menu.tsx, form.tsx, hover-card.tsx, input-otp.tsx, menubar.tsx, navigation-menu.tsx, pagination.tsx, popover.tsx, progress.tsx, radio-group.tsx, resizable.tsx, scroll-area.tsx, sidebar.tsx, slider.tsx, sonner.tsx, table.tsx, tabs.tsx, toaster.tsx, toggle-group.tsx
+   (Note: sonner.tsx is unused — layout.tsx imports `sonner` directly from the npm package, not from this wrapper.)
+   A further 7 files are only imported by files that are themselves in the unused list, so they become dead once the 32 are removed: dialog.tsx (→command.tsx), sheet.tsx, separator.tsx, skeleton.tsx, tooltip.tsx (→sidebar.tsx), toggle.tsx (→toggle-group.tsx), toast.tsx (→use-toast.ts and toaster.tsx, both unused).
+
+2) Unused exports in src/lib/languages.ts:
+   - RED_FLAG_SYMPTOMS (lines 21-34) — never imported anywhere
+   - HistorySection type (line 18) — never imported anywhere
+   - HISTORY_SECTIONS is still used by HistoryStep.tsx (keep)
+
+3) Unused exports in src/lib/types.ts:
+   - STEP_LABELS const (lines 141-150) — never imported; WorkflowProgress.tsx declares its own local STEP_LABELS at line 31
+   - ABDMRecord, ConsentRecord, ChatRequest, ChatResponse, SummaryRequest, SummaryResponse, DocumentAnalyzeRequest, DocumentAnalyzeResponse — all 8 interfaces are defined but never imported anywhere (API routes use inline-typed shapes)
+   - Still used: PatientInfo, ChatTurn, ExtractedDocumentData, ClinicalSummarySections, RedFlag, WorkflowStep, STEP_ORDER
+
+4) Unused imports in src/components/medikiosk/*.tsx:
+   - AccessibilityPanel.tsx: `useState` (react), `User` (lucide-react)
+   - DocumentsStep.tsx: `Sparkles` (lucide-react)
+   - HistoryStep.tsx: `PlayCircle`, `Radio` (lucide-react)
+   - IdentifyStep.tsx: `Info` (lucide-react)
+   - RedFlagToast.tsx: `useEffect` (react)
+   (ESLint doesn't catch these because @typescript-eslint/no-unused-vars is disabled in eslint.config.mjs.)
+
+5) Dead API routes / handlers:
+   - src/app/api/route.ts — entire "Hello, world!" GET route; never called
+   - src/app/api/redflag/route.ts — entire file (GET + PATCH); never called (RedFlagToast reads from the store, not the API)
+   - src/app/api/chat/route.ts — GET handler (lines 127-140) dead; only POST is called
+   - src/app/api/consent/route.ts — GET handler dead; only POST is called
+   - src/app/api/abdm/route.ts — GET handler dead; only POST is called
+   - src/app/api/summary/route.ts — GET handler dead; only PATCH is called
+   - src/app/api/patient/route.ts — PATCH handler (lines 60-89) dead; only POST and GET are called
+
+6) Unused medikiosk component files — NONE. All 18 components in src/components/medikiosk/ are imported by page.tsx or by each other (ModeToggle → PrefaceScreen; QuickSymptomPanel → HistoryStep; all others → page.tsx).
+
+7) Examples / test / extra folders (none of these are needed for the running app):
+   - examples/ (websocket/server.ts, websocket/frontend.tsx) — standalone Socket.IO example, not imported by the app
+   - tests/ (3 shell scripts) — runtime/build test harness, not imported by the app
+   - tool-results/ (2 .txt files) — debug-log files from previous agent's Read tool calls (leftover junk)
+   - upload/IMG_2760.PNG (836KB) — not referenced anywhere in src/
+   - download/README.md — KEEP per instructions (it describes the source archive). Note: the archive it describes (chikitsahayak-source.tar.gz) is itself junk for the repo.
+   - skills/ — already in .gitignore (won't be pushed), but still on disk
+   - mini-services/ — empty directory (only .gitkeep)
+   - .zscripts/ — build/start scripts; only referenced by tests/*.sh — keep if deployment scripts are needed, otherwise safe to delete
+
+8) Top-level junk files (TRACKED in git, would be pushed):
+   - chikitsahayak-source.tar.gz (5.0 MB) — packaged source snapshot; should not live in the repo
+   - chikitsahayak-source.zip (5.3 MB) — same; should not live in the repo
+   - dev.log (57 KB) — already gitignored (won't be pushed)
+   - mini-services/.gitkeep — empty placeholder; remove if mini-services/ is deleted
+   - No test-*.js files in the project root (the only test-*.mjs file is in /tmp, outside the repo)
+
+9) Unused hooks:
+   - src/hooks/use-toast.ts — only imported by src/components/ui/toaster.tsx (which is itself unused) → transitively dead
+   - src/hooks/use-mobile.ts — only imported by src/components/ui/sidebar.tsx (which is itself unused) → transitively dead
+
+Stage Summary — Files SAFE TO DELETE (no behavioural impact; not referenced by the running app):
+
+UI components (39 files, all in src/components/ui/):
+- accordion.tsx, alert-dialog.tsx, alert.tsx, aspect-ratio.tsx, avatar.tsx, breadcrumb.tsx, calendar.tsx, carousel.tsx, chart.tsx, collapsible.tsx, command.tsx, context-menu.tsx, dialog.tsx, drawer.tsx, dropdown-menu.tsx, form.tsx, hover-card.tsx, input-otp.tsx, menubar.tsx, navigation-menu.tsx, pagination.tsx, popover.tsx, progress.tsx, radio-group.tsx, resizable.tsx, scroll-area.tsx, sheet.tsx, sidebar.tsx, skeleton.tsx, slider.tsx, sonner.tsx, table.tsx, tabs.tsx, toast.tsx, toaster.tsx, toggle.tsx, toggle-group.tsx, tooltip.tsx, separator.tsx
+
+Hooks (2 files):
+- src/hooks/use-toast.ts
+- src/hooks/use-mobile.ts
+
+API routes / handlers (entire files):
+- src/app/api/route.ts (the "Hello, world!" GET)
+- src/app/api/redflag/route.ts (entire file — both GET and PATCH are dead)
+
+API route handlers to delete in place (keep the file, drop the dead export):
+- src/app/api/chat/route.ts — remove the GET function (lines 127-140)
+- src/app/api/consent/route.ts — remove the GET handler
+- src/app/api/abdm/route.ts — remove the GET handler
+- src/app/api/summary/route.ts — remove the GET handler
+- src/app/api/patient/route.ts — remove the PATCH handler (lines 60-89)
+
+Top-level / project folders and files:
+- chikitsahayak-source.tar.gz (top-level, 5 MB)
+- chikitsahayak-source.zip (top-level, 5 MB)
+- examples/ (entire folder)
+- tests/ (entire folder)
+- tool-results/ (entire folder)
+- upload/ (entire folder — IMG_2760.PNG)
+- mini-services/ (empty placeholder folder + .gitkeep)
+- .zscripts/ (build/start scripts — delete IF not needed for deployment; only referenced by tests/*.sh)
+
+Dead exports to remove (in place, keep the file):
+- src/lib/languages.ts — drop RED_FLAG_SYMPTOMS (lines 20-34) and HistorySection type (line 18)
+- src/lib/types.ts — drop STEP_LABELS (lines 141-150), and the 8 unused interfaces: ABDMRecord, ConsentRecord, ChatRequest, ChatResponse, SummaryRequest, SummaryResponse, DocumentAnalyzeRequest, DocumentAnalyzeResponse
+
+Unused imports to remove (in place):
+- src/components/medikiosk/AccessibilityPanel.tsx — drop `useState` and `User`
+- src/components/medikiosk/DocumentsStep.tsx — drop `Sparkles`
+- src/components/medikiosk/HistoryStep.tsx — drop `PlayCircle`, `Radio`
+- src/components/medikiosk/IdentifyStep.tsx — drop `Info`
+- src/components/medikiosk/RedFlagToast.tsx — drop `useEffect`
+
+Note: ESLint won't catch any of the unused imports/exports because eslint.config.mjs explicitly disables @typescript-eslint/no-unused-vars and no-unused-vars. Re-enabling those rules would auto-surface the file-level dead imports above.

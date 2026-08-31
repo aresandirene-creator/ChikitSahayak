@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import type { ExtractedDocumentData } from "@/lib/types";
 import {
   FileScan, UploadCloud, FileText, Pill, TestTube, Stethoscope, Activity,
-  CalendarDays, Building2, AlertCircle, CheckCircle2, Loader2, Sparkles,
+  CalendarDays, Building2, AlertCircle, CheckCircle2, Loader2,
   ArrowRight, FilePlus,
 } from "lucide-react";
 
