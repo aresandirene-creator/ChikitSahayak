@@ -116,17 +116,27 @@ export async function POST(req: NextRequest) {
         })
       : null;
 
-    // Run local OCR first. For low-confidence handwritten documents, use the
-    // configured Groq vision model as a precise fallback.
+    // Tesseract workers are too slow and unreliable in serverless functions.
+    // Use Groq Vision directly when hosted, while retaining local OCR for
+    // self-hosted/offline kiosk installs.
     try {
-      const ocr = await recognizeDocument(dataUrl, patient.language);
-      let extracted: ExtractedDocumentData = { rawText: ocr.rawText };
-      if (ocr.confidence < 70 && process.env.GROQ_API_KEY) {
+      let extracted: ExtractedDocumentData;
+      if (process.env.VERCEL && process.env.GROQ_API_KEY) {
         extracted = await recognizeHandwritingWithGroq(
           dataUrl,
           fileType ?? "other",
           patient.ayushMode
         );
+      } else {
+        const ocr = await recognizeDocument(dataUrl, patient.language);
+        extracted = { rawText: ocr.rawText };
+        if (ocr.confidence < 70 && process.env.GROQ_API_KEY) {
+          extracted = await recognizeHandwritingWithGroq(
+            dataUrl,
+            fileType ?? "other",
+            patient.ayushMode
+          );
+        }
       }
 
       // Parse record date

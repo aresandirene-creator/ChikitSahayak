@@ -73,9 +73,12 @@ export function DocumentsStep() {
       });
 
       try {
+        const controller = new AbortController();
+        const timeout = window.setTimeout(() => controller.abort(), 90_000);
         const res = await fetch("/api/documents/analyze", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          signal: controller.signal,
           body: JSON.stringify({
             patientId: patient.id,
             encounterId,
@@ -86,6 +89,7 @@ export function DocumentsStep() {
             fileType: selectedType,
           }),
         });
+        window.clearTimeout(timeout);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Analysis failed");
 
