@@ -31,6 +31,7 @@ const SECTION_LABELS: Record<string, { label: string; short: string }> = Object.
 export function HistoryStep() {
   const patient = useChikitSahayakStore((s) => s.patient);
   const encounterId = useChikitSahayakStore((s) => s.encounterId);
+  const uiLanguage = useChikitSahayakStore((s) => s.uiLanguage);
   const turns = useChikitSahayakStore((s) => s.turns);
   const addTurn = useChikitSahayakStore((s) => s.addTurn);
   const isAiThinking = useChikitSahayakStore((s) => s.isAiThinking);
@@ -114,6 +115,9 @@ export function HistoryStep() {
           patientId: patient.id,
           encounterId,
           message: messageText,
+          // Send the CURRENT UI language so mid-process language switches
+          // take effect immediately — the AI switches to the new language.
+          language: uiLanguage,
           // TTS is client-side via the Web Speech API — no server audio needed
         }),
       });
@@ -219,7 +223,7 @@ export function HistoryStep() {
     // back to it when the browser doesn't support SpeechRecognition.
     if (recognitionSupported) {
       setRecording(true);
-      startRecognition(patient?.language || "en");
+      startRecognition(uiLanguage || "en");
       return;
     }
 

@@ -7,18 +7,31 @@ import {
 } from "@/lib/medical-prompts";
 
 // POST /api/chat — one turn of the AI history-taking conversation.
-// Body: { patientId, encounterId?, message }
-// TTS is handled client-side via the browser's Web Speech API.
+// Body: { patientId, encounterId?, message, language? }
+// `language` is the CURRENT UI language (may differ from patient.language if
+// the user switched mid-process). TTS is handled client-side via the browser's
+// Web Speech API.
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { patientId, encounterId, message } = body;
+    const { patientId, encounterId, message, language } = body;
     if (!patientId || !message) {
       return NextResponse.json({ error: "patientId and message required" }, { status: 400 });
     }
 
     const patient = await db.patient.findUnique({ where: { id: patientId } });
     if (!patient) return NextResponse.json({ error: "patient not found" }, { status: 404 });
+
+    // Use the current language from the request (so mid-process language
+    // switches take effect immediately). Fall back to the patient's stored
+    // language if not provided.
+    const activeLang = language || patient.language || "en";
+
+    // If the user switched language, update the patient record so future
+    // requests (summary generation, etc.) also use the new language.
+    if (language && language !== patient.language) {
+      await db.patient.update({ where: { id: patientId }, data: { language } });
+    }
 
     // Load prior chat history for THIS encounter (or all-time if no encounter)
     const priorTurns = await db.chatMessage.findMany({
@@ -32,7 +45,7 @@ export async function POST(req: NextRequest) {
     );
 
     const systemPrompt = buildHistorySystemPrompt({
-      language: patient.language || "en",
+      language: activeLang,
       ayushMode: patient.ayushMode,
       patientName: patient.name,
       patientAge: patient.age ?? undefined,
@@ -40,10 +53,28 @@ export async function POST(req: NextRequest) {
       completedSections,
     });
 
-    // Build messages: system + history + new user message
+    // Build messages: system + history + new user message.
+    // IMPORTANT: the system prompt uses the CURRENT language, so even if
+    // previous turns were in a different language, the AI will switch to
+    // the new language from this point on. We inject a short instruction
+    // right before the user's message to force the switch.
+    const langName = activeLang === "en" ? "English" :
+      activeLang === "hi" ? "Hindi (हिन्दी)" :
+      activeLang === "bn" ? "Bengali (বাংলা)" :
+      activeLang === "ta" ? "Tamil (தமிழ்)" :
+      activeLang === "te" ? "Telugu (తెలుగు)" :
+      activeLang === "mr" ? "Marathi (मराठी)" :
+      activeLang === "gu" ? "Gujarati (ગુજરાતી)" :
+      activeLang === "kn" ? "Kannada (ಕನ್ನಡ)" :
+      activeLang === "ml" ? "Malayalam (മലയാളം)" :
+      activeLang === "pa" ? "Punjabi (ਪੰਜਾਬੀ)" :
+      activeLang === "ur" ? "Urdu (اُردُو)" :
+      activeLang === "or" ? "Odia (ଓଡ଼ିଆ)" : "English";
+
     const messages: Array<{ role: string; content: string }> = [
       { role: "assistant", content: systemPrompt },
       ...priorTurns.map((t) => ({ role: t.role, content: t.content })),
+      { role: "assistant", content: `[LANGUAGE SWITCH] From this point onward, you MUST respond ONLY in ${langName}. Ignore the language of any previous messages in this conversation. Reply in ${langName} now.` },
       { role: "user", content: message },
     ];
 
@@ -55,7 +86,7 @@ export async function POST(req: NextRequest) {
         role: "user",
         content: message,
         section: body.section ?? "general",
-        language: patient.language || "en",
+        language: activeLang,
       },
     });
 
@@ -76,7 +107,7 @@ export async function POST(req: NextRequest) {
         role: "assistant",
         content: parsed.cleanText,
         section: parsed.section,
-        language: patient.language || "en",
+        language: activeLang,
       },
     });
 
@@ -112,7 +143,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       reply: parsed.cleanText,
       section: parsed.section,
-      language: patient.language || "en",
+      language: activeLang,
       done: parsed.done,
       redFlags: savedRedFlags,
       messageId: saved.id,

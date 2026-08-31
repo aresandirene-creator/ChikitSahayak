@@ -19,6 +19,7 @@ import {
 export function VoiceAssistant({ onClose }: { onClose: () => void }) {
   const patient = useChikitSahayakStore((s) => s.patient);
   const encounterId = useChikitSahayakStore((s) => s.encounterId);
+  const uiLanguage = useChikitSahayakStore((s) => s.uiLanguage);
   const { t } = useI18n();
   const { speak, cancel: cancelSpeech, speaking, supported: speechSupported } = useSpeech();
   const {
@@ -85,7 +86,7 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
     // the recognitionTranscript effect below.
     if (recognitionSupported) {
       setListening(true);
-      startRecognition(patient.language || "en");
+      startRecognition(uiLanguage || "en");
       return;
     }
 
@@ -168,6 +169,7 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
           patientId: patient.id,
           encounterId,
           message: transcript,
+          language: uiLanguage, // current UI language so mid-process switches take effect
           withAudio: false, // we use Web Speech API for TTS
         }),
       });
@@ -179,7 +181,7 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
       // (Google-quality Indian-language voices, client-side, no API key)
       setThinking(false);
       if (speechSupported && chatData.reply) {
-        speak(chatData.reply, chatData.language || patient.language || "en");
+        speak(chatData.reply, chatData.language || uiLanguage || "en");
       }
     } catch (e) {
       toast.error((e as Error).message);
