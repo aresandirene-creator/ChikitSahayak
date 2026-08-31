@@ -1,4 +1,4 @@
-// Shared TypeScript types for ChikitsaHayak
+// Shared TypeScript types for ChikitSahayak
 
 export interface PatientInfo {
   id: string;

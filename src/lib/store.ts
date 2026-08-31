@@ -14,7 +14,7 @@ import type { LangCode } from "./i18n";
 type PrefaceTab = "new" | "returning" | null;
 type UiMode = "normal" | "graphical";
 
-interface ChikitsaHayakState {
+interface ChikitSahayakState {
   // Workflow
   step: WorkflowStep;
   setStep: (s: WorkflowStep) => void;
@@ -121,7 +121,7 @@ interface ChikitsaHayakState {
 
   // ABDM
   abdmRecords: Array<{ id: string; action: string; status: string; message?: string; createdAt: string }>;
-  setAbdmRecords: (r: ChikitsaHayakState["abdmRecords"]) => void;
+  setAbdmRecords: (r: ChikitSahayakState["abdmRecords"]) => void;
   addAbdmRecord: (r: { id: string; action: string; status: string; message?: string; createdAt: string }) => void;
 
   // Auto-reset countdown for privacy (seconds remaining before wipe)
@@ -132,7 +132,7 @@ interface ChikitsaHayakState {
   reset: () => void;
 }
 
-export const useChikitsaHayakStore = create<ChikitsaHayakState>((set, get) => ({
+export const useChikitSahayakStore = create<ChikitSahayakState>((set, get) => ({
   step: "welcome",
   setStep: (s) => set({ step: s }),
   nextStep: () => {

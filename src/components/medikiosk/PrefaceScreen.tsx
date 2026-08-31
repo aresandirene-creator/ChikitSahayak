@@ -1,9 +1,9 @@
 "use client";
 
-import { useChikitsaHayakStore } from "@/lib/store";
+import { useChikitSahayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
 import { useUiMode } from "@/lib/use-ui-mode";
-import { ChikitsaHayakLogo } from "@/components/medikiosk/ChikitsaHayakLogo";
+import { ChikitSahayakLogo } from "@/components/medikiosk/ChikitSahayakLogo";
 import { LanguageSwitcher } from "@/components/medikiosk/LanguageSwitcher";
 import { ModeToggle } from "@/components/medikiosk/ModeToggle";
 import {
@@ -17,9 +17,9 @@ import {
  * big choice cards (New patient / Returning patient).
  */
 export function PrefaceScreen() {
-  const setPrefaceTab = useChikitsaHayakStore((s) => s.setPrefaceTab);
-  const setStep = useChikitsaHayakStore((s) => s.setStep);
-  const reset = useChikitsaHayakStore((s) => s.reset);
+  const setPrefaceTab = useChikitSahayakStore((s) => s.setPrefaceTab);
+  const setStep = useChikitSahayakStore((s) => s.setStep);
+  const reset = useChikitSahayakStore((s) => s.reset);
   const { t } = useI18n();
   const { graphical } = useUiMode();
 
@@ -48,7 +48,7 @@ export function PrefaceScreen() {
           {/* Logo */}
           <div className="flex justify-center mb-5">
             <div className="size-20 sm:size-24 rounded-2xl bg-white shadow-soft-lg p-2">
-              <ChikitsaHayakLogo size={72} rounded={false} />
+              <ChikitSahayakLogo size={72} rounded={false} />
             </div>
           </div>
 

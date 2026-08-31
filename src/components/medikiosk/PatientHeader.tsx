@@ -1,13 +1,13 @@
 "use client";
 
-import { useChikitsaHayakStore } from "@/lib/store";
+import { useChikitSahayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
 import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, Leaf } from "lucide-react";
 
 export function PatientHeader() {
-  const patient = useChikitsaHayakStore((s) => s.patient);
-  const setStep = useChikitsaHayakStore((s) => s.setStep);
+  const patient = useChikitSahayakStore((s) => s.patient);
+  const setStep = useChikitSahayakStore((s) => s.setStep);
   const { t } = useI18n();
 
   if (!patient) {

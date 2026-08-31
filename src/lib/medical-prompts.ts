@@ -1,4 +1,4 @@
-// Medical prompts powering ChikitsaHayak's AI history taking & summary generation
+// Medical prompts powering ChikitSahayak's AI history taking & summary generation
 
 import { getLanguageNativeName, getLanguageName } from "./i18n";
 
@@ -18,7 +18,7 @@ export function buildHistorySystemPrompt(opts: {
   const nativeName = getLanguageNativeName(opts.language);
   const completed = (opts.completedSections ?? []).join(", ") || "none yet";
 
-  const base = `You are ChikitsaHayak, a patient-facing clinical intake assistant operating on a kiosk inside an Indian hospital/clinic waiting area.
+  const base = `You are ChikitSahayak, a patient-facing clinical intake assistant operating on a kiosk inside an Indian hospital/clinic waiting area.
 
 Your role:
 - Collect a structured clinical history from the patient BEFORE the doctor consultation.
@@ -87,7 +87,7 @@ export function buildSummarySystemPrompt(opts: {
   patientGender?: string;
   ayushMode?: boolean;
 }) {
-  return `You are ChikitsaHayak's clinical summariser. You receive a transcript of the AI history-taking conversation and the structured data extracted from the patient's previous medical documents.
+  return `You are ChikitSahayak's clinical summariser. You receive a transcript of the AI history-taking conversation and the structured data extracted from the patient's previous medical documents.
 
 Produce a concise, structured, physician-readable clinical history in Markdown. Use these sections exactly:
 - HPI (History of Present Illness)
@@ -188,7 +188,7 @@ export function buildDocumentAnalysisPrompt(opts: {
 
   return `${typeHint}
 
-You are ChikitsaHayak's document digitisation engine. The image may contain text in English or any Indian language. Perform multilingual OCR and structured extraction.
+You are ChikitSahayak's document digitisation engine. The image may contain text in English or any Indian language. Perform multilingual OCR and structured extraction.
 
 Return STRICT JSON (no markdown, no prose outside the JSON) with this shape:
 {

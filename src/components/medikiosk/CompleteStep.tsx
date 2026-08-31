@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useChikitsaHayakStore } from "@/lib/store";
+import { useChikitSahayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
 import { useUiMode } from "@/lib/use-ui-mode";
 import { Button } from "@/components/ui/button";
@@ -14,16 +14,16 @@ import {
 const RESET_SECONDS = 30;
 
 export function CompleteStep() {
-  const patient = useChikitsaHayakStore((s) => s.patient);
-  const encounterId = useChikitsaHayakStore((s) => s.encounterId);
-  const turns = useChikitsaHayakStore((s) => s.turns);
-  const documents = useChikitsaHayakStore((s) => s.documents);
-  const summaryStatus = useChikitsaHayakStore((s) => s.summaryStatus);
-  const redFlags = useChikitsaHayakStore((s) => s.redFlags);
-  const abdmRecords = useChikitsaHayakStore((s) => s.abdmRecords);
-  const setStep = useChikitsaHayakStore((s) => s.setStep);
-  const reset = useChikitsaHayakStore((s) => s.reset);
-  const setResetCountdown = useChikitsaHayakStore((s) => s.setResetCountdown);
+  const patient = useChikitSahayakStore((s) => s.patient);
+  const encounterId = useChikitSahayakStore((s) => s.encounterId);
+  const turns = useChikitSahayakStore((s) => s.turns);
+  const documents = useChikitSahayakStore((s) => s.documents);
+  const summaryStatus = useChikitSahayakStore((s) => s.summaryStatus);
+  const redFlags = useChikitSahayakStore((s) => s.redFlags);
+  const abdmRecords = useChikitSahayakStore((s) => s.abdmRecords);
+  const setStep = useChikitSahayakStore((s) => s.setStep);
+  const reset = useChikitSahayakStore((s) => s.reset);
+  const setResetCountdown = useChikitSahayakStore((s) => s.setResetCountdown);
   const { t } = useI18n();
   const { graphical } = useUiMode();
 

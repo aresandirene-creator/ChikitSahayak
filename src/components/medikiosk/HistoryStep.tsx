@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useChikitsaHayakStore } from "@/lib/store";
+import { useChikitSahayakStore } from "@/lib/store";
 import { useContinueHandler } from "@/lib/use-continue-handler";
 import { useI18n } from "@/lib/use-i18n";
 import { useUiMode } from "@/lib/use-ui-mode";
@@ -29,23 +29,23 @@ const SECTION_LABELS: Record<string, { label: string; short: string }> = Object.
 );
 
 export function HistoryStep() {
-  const patient = useChikitsaHayakStore((s) => s.patient);
-  const encounterId = useChikitsaHayakStore((s) => s.encounterId);
-  const turns = useChikitsaHayakStore((s) => s.turns);
-  const addTurn = useChikitsaHayakStore((s) => s.addTurn);
-  const isAiThinking = useChikitsaHayakStore((s) => s.isAiThinking);
-  const setIsAiThinking = useChikitsaHayakStore((s) => s.setIsAiThinking);
-  const currentSection = useChikitsaHayakStore((s) => s.currentSection);
-  const setCurrentSection = useChikitsaHayakStore((s) => s.setCurrentSection);
-  const historyComplete = useChikitsaHayakStore((s) => s.historyComplete);
-  const setHistoryComplete = useChikitsaHayakStore((s) => s.setHistoryComplete);
-  const redFlags = useChikitsaHayakStore((s) => s.redFlags);
-  const addRedFlags = useChikitsaHayakStore((s) => s.addRedFlags);
-  const voiceEnabled = useChikitsaHayakStore((s) => s.voiceEnabled);
-  const setVoiceEnabled = useChikitsaHayakStore((s) => s.setVoiceEnabled);
-  const voicePlaying = useChikitsaHayakStore((s) => s.voicePlaying);
-  const setVoicePlaying = useChikitsaHayakStore((s) => s.setVoicePlaying);
-  const nextStep = useChikitsaHayakStore((s) => s.nextStep);
+  const patient = useChikitSahayakStore((s) => s.patient);
+  const encounterId = useChikitSahayakStore((s) => s.encounterId);
+  const turns = useChikitSahayakStore((s) => s.turns);
+  const addTurn = useChikitSahayakStore((s) => s.addTurn);
+  const isAiThinking = useChikitSahayakStore((s) => s.isAiThinking);
+  const setIsAiThinking = useChikitSahayakStore((s) => s.setIsAiThinking);
+  const currentSection = useChikitSahayakStore((s) => s.currentSection);
+  const setCurrentSection = useChikitSahayakStore((s) => s.setCurrentSection);
+  const historyComplete = useChikitSahayakStore((s) => s.historyComplete);
+  const setHistoryComplete = useChikitSahayakStore((s) => s.setHistoryComplete);
+  const redFlags = useChikitSahayakStore((s) => s.redFlags);
+  const addRedFlags = useChikitSahayakStore((s) => s.addRedFlags);
+  const voiceEnabled = useChikitSahayakStore((s) => s.voiceEnabled);
+  const setVoiceEnabled = useChikitSahayakStore((s) => s.setVoiceEnabled);
+  const voicePlaying = useChikitSahayakStore((s) => s.voicePlaying);
+  const setVoicePlaying = useChikitSahayakStore((s) => s.setVoicePlaying);
+  const nextStep = useChikitSahayakStore((s) => s.nextStep);
   const { t } = useI18n();
   const { graphical } = useUiMode();
   const { speak, cancel: cancelSpeech, speaking: speechSpeaking } = useSpeech();

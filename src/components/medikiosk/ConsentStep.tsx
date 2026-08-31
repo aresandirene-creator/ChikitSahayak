@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useChikitsaHayakStore } from "@/lib/store";
+import { useChikitSahayakStore } from "@/lib/store";
 import { useContinueHandler } from "@/lib/use-continue-handler";
 import { useI18n } from "@/lib/use-i18n";
 import { useUiMode } from "@/lib/use-ui-mode";
@@ -32,13 +32,13 @@ const RETENTION_OPTIONS = [
 ];
 
 export function ConsentStep() {
-  const patient = useChikitsaHayakStore((s) => s.patient);
-  const encounterId = useChikitsaHayakStore((s) => s.encounterId);
-  const consents = useChikitsaHayakStore((s) => s.consents);
-  const setConsent = useChikitsaHayakStore((s) => s.setConsent);
-  const retentionDays = useChikitsaHayakStore((s) => s.retentionDays);
-  const setRetentionDays = useChikitsaHayakStore((s) => s.setRetentionDays);
-  const nextStep = useChikitsaHayakStore((s) => s.nextStep);
+  const patient = useChikitSahayakStore((s) => s.patient);
+  const encounterId = useChikitSahayakStore((s) => s.encounterId);
+  const consents = useChikitSahayakStore((s) => s.consents);
+  const setConsent = useChikitSahayakStore((s) => s.setConsent);
+  const retentionDays = useChikitSahayakStore((s) => s.retentionDays);
+  const setRetentionDays = useChikitSahayakStore((s) => s.setRetentionDays);
+  const nextStep = useChikitSahayakStore((s) => s.nextStep);
   const { t } = useI18n();
   const { graphical } = useUiMode();
   const [saving, setSaving] = useState(false);

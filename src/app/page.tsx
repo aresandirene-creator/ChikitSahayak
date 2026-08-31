@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useChikitsaHayakStore } from "@/lib/store";
+import { useChikitSahayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
 import { useUiMode } from "@/lib/use-ui-mode";
-import { ChikitsaHayakLogo } from "@/components/medikiosk/ChikitsaHayakLogo";
+import { ChikitSahayakLogo } from "@/components/medikiosk/ChikitSahayakLogo";
 import { PrefaceScreen } from "@/components/medikiosk/PrefaceScreen";
 import { LoginStep } from "@/components/medikiosk/LoginStep";
 import { IdentifyStep } from "@/components/medikiosk/IdentifyStep";
@@ -23,12 +23,12 @@ import { VoiceAssistant } from "@/components/medikiosk/VoiceAssistant";
 import { Type, ImageIcon, Accessibility, Mic } from "lucide-react";
 
 export default function Home() {
-  const step = useChikitsaHayakStore((s) => s.step);
-  const prefaceTab = useChikitsaHayakStore((s) => s.prefaceTab);
-  const patient = useChikitsaHayakStore((s) => s.patient);
-  const fontScale = useChikitsaHayakStore((s) => s.fontScale);
-  const highContrast = useChikitsaHayakStore((s) => s.highContrast);
-  const reduceMotion = useChikitsaHayakStore((s) => s.reduceMotion);
+  const step = useChikitSahayakStore((s) => s.step);
+  const prefaceTab = useChikitSahayakStore((s) => s.prefaceTab);
+  const patient = useChikitSahayakStore((s) => s.patient);
+  const fontScale = useChikitSahayakStore((s) => s.fontScale);
+  const highContrast = useChikitSahayakStore((s) => s.highContrast);
+  const reduceMotion = useChikitSahayakStore((s) => s.reduceMotion);
   const { t } = useI18n();
   const { graphical, setUiMode } = useUiMode();
   const [showAccessibility, setShowAccessibility] = useState(false);
@@ -57,7 +57,7 @@ export default function Home() {
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-red-100/80 shadow-soft">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
-            <ChikitsaHayakLogo size={36} />
+            <ChikitSahayakLogo size={36} />
             <div className="leading-tight">
               <div className="font-bold text-base text-red-900 tracking-tight">{t("appName")}</div>
               <div className="text-[10px] text-red-500/80 -mt-0.5 font-medium">{t("tagline")}</div>

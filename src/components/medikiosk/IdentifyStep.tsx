@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useChikitsaHayakStore } from "@/lib/store";
+import { useChikitSahayakStore } from "@/lib/store";
 import { useContinueHandler } from "@/lib/use-continue-handler";
 import { useI18n } from "@/lib/use-i18n";
 import { useUiMode } from "@/lib/use-ui-mode";
@@ -20,14 +20,14 @@ import {
 } from "lucide-react";
 
 export function IdentifyStep() {
-  const setPatient = useChikitsaHayakStore((s) => s.setPatient);
-  const setEncounterId = useChikitsaHayakStore((s) => s.setEncounterId);
-  const setConsent = useChikitsaHayakStore((s) => s.setConsent);
-  const setUiLanguage = useChikitsaHayakStore((s) => s.setUiLanguage);
-  const autoAdaptAccessibility = useChikitsaHayakStore((s) => s.autoAdaptAccessibility);
-  const nextStep = useChikitsaHayakStore((s) => s.nextStep);
-  const existing = useChikitsaHayakStore((s) => s.patient);
-  const uiLanguage = useChikitsaHayakStore((s) => s.uiLanguage);
+  const setPatient = useChikitSahayakStore((s) => s.setPatient);
+  const setEncounterId = useChikitSahayakStore((s) => s.setEncounterId);
+  const setConsent = useChikitSahayakStore((s) => s.setConsent);
+  const setUiLanguage = useChikitSahayakStore((s) => s.setUiLanguage);
+  const autoAdaptAccessibility = useChikitSahayakStore((s) => s.autoAdaptAccessibility);
+  const nextStep = useChikitSahayakStore((s) => s.nextStep);
+  const existing = useChikitSahayakStore((s) => s.patient);
+  const uiLanguage = useChikitSahayakStore((s) => s.uiLanguage);
   const { t } = useI18n();
   const { graphical } = useUiMode();
 

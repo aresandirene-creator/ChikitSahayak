@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useChikitsaHayakStore } from "@/lib/store";
+import { useChikitSahayakStore } from "@/lib/store";
 import { useContinueHandler } from "@/lib/use-continue-handler";
 import { useI18n } from "@/lib/use-i18n";
 import { Button } from "@/components/ui/button";
@@ -38,19 +38,19 @@ const AYUSH_SECTION: {
 } = { key: "ayurvedic", labelKey: "summarySectionAyurvedic", icon: Leaf };
 
 export function SummaryStep() {
-  const patient = useChikitsaHayakStore((s) => s.patient);
-  const encounterId = useChikitsaHayakStore((s) => s.encounterId);
-  const summaryId = useChikitsaHayakStore((s) => s.summaryId);
-  const summarySections = useChikitsaHayakStore((s) => s.summarySections);
-  const summaryFreeText = useChikitsaHayakStore((s) => s.summaryFreeText);
-  const summaryStatus = useChikitsaHayakStore((s) => s.summaryStatus);
-  const setSummary = useChikitsaHayakStore((s) => s.setSummary);
-  const updateSummarySection = useChikitsaHayakStore((s) => s.updateSummarySection);
-  const setSummaryStatus = useChikitsaHayakStore((s) => s.setSummaryStatus);
-  const redFlags = useChikitsaHayakStore((s) => s.redFlags);
-  const nextStep = useChikitsaHayakStore((s) => s.nextStep);
-  const turns = useChikitsaHayakStore((s) => s.turns);
-  const documents = useChikitsaHayakStore((s) => s.documents);
+  const patient = useChikitSahayakStore((s) => s.patient);
+  const encounterId = useChikitSahayakStore((s) => s.encounterId);
+  const summaryId = useChikitSahayakStore((s) => s.summaryId);
+  const summarySections = useChikitSahayakStore((s) => s.summarySections);
+  const summaryFreeText = useChikitSahayakStore((s) => s.summaryFreeText);
+  const summaryStatus = useChikitSahayakStore((s) => s.summaryStatus);
+  const setSummary = useChikitSahayakStore((s) => s.setSummary);
+  const updateSummarySection = useChikitSahayakStore((s) => s.updateSummarySection);
+  const setSummaryStatus = useChikitSahayakStore((s) => s.setSummaryStatus);
+  const redFlags = useChikitSahayakStore((s) => s.redFlags);
+  const nextStep = useChikitSahayakStore((s) => s.nextStep);
+  const turns = useChikitSahayakStore((s) => s.turns);
+  const documents = useChikitSahayakStore((s) => s.documents);
   const { t } = useI18n();
 
   const [generating, setGenerating] = useState(false);

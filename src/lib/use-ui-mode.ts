@@ -1,6 +1,6 @@
 "use client";
 
-import { useChikitsaHayakStore } from "@/lib/store";
+import { useChikitSahayakStore } from "@/lib/store";
 
 /**
  * Returns whether the kiosk is in "graphical" mode (icon-heavy, minimal text,
@@ -8,8 +8,8 @@ import { useChikitsaHayakStore } from "@/lib/store";
  * preface screen; applies across every step.
  */
 export function useUiMode() {
-  const uiMode = useChikitsaHayakStore((s) => s.uiMode);
-  const setUiMode = useChikitsaHayakStore((s) => s.setUiMode);
+  const uiMode = useChikitSahayakStore((s) => s.uiMode);
+  const setUiMode = useChikitSahayakStore((s) => s.setUiMode);
   const graphical = uiMode === "graphical";
   return { graphical, uiMode, setUiMode };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useChikitsaHayakStore } from "@/lib/store";
+import { useChikitSahayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
 import { Type, ImageIcon } from "lucide-react";
 
@@ -11,8 +11,8 @@ import { Type, ImageIcon } from "lucide-react";
  * patients (kept in the store through reset()).
  */
 export function ModeToggle() {
-  const uiMode = useChikitsaHayakStore((s) => s.uiMode);
-  const setUiMode = useChikitsaHayakStore((s) => s.setUiMode);
+  const uiMode = useChikitSahayakStore((s) => s.uiMode);
+  const setUiMode = useChikitSahayakStore((s) => s.setUiMode);
   const { t } = useI18n();
 
   const options = [

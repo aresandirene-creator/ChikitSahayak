@@ -1,4 +1,4 @@
-// ChikitsaHayak i18n — UI strings for 12 Indian languages + English.
+// ChikitSahayak i18n — UI strings for 12 Indian languages + English.
 // Used by the useI18n() hook to render the entire kiosk UI in the patient's
 // preferred language. When the patient changes language on the identify step,
 // the whole UI re-renders in that language.
@@ -164,7 +164,7 @@ export interface Translation {
   // History step
   historyBadge: string;
   historyTitle: string;
-  historySubtitle: string; // "ChikitsaHayak speaks {lang}. Speak or type…"
+  historySubtitle: string; // "ChikitSahayak speaks {lang}. Speak or type…"
   historyCurrentSection: string;
   historyVoiceLabel: string;
   historyVoiceOn: string;
@@ -347,10 +347,10 @@ function withFallbacks(t: Partial<Translation>, fallback: Translation): Translat
 }
 
 const en: Translation = {
-  appName: "ChikitsaHayak",
+  appName: "ChikitSahayak",
   headerAccessibility: "Accessibility",
   headerVoiceAssistant: "Talk",
-  headerVoiceAssistantTitle: "Talk to ChikitsaHayak",
+  headerVoiceAssistantTitle: "Talk to ChikitSahayak",
   headerAccessibilityTitle: "Accessibility settings",
   tagline: "AI-powered clinical intake",
   back: "Back",
@@ -371,8 +371,8 @@ const en: Translation = {
   stepComplete: "Consultation",
   stepOf: "Step {x} of {y}",
 
-  prefaceWelcome: "Welcome to ChikitsaHayak",
-  prefaceSubtitle: "Before you meet the doctor, ChikitsaHayak collects your health history, organises your old medical papers and prepares a summary — so the doctor can spend more time examining you.",
+  prefaceWelcome: "Welcome to ChikitSahayak",
+  prefaceSubtitle: "Before you meet the doctor, ChikitSahayak collects your health history, organises your old medical papers and prepares a summary — so the doctor can spend more time examining you.",
   prefaceTabNew: "I am a new patient",
   prefaceTabNewDesc: "First visit. Start a fresh intake — about 5 minutes.",
   prefaceTabReturning: "I am returning for a follow-up",
@@ -390,7 +390,7 @@ const en: Translation = {
   prefaceWorkflowLabel: "Your visit",
 
   modeToggleTitle: "How should this kiosk look?",
-  modeToggleDesc: "Choose your preferred way to use ChikitsaHayak. You can change this any time.",
+  modeToggleDesc: "Choose your preferred way to use ChikitSahayak. You can change this any time.",
   modeNormal: "Normal",
   modeNormalDesc: "Text with details — for readers.",
   modeGraphical: "Graphical",
@@ -433,24 +433,24 @@ const en: Translation = {
   identifyLanguage: "Preferred language",
   identifyAbha: "ABHA ID (optional)",
   identifyAbhaPlaceholder: "e.g. 12-3456-7890-1234",
-  identifyAbhaHint: "If you already have an ABHA, enter it here. Otherwise ChikitsaHayak can generate one later.",
+  identifyAbhaHint: "If you already have an ABHA, enter it here. Otherwise ChikitSahayak can generate one later.",
   identifyAyush: "Enable AYUSH / Ayurvedic history mode",
   identifyAyushDesc: "Adds Ayurvedic questions — Prakriti, Vikriti, Ahara, Vihara, Agni and prior AYUSH treatments.",
-  identifyPrivacyNote: "Data privacy: All information stays on this kiosk and is shared with the doctor only after you give consent. ChikitsaHayak uses consent-based ABDM-aligned data flows.",
+  identifyPrivacyNote: "Data privacy: All information stays on this kiosk and is shared with the doctor only after you give consent. ChikitSahayak uses consent-based ABDM-aligned data flows.",
   identifyContinue: "Continue to consent",
   identifySaving: "Saving…",
   identifySaved: "Patient identified",
 
   consentBadge: "Step 2 · Consent",
-  consentTitle: "What may ChikitsaHayak store and share?",
-  consentSubtitle: "You decide what ChikitsaHayak can collect and who it can be shared with. You can change your mind at any time. The first three are required to proceed.",
+  consentTitle: "What may ChikitSahayak store and share?",
+  consentSubtitle: "You decide what ChikitSahayak can collect and who it can be shared with. You can change your mind at any time. The first three are required to proceed.",
   consentPrivacyTitle: "Privacy & security controls",
   consentPrivacyDesc: "All data is stored locally on this kiosk for this visit and shared only with the treating physician. ABDM sharing follows the National Health Authority's consent artefact standards.",
   consentGranularNote: "Tick what you are comfortable with. Untick anything you do not want stored or shared.",
   consentItemDemographicsTitle: "Store my basic details",
   consentItemDemographicsDesc: "Name, age, gender, blood group, language and ABHA — so the kiosk recognises you on your next visit.",
   consentItemHistoryTitle: "Record my AI history conversation",
-  consentItemHistoryDesc: "The answers you give to ChikitsaHayak's AI assistant about your symptoms and history.",
+  consentItemHistoryDesc: "The answers you give to ChikitSahayak's AI assistant about your symptoms and history.",
   consentItemDocumentsTitle: "Digitise my medical documents",
   consentItemDocumentsDesc: "Old prescriptions, lab reports and discharge summaries — read by AI to extract diagnoses, medicines and test results.",
   consentItemSummaryTitle: "Generate an AI clinical summary",
@@ -458,7 +458,7 @@ const en: Translation = {
   consentItemAbdmTitle: "Share with ABHA / hospital HIS via ABDM",
   consentItemAbdmDesc: "Link your ABHA, fetch prior records through ABDM, and share the summary with the hospital's EMR using FHIR standards.",
   consentRetentionTitle: "How long may we keep this data?",
-  consentRetentionDesc: "Choose how long ChikitsaHayak may retain this visit's data. After this period it is automatically deleted.",
+  consentRetentionDesc: "Choose how long ChikitSahayak may retain this visit's data. After this period it is automatically deleted.",
   consentRetain7: "7 days",
   consentRetain30: "30 days",
   consentRetain90: "90 days",
@@ -472,7 +472,7 @@ const en: Translation = {
 
   historyBadge: "Step 3 · AI History",
   historyTitle: "Let's talk about your health",
-  historySubtitle: "ChikitsaHayak speaks {lang}. Speak or type — the AI asks short follow-up questions to build your history for the doctor.",
+  historySubtitle: "ChikitSahayak speaks {lang}. Speak or type — the AI asks short follow-up questions to build your history for the doctor.",
   historyCurrentSection: "Current section",
   historyVoiceLabel: "AI voice",
   historyVoiceOn: "AI voice on",
@@ -492,7 +492,7 @@ const en: Translation = {
   historyDoneDesc: "You can keep talking, or continue to scan your old documents.",
   historyRedFlagTitle: "Red-flag alerts",
   historyRedFlagEmpty: "No red flags detected yet.",
-  historyDisclaimer: "ChikitsaHayak never diagnoses. The AI only collects history for the doctor to review.",
+  historyDisclaimer: "ChikitSahayak never diagnoses. The AI only collects history for the doctor to review.",
   historyTipsTitle: "How to use this step",
   historyTips1: "Tap the mic to speak your answer — it is transcribed automatically.",
   historyTips2: "Or type your answer and press Enter to send.",
@@ -503,7 +503,7 @@ const en: Translation = {
 
   documentsBadge: "Step 4 · Scan Documents",
   documentsTitle: "Scan your old medical papers",
-  documentsSubtitle: "Upload photos of old prescriptions, lab reports and discharge summaries. ChikitsaHayak reads them in any Indian language, extracts the key details, and arranges them in date order — highlighting any abnormal test results for the doctor.",
+  documentsSubtitle: "Upload photos of old prescriptions, lab reports and discharge summaries. ChikitSahayak reads them in any Indian language, extracts the key details, and arranges them in date order — highlighting any abnormal test results for the doctor.",
   documentsTypeLabel: "Document type",
   documentsTypePrescription: "Prescription",
   documentsTypeLab: "Lab report",
@@ -535,7 +535,7 @@ const en: Translation = {
 
   summaryBadge: "Step 5 · AI Summary",
   summaryTitle: "Doctor-ready clinical history",
-  summarySubtitle: "ChikitsaHayak has combined your answers and digitised records into the structured summary below. The doctor can review, edit, confirm or reject this summary. The AI does not independently diagnose you.",
+  summarySubtitle: "ChikitSahayak has combined your answers and digitised records into the structured summary below. The doctor can review, edit, confirm or reject this summary. The AI does not independently diagnose you.",
   summaryGenerating: "Generating AI clinical summary…",
   summaryGeneratingDesc: "Combining your conversation and documents into a structured, physician-readable history.",
   summaryNoHistory: "No history collected yet. Go back and complete the AI history step first.",
@@ -570,7 +570,7 @@ const en: Translation = {
   summaryNotesTitle: "Physician notes (optional)",
   summaryNotesDesc: "Private notes for the doctor — not shared with the patient.",
   summaryNotesPlaceholder: "e.g. Patient anxious about ECG result. Reassure and explain plan during consult.",
-  summaryDisclaimerTitle: "ChikitsaHayak does not independently diagnose the patient.",
+  summaryDisclaimerTitle: "ChikitSahayak does not independently diagnose the patient.",
   summaryDisclaimerBody: "This summary is an AI-organised draft of your history and prior records. The treating physician remains responsible for clinical reasoning, diagnosis and treatment. Confirm to push to the HIS, or reject to regenerate.",
   summaryConfirmToast: "Summary confirmed — ready for HIS / ABHA integration",
   summaryRejectToast: "Summary rejected — please regenerate or edit",
@@ -580,7 +580,7 @@ const en: Translation = {
 
   abdmBadge: "Step 6 · ABDM & Hospital",
   abdmTitle: "Connect to ABHA, ABDM and the hospital",
-  abdmSubtitle: "With your consent, ChikitsaHayak links your ABHA, fetches prior records from ABDM as FHIR bundles, and pushes the confirmed summary to the hospital HIS / EMR so the doctor sees it during consultation.",
+  abdmSubtitle: "With your consent, ChikitSahayak links your ABHA, fetches prior records from ABDM as FHIR bundles, and pushes the confirmed summary to the hospital HIS / EMR so the doctor sees it during consultation.",
   abdmStatusAbha: "ABHA status",
   abdmStatusSummary: "Summary status",
   abdmStatusActions: "Integration actions",
@@ -623,7 +623,7 @@ const en: Translation = {
   completeNext2: "The doctor spends the consultation time on examination, clinical reasoning and counselling.",
   completeNext3: "Any new prescriptions or lab orders are added to your ABHA-linked longitudinal health record.",
   completeImpactTitle: "More consultation time for what matters",
-  completeImpactBody: "By shifting history-taking and document organisation to before the consultation, ChikitsaHayak frees up doctor time — for examination, clinical reasoning, diagnosis, counselling and treatment.",
+  completeImpactBody: "By shifting history-taking and document organisation to before the consultation, ChikitSahayak frees up doctor time — for examination, clinical reasoning, diagnosis, counselling and treatment.",
   completeViewSummary: "View summary",
   completeNewPatient: "Start new patient intake",
   completePrivacyTitle: "Privacy auto-reset",
@@ -662,8 +662,8 @@ const hi: Partial<Translation> = {
   stepAbdm: "एचआईएस / एबीडीएम",
   stepComplete: "परामर्श",
   stepOf: "चरण {x} / {y}",
-  prefaceWelcome: "चिकित्साहायक में आपका स्वागत है",
-  prefaceSubtitle: "डॉक्टर से मिलने से पहले, चिकित्साहायक आपका स्वास्थ्य इतिहास लेता है, आपके पुराने दस्तावेज़ व्यवस्थित करता है और एक सारांश तैयार करता है — ताकि डॉक्टर आपकी जाँच में अधिक समय दे सके।",
+  prefaceWelcome: "चिकित्साहयक में आपका स्वागत है",
+  prefaceSubtitle: "डॉक्टर से मिलने से पहले, चिकित्साहयक आपका स्वास्थ्य इतिहास लेता है, आपके पुराने दस्तावेज़ व्यवस्थित करता है और एक सारांश तैयार करता है — ताकि डॉक्टर आपकी जाँच में अधिक समय दे सके।",
   prefaceTabNew: "मैं नया मरीज हूँ",
   prefaceTabNewDesc: "पहली बार। नया इतिहास शुरू करें — लगभग 5 मिनट।",
   prefaceTabReturning: "मैं फॉलो-अप के लिए लौटा/लौटी हूँ",
@@ -681,7 +681,7 @@ const hi: Partial<Translation> = {
   prefaceWorkflowLabel: "आपका दौरा",
 
   modeToggleTitle: "यह कियोस्क कैसा दिखे?",
-  modeToggleDesc: "चिकित्साहायक का उपयोग करने का अपना तरीका चुनें। आप इसे कभी भी बदल सकते हैं।",
+  modeToggleDesc: "चिकित्साहयक का उपयोग करने का अपना तरीका चुनें। आप इसे कभी भी बदल सकते हैं।",
   modeNormal: "सामान्य",
   modeNormalDesc: "विवरण के साथ पाठ — पढ़ने वालों के लिए।",
   modeGraphical: "चित्रात्मक",
@@ -722,7 +722,7 @@ const hi: Partial<Translation> = {
   identifyLanguage: "पसंद की भाषा",
   identifyAbha: "एबीएचए आईडी (वैकल्पिक)",
   identifyAbhaPlaceholder: "जैसे 12-3456-7890-1234",
-  identifyAbhaHint: "यदि आपके पास एबीएचए है, तो यहाँ दर्ज करें। अन्यथा चिकित्साहायक बाद में एक जनरेट कर सकता है।",
+  identifyAbhaHint: "यदि आपके पास एबीएचए है, तो यहाँ दर्ज करें। अन्यथा चिकित्साहयक बाद में एक जनरेट कर सकता है।",
   identifyAyush: "आयुष / आयुर्वेदिक इतिहास मोड सक्षम करें",
   identifyAyushDesc: "आयुर्वेदिक प्रश्न जोड़ता है — प्रकृति, विकृति, आहार, विहार, अग्नि और पूर्व आयुष उपचार।",
   identifyPrivacyNote: "डेटा गोपनीयता: सभी जानकारी इस कियोस्क पर रहती है और केवल आपकी सहमति के बाद डॉक्टर के साथ साझा की जाती है।",
@@ -730,8 +730,8 @@ const hi: Partial<Translation> = {
   identifySaving: "सहेज रहे हैं…",
   identifySaved: "मरीज पहचाना गया",
   consentBadge: "चरण 2 · सहमति",
-  consentTitle: "चिकित्साहायक क्या संग्रहीत और साझा कर सकता है?",
-  consentSubtitle: "आप तय करते हैं कि चिकित्साहायक क्या संग्रह कर सकता है और किसके साथ साझा कर सकता है। आप कभी भी अपना निर्णय बदल सकते हैं। आगे बढ़ने के लिए पहले तीन आवश्यक हैं।",
+  consentTitle: "चिकित्साहयक क्या संग्रहीत और साझा कर सकता है?",
+  consentSubtitle: "आप तय करते हैं कि चिकित्साहयक क्या संग्रह कर सकता है और किसके साथ साझा कर सकता है। आप कभी भी अपना निर्णय बदल सकते हैं। आगे बढ़ने के लिए पहले तीन आवश्यक हैं।",
   consentPrivacyTitle: "गोपनीयता और सुरक्षा नियंत्रण",
   consentPrivacyDesc: "इस दौरे का सभी डेटा इस कियोस्क पर स्थानीय रूप से संग्रहीत है और केवल इलाज करने वाले डॉक्टर के साथ साझा किया जाता है। एबीडीएम साझाकरण राष्ट्रीय स्वास्थ्य प्राधिकरण के सहमति मानकों का पालन करता है।",
   consentGranularNote: "जो सहमत हैं वह टिक करें। जो संग्रहीत या साझा नहीं करना चाहते उसका टिक हटाएँ।",
@@ -746,7 +746,7 @@ const hi: Partial<Translation> = {
   consentItemAbdmTitle: "एबीएचए / अस्पताल एचआईएस के साथ एबीडीएम साझाकरण",
   consentItemAbdmDesc: "अपना एबीएचए लिंक करें, एबीडीएम से पूर्व रिकॉर्ड लाएँ, और सारांश को अस्पताल ईएमआर में साझा करें।",
   consentRetentionTitle: "यह डेटा कब तक रख सकते हैं?",
-  consentRetentionDesc: "चुनें कि चिकित्साहायक इस दौरे का डेटा कितने समय तक रख सकता है। इस अवधि के बाद यह स्वचालित रूप से हट जाता है।",
+  consentRetentionDesc: "चुनें कि चिकित्साहयक इस दौरे का डेटा कितने समय तक रख सकता है। इस अवधि के बाद यह स्वचालित रूप से हट जाता है।",
   consentRetain7: "7 दिन",
   consentRetain30: "30 दिन",
   consentRetain90: "90 दिन",
@@ -759,7 +759,7 @@ const hi: Partial<Translation> = {
   consentGranted: "सहमति सहेजी गई",
   historyBadge: "चरण 3 · एआई इतिहास",
   historyTitle: "आइए आपके स्वास्थ्य के बारे में बात करें",
-  historySubtitle: "चिकित्साहायक {lang} में बोलता है। बोलें या टाइप करें — एआई डॉक्टर के लिए छोटे फॉलो-अप प्रश्न पूछता है।",
+  historySubtitle: "चिकित्साहयक {lang} में बोलता है। बोलें या टाइप करें — एआई डॉक्टर के लिए छोटे फॉलो-अप प्रश्न पूछता है।",
   historyCurrentSection: "वर्तमान अनुभाग",
   historyVoiceLabel: "एआई आवाज़",
   historyVoiceOn: "एआई आवाज़ चालू",
@@ -779,7 +779,7 @@ const hi: Partial<Translation> = {
   historyDoneDesc: "आप बात करते रह सकते हैं, या दस्तावेज़ स्कैन पर जा सकते हैं।",
   historyRedFlagTitle: "खतरे के लक्षण अलर्ट",
   historyRedFlagEmpty: "अभी कोई खतरे का संकेत नहीं।",
-  historyDisclaimer: "चिकित्साहायक कभी निदान नहीं करता। एआई केवल डॉक्टर की समीक्षा के लिए इतिहास जमा करता है।",
+  historyDisclaimer: "चिकित्साहयक कभी निदान नहीं करता। एआई केवल डॉक्टर की समीक्षा के लिए इतिहास जमा करता है।",
   historyTipsTitle: "इस चरण का उपयोग कैसे करें",
   historyTips1: "अपना उत्तर बोलने के लिए माइक टैप करें — यह स्वचालित लिखा जाता है।",
   historyTips2: "या अपना उत्तर टाइप करें और भेजने के लिए Enter दबाएँ।",
@@ -789,7 +789,7 @@ const hi: Partial<Translation> = {
   historyQuickSymptoms: "जहाँ दर्द है वहाँ टैप करें",
   documentsBadge: "चरण 4 · दस्तावेज़ स्कैन",
   documentsTitle: "अपने पुराने चिकित्सा कागज़ स्कैन करें",
-  documentsSubtitle: "पुराने पर्चे, लैब रिपोर्ट और डिस्चार्ज सारांश की फ़ोटो अपलोड करें। चिकित्साहायक किसी भी भारतीय भाषा में उन्हें पढ़ता है, मुख्य जानकारी निकालता है, और तारीख़ क्रम में व्यवस्थित करता है — किसी भी असामान्य परीक्षण परिणाम को डॉक्टर के लिए चिह्नित करता है।",
+  documentsSubtitle: "पुराने पर्चे, लैब रिपोर्ट और डिस्चार्ज सारांश की फ़ोटो अपलोड करें। चिकित्साहयक किसी भी भारतीय भाषा में उन्हें पढ़ता है, मुख्य जानकारी निकालता है, और तारीख़ क्रम में व्यवस्थित करता है — किसी भी असामान्य परीक्षण परिणाम को डॉक्टर के लिए चिह्नित करता है।",
   documentsTypeLabel: "दस्तावेज़ प्रकार",
   documentsTypePrescription: "पर्चा",
   documentsTypeLab: "लैब रिपोर्ट",
@@ -820,7 +820,7 @@ const hi: Partial<Translation> = {
   documentsDigitised: "डिजिटल",
   summaryBadge: "चरण 5 · एआई सारांश",
   summaryTitle: "डॉक्टर-तैयार नैदानिक इतिहास",
-  summarySubtitle: "चिकित्साहायक ने आपके उत्तर और डिजिटल रिकॉर्ड्स को नीचे संरचित सारांश में जोड़ा है। डॉक्टर इस सारांश की समीक्षा/संपादन/पुष्टि/अस्वीकृति कर सकता है। एआई स्वतंत्र रूप से निदान नहीं करता।",
+  summarySubtitle: "चिकित्साहयक ने आपके उत्तर और डिजिटल रिकॉर्ड्स को नीचे संरचित सारांश में जोड़ा है। डॉक्टर इस सारांश की समीक्षा/संपादन/पुष्टि/अस्वीकृति कर सकता है। एआई स्वतंत्र रूप से निदान नहीं करता।",
   summaryGenerating: "एआई नैदानिक सारांश बन रहा है…",
   summaryGeneratingDesc: "आपकी बातचीत और दस्तावेज़ों को संरचित, डॉक्टर-पठनीय इतिहास में जोड़ रहे हैं।",
   summaryNoHistory: "अभी कोई इतिहास संग्रह नहीं। पहले एआई इतिहास चरण पूरा करें।",
@@ -855,7 +855,7 @@ const hi: Partial<Translation> = {
   summaryNotesTitle: "डॉक्टर नोट्स (वैकल्पिक)",
   summaryNotesDesc: "डॉक्टर के लिए निजी नोट्स — मरीज के साथ साझा नहीं।",
   summaryNotesPlaceholder: "जैसे मरीज ईसीजी परिणाम से चिंतित। परामर्श में आश्वस्त करें।",
-  summaryDisclaimerTitle: "चिकित्साहायक स्वतंत्र रूप से निदान नहीं करता।",
+  summaryDisclaimerTitle: "चिकित्साहयक स्वतंत्र रूप से निदान नहीं करता।",
   summaryDisclaimerBody: "यह सारांश आपके इतिहास और पूर्व रिकॉर्ड्स का एआई-व्यवस्थित प्रारूप है। इलाज करने वाला डॉक्टर नैदानिक निर्णय, निदान और उपचार के लिए ज़िम्मेदार रहता है।",
   summaryConfirmToast: "सारांश पुष्ट — एचआईएस / एबीडीएम एकीकरण के लिए तैयार",
   summaryRejectToast: "सारांश अस्वीकृत — कृपया पुनः बनाएँ या संपादित करें",
@@ -864,7 +864,7 @@ const hi: Partial<Translation> = {
   summaryNeedConfirm: "कृपया पहले सारांश पुष्ट करें",
   abdmBadge: "चरण 6 · एबीडीएम और अस्पताल",
   abdmTitle: "एबीएचए, एबीडीएम और अस्पताल से जुड़ें",
-  abdmSubtitle: "आपकी सहमति से, चिकित्साहायक आपका एबीएचए लिंक करता है, एबीडीएम से पूर्व रिकॉर्ड लाता है, और पुष्ट सारांश अस्पताल एचआईएस / ईएमआर में भेजता है ताकि डॉक्टर परामर्श में देख सके।",
+  abdmSubtitle: "आपकी सहमति से, चिकित्साहयक आपका एबीएचए लिंक करता है, एबीडीएम से पूर्व रिकॉर्ड लाता है, और पुष्ट सारांश अस्पताल एचआईएस / ईएमआर में भेजता है ताकि डॉक्टर परामर्श में देख सके।",
   abdmStatusAbha: "एबीएचए स्थिति",
   abdmStatusSummary: "सारांश स्थिति",
   abdmStatusActions: "एकीकरण क्रियाएँ",
@@ -906,7 +906,7 @@ const hi: Partial<Translation> = {
   completeNext2: "डॉक्टर परामर्श समय जाँच, नैदानिक तर्क और परामर्श में खर्च करता है।",
   completeNext3: "कोई नए पर्चे या लैब आदेश आपके एबीएचए-लिंक्ड स्वास्थ्य रिकॉर्ड में जोड़े जाते हैं।",
   completeImpactTitle: "महत्वपूर्ण कार्यों के लिए अधिक परामर्श समय",
-  completeImpactBody: "इतिहास लेने और दस्तावेज़ व्यवस्था को परामर्श से पहले ले जाकर, चिकित्साहायक डॉक्टर समय खाली करता है — जाँच, तर्क, निदान, परामर्श और उपचार के लिए।",
+  completeImpactBody: "इतिहास लेने और दस्तावेज़ व्यवस्था को परामर्श से पहले ले जाकर, चिकित्साहयक डॉक्टर समय खाली करता है — जाँच, तर्क, निदान, परामर्श और उपचार के लिए।",
   completeViewSummary: "सारांश देखें",
   completeNewPatient: "नया मरीज इतिहास शुरू करें",
   completePrivacyTitle: "गोपनीयता स्वतः-रीसेट",
@@ -934,7 +934,7 @@ export const translations: Record<LangCode, Translation> = {
   // patient's chat conversation is still conducted in their language by the
   // LLM/TTS/ASR pipeline regardless of UI translation coverage.
   bn: withFallbacks({
-    appName: "ChikitsaHayak",
+    appName: "ChikitSahayak",
     tagline: "এআই-চালিত রোগী ইতিহাস সংগ্রহ",
     back: "পিছনে",
     continue: "এগিয়ে যান",
@@ -1217,7 +1217,7 @@ export const translations: Record<LangCode, Translation> = {
 
 
   ta: withFallbacks({
-    appName: "ChikitsaHayak",
+    appName: "ChikitSahayak",
     tagline: "செயற்கை நுண்ணறிவு இயக்கப்பட்ட நோயாளி வரலாறு சேகரிப்பு",
     back: "பின்",
     continue: "தொடரவும்",
@@ -1500,7 +1500,7 @@ export const translations: Record<LangCode, Translation> = {
 
 
   te: withFallbacks({
-    appName: "ChikitsaHayak",
+    appName: "ChikitSahayak",
     tagline: "ఏఐ-ఆధారిత రోగి చరిత్ర సేకరణ",
     back: "వెనుకకు",
     continue: "కొనసాగించు",
@@ -1783,7 +1783,7 @@ export const translations: Record<LangCode, Translation> = {
 
 
   mr: withFallbacks({
-    appName: "ChikitsaHayak",
+    appName: "ChikitSahayak",
     tagline: "एआय-सक्षम रुग्ण इतिहास संकलन",
     back: "मागे",
     continue: "पुढे",
@@ -1801,8 +1801,8 @@ export const translations: Record<LangCode, Translation> = {
     stepAbdm: "एचआयएस / एबीडीएम",
     stepComplete: "सल्लामसलत",
     stepOf: "पायरी {x} / {y}",
-    prefaceWelcome: "चिकित्साहायकमध्ये आपले स्वागत आहे",
-    prefaceSubtitle: "डॉक्टरांना भेटण्यापूर्वी, चिकित्साहायक आपला आरोग्य इतिहास गोळा करतो, जुने रेकॉर्ड व्यवस्थित करतो, सारांश तयार करतो — डॉक्टर आपली तपासणी जास्त वेळ देऊ शकतात.",
+    prefaceWelcome: "चिकित्साहयकमध्ये आपले स्वागत आहे",
+    prefaceSubtitle: "डॉक्टरांना भेटण्यापूर्वी, चिकित्साहयक आपला आरोग्य इतिहास गोळा करतो, जुने रेकॉर्ड व्यवस्थित करतो, सारांश तयार करतो — डॉक्टर आपली तपासणी जास्त वेळ देऊ शकतात.",
     prefaceTabNew: "मी नवीन रुग्ण आहे",
     prefaceTabNewDesc: "पहिल्यांदा. नवीन इतिहास — साधारण ५ मिनिटे.",
     prefaceTabReturning: "मी फॉलो-अपसाठी परत आलो",
@@ -1819,7 +1819,7 @@ export const translations: Record<LangCode, Translation> = {
     prefaceFeature4Desc: "तुमच्या संमतीने तुमची रेकॉर्ड तुमच्यासोबत.",
     prefaceWorkflowLabel: "तुमचा दौरा",
     modeToggleTitle: "हा कियोस्क कसा दिसावा?",
-    modeToggleDesc: "चिकित्साहायक वापरण्याचा तुमचा पसंतीचा मार्ग निवडा.",
+    modeToggleDesc: "चिकित्साहयक वापरण्याचा तुमचा पसंतीचा मार्ग निवडा.",
     modeNormal: "साधारण",
     modeNormalDesc: "तपशीलासह मजकूर — वाचकांसाठी.",
     modeGraphical: "ग्राफिकल",
@@ -1860,7 +1860,7 @@ export const translations: Record<LangCode, Translation> = {
     identifyLanguage: "पसंतीची भाषा",
     identifyAbha: "एबीएचए आयडी (पर्यायी)",
     identifyAbhaPlaceholder: "उदा. 12-3456-7890-1234",
-    identifyAbhaHint: "एबीएचए असेल तर द्या. नसेल तर चिकित्साहायक नंतर तयार करू शकतो.",
+    identifyAbhaHint: "एबीएचए असेल तर द्या. नसेल तर चिकित्साहयक नंतर तयार करू शकतो.",
     identifyAyush: "आयुष / आयुर्वेदिक इतिहास मोड सक्षम करा",
     identifyAyushDesc: "आयुर्वेदिक प्रश्न जोडतो — प्रकृति, विकृति, आहार, विहार, अग्नि.",
     identifyPrivacyNote: "डेटा गोपनीयता: सर्व माहिती या कियोस्कवर राहते, तुमच्या संमतीनंतरच डॉक्टरांसोबत शेअर होते.",
@@ -1868,7 +1868,7 @@ export const translations: Record<LangCode, Translation> = {
     identifySaving: "जतन होत आहे…",
     identifySaved: "रुग्ण ओळखला",
     consentBadge: "पायरी २ · संमती",
-    consentTitle: "चिकित्साहायक काय साठवू आणि शेअर करू शकतो?",
+    consentTitle: "चिकित्साहयक काय साठवू आणि शेअर करू शकतो?",
     consentSubtitle: "तुम्ही ठरवता काय गोळा आणि शेअर व्हावे. कधीही मन बदलू शकता. पहिली तीन आवश्यक.",
     consentPrivacyTitle: "गोपनीयता आणि सुरक्षा नियंत्रण",
     consentPrivacyDesc: "या दौऱ्याचा सर्व डेटा या कियोस्कवर स्थानिक साठवला जातो, फक्त डॉक्टरांसोबत शेअर होतो.",
@@ -1897,7 +1897,7 @@ export const translations: Record<LangCode, Translation> = {
     consentGranted: "संमती जतन झाली",
     historyBadge: "पायरी ३ · एआय इतिहास",
     historyTitle: "चला तुमच्या आरोग्याबद्दल बोलूया",
-    historySubtitle: "चिकित्साहायक {lang}-मध्ये बोलतो. बोला किंवा टाईप करा — एआय डॉक्टरांसाठी प्रश्न विचारतो.",
+    historySubtitle: "चिकित्साहयक {lang}-मध्ये बोलतो. बोला किंवा टाईप करा — एआय डॉक्टरांसाठी प्रश्न विचारतो.",
     historyCurrentSection: "सध्याचा विभाग",
     historyVoiceLabel: "एआय आवाज",
     historyMicStart: "आवाज इनपुट सुरू",
@@ -1916,7 +1916,7 @@ export const translations: Record<LangCode, Translation> = {
     historyRedFlagTitle: "लाल-झेंडा सूचना",
     historyRedFlagEmpty: "अजून लाल-झेंडा नाही.",
     historyQuickSymptoms: "जिथे वेदना आहे तिथे टॅप करा",
-    historyDisclaimer: "चिकित्साहायक कधीही निदान करत नाही. एआय फक्त डॉक्टरांच्या समीक्षेसाठी इतिहास गोळा करतो.",
+    historyDisclaimer: "चिकित्साहयक कधीही निदान करत नाही. एआय फक्त डॉक्टरांच्या समीक्षेसाठी इतिहास गोळा करतो.",
     historyTipsTitle: "ही पायरी वापरा",
     historyTips1: "उत्तर बोलण्यासाठी माईक टॅप करा — स्वयंचलित लिहिले जाते.",
     historyTips2: "किंवा उत्तर टाईप करून Enter दाबा.",
@@ -1925,7 +1925,7 @@ export const translations: Record<LangCode, Translation> = {
     historyTips5: "कधीही पुढील पायरीवर जा — परत आल्यावर सुरू राहील.",
     documentsBadge: "पायरी ४ · कागदपत्रे स्कॅन",
     documentsTitle: "जुनी वैद्यकीय कागदपत्रे स्कॅन करा",
-    documentsSubtitle: "जुन्या प्रिस्क्रिप्शन, लॅब रिपोर्ट फोटो अपलोड करा. चिकित्साहायक कोणत्याही भाषेत वाचतो, तारखेनुसार ठेवतो — असामान्य चाचणी मूल्ये दर्शवतो.",
+    documentsSubtitle: "जुन्या प्रिस्क्रिप्शन, लॅब रिपोर्ट फोटो अपलोड करा. चिकित्साहयक कोणत्याही भाषेत वाचतो, तारखेनुसार ठेवतो — असामान्य चाचणी मूल्ये दर्शवतो.",
     documentsTypeLabel: "कागदपत्र प्रकार",
     documentsTypePrescription: "प्रिस्क्रिप्शन",
     documentsTypeLab: "लॅब रिपोर्ट",
@@ -1956,7 +1956,7 @@ export const translations: Record<LangCode, Translation> = {
     documentsDigitised: "डिजिटल झाले",
     summaryBadge: "पायरी ५ · एआय सारांश",
     summaryTitle: "डॉक्टर-तयार क्लिनिकल इतिहास",
-    summarySubtitle: "चिकित्साहायक तुमची उत्तरे आणि रेकॉर्डमधून सारांश तयार केला आहे. डॉक्टर समीक्षा करू शकतात. एआय निदान करत नाही.",
+    summarySubtitle: "चिकित्साहयक तुमची उत्तरे आणि रेकॉर्डमधून सारांश तयार केला आहे. डॉक्टर समीक्षा करू शकतात. एआय निदान करत नाही.",
     summaryGenerating: "एआय क्लिनिकल सारांश तयार होत आहे…",
     summaryGeneratingDesc: "संभाषण आणि कागदपत्रांमधून डॉक्टर-वाचनीय इतिहास तयार होत आहे.",
     summaryNoHistory: "इतिहास नाही. आधी इतिहास पायरी पूर्ण करा.",
@@ -1991,7 +1991,7 @@ export const translations: Record<LangCode, Translation> = {
     summaryNotesTitle: "डॉक्टर नोट्स (पर्यायी)",
     summaryNotesDesc: "डॉक्टरांसाठी खाजगी नोट्स.",
     summaryNotesPlaceholder: "उदा. रुग्ण ईसीजी बद्दल काळजीत.",
-    summaryDisclaimerTitle: "चिकित्साहायक स्वतंत्रपणे निदान करत नाही.",
+    summaryDisclaimerTitle: "चिकित्साहयक स्वतंत्रपणे निदान करत नाही.",
     summaryDisclaimerBody: "हा तुमचा इतिहास आणि रेकॉर्डचा एआय-व्यवस्थित मसूदा आहे. डॉक्टर क्लिनिकल निर्णय, निदान, उपचारास जबाबदार.",
     summaryConfirmToast: "सारांश निश्चित — एचआयएस / एबीडीएम-साठी तयार",
     summaryRejectToast: "सारांश नकार — पुन्हा तयार करा",
@@ -2000,7 +2000,7 @@ export const translations: Record<LangCode, Translation> = {
     summaryNeedConfirm: "आधी सारांश निश्चित करा",
     abdmBadge: "पायरी ६ · एबीडीएम आणि रुग्णालय",
     abdmTitle: "एबीएचए, एबीडीएम आणि रुग्णालयशी जोडा",
-    abdmSubtitle: "तुमच्या संमतीने चिकित्साहायक एबीएचए लिंक करतो, एबीडीएममधून रेकॉर्ड आणतो, सारांश रुग्णालय एचआयएस-ला पाठवतो.",
+    abdmSubtitle: "तुमच्या संमतीने चिकित्साहयक एबीएचए लिंक करतो, एबीडीएममधून रेकॉर्ड आणतो, सारांश रुग्णालय एचआयएस-ला पाठवतो.",
     abdmStatusAbha: "एबीएचए स्थिती",
     abdmStatusSummary: "सारांश स्थिती",
     abdmStatusActions: "समन्वय क्रिया",
@@ -2042,7 +2042,7 @@ export const translations: Record<LangCode, Translation> = {
     completeNext2: "डॉक्टर तपासणी, क्लिनिकल तर्क, सल्ल्यास वेळ देतात.",
     completeNext3: "नवीन प्रिस्क्रिप्शन तुमच्या एबीएचए-लिंक्ड रेकॉर्डमध्ये जोडली जातील.",
     completeImpactTitle: "महत्त्वाच्या कामासाठी जास्त सल्लामसलत वेळ",
-    completeImpactBody: "इतिहास संकलन सल्लामसलतीपूर्वी नेऊन चिकित्साहायक डॉक्टर वेळ वाचवतो.",
+    completeImpactBody: "इतिहास संकलन सल्लामसलतीपूर्वी नेऊन चिकित्साहयक डॉक्टर वेळ वाचवतो.",
     completeViewSummary: "सारांश पाहा",
     completeNewPatient: "नवीन रुग्ण सुरू",
     completePrivacyTitle: "गोपनीयता स्वतः-रीसेट",
@@ -2060,13 +2060,13 @@ export const translations: Record<LangCode, Translation> = {
     abdmMsgPatientNotFound: "रुग्ण सापडला नाही",
     headerAccessibility: "सुलभता",
     headerVoiceAssistant: "बोला",
-    headerVoiceAssistantTitle: "चिकित्साहायकशी बोला",
+    headerVoiceAssistantTitle: "चिकित्साहयकशी बोला",
     headerAccessibilityTitle: "सुलभता सेटिंग्स",
   }, en),
 
 
   gu: withFallbacks({
-    appName: "ChikitsaHayak",
+    appName: "ChikitSahayak",
     tagline: "એઆઈ-સક્ષમ દર્દી ઇતિહાસ સંગ્રહ",
     back: "પાછળ",
     continue: "ચાલુ રાખો",
@@ -2349,7 +2349,7 @@ export const translations: Record<LangCode, Translation> = {
 
 
   kn: withFallbacks({
-    appName: "ChikitsaHayak",
+    appName: "ChikitSahayak",
     tagline: "ಎಐ-ಚಾಲಿತ ರೋಗಿ ಇತಿಹಾಸ ಸಂಗ್ರಹಣೆ",
     back: "ಹಿಂದೆ",
     continue: "ಮುಂದುವರಿಸಿ",
@@ -2632,7 +2632,7 @@ export const translations: Record<LangCode, Translation> = {
 
 
   ml: withFallbacks({
-    appName: "ChikitsaHayak",
+    appName: "ChikitSahayak",
     tagline: "എഐ-പ്രവർത്തിത രോഗി ചരിത്ര ശേഖരണം",
     back: "പിന്നിലേക്ക്",
     continue: "തുടരുക",
@@ -2915,7 +2915,7 @@ export const translations: Record<LangCode, Translation> = {
 
 
   pa: withFallbacks({
-    appName: "ChikitsaHayak",
+    appName: "ChikitSahayak",
     tagline: "ਏਆਈ-ਚਾਲਿਤ ਮਰੀਜ਼ ਇਤਿਹਾਸ ਇਕੱਠਾ",
     back: "ਪਿੱਛੇ",
     continue: "ਜਾਰੀ ਰੱਖੋ",
@@ -3198,7 +3198,7 @@ export const translations: Record<LangCode, Translation> = {
 
 
   ur: withFallbacks({
-    appName: "ChikitsaHayak",
+    appName: "ChikitSahayak",
     tagline: "اے آئی پر چلنے والا مریض کی تاریخ کا جمع",
     back: "پیچھے",
     continue: "جاری رکھیں",
@@ -3481,7 +3481,7 @@ export const translations: Record<LangCode, Translation> = {
 
 
   or: withFallbacks({
-    appName: "ChikitsaHayak",
+    appName: "ChikitSahayak",
     tagline: "ଏଆଇ-ଚାଳିତ ରୋଗୀ ଇତିହାସ ସଂଗ୍ରହ",
     back: "ପଛକୁ",
     continue: "ଜାରି ରଖନ୍ତୁ",

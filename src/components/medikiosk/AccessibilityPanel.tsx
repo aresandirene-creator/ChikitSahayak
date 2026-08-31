@@ -1,6 +1,6 @@
 "use client";
 
-import { useChikitsaHayakStore } from "@/lib/store";
+import { useChikitSahayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -18,12 +18,12 @@ import {
  * based on age; this panel lets the user override it.
  */
 export function AccessibilityPanel({ onClose }: { onClose: () => void }) {
-  const fontScale = useChikitsaHayakStore((s) => s.fontScale);
-  const setFontScale = useChikitsaHayakStore((s) => s.setFontScale);
-  const highContrast = useChikitsaHayakStore((s) => s.highContrast);
-  const setHighContrast = useChikitsaHayakStore((s) => s.setHighContrast);
-  const reduceMotion = useChikitsaHayakStore((s) => s.reduceMotion);
-  const setReduceMotion = useChikitsaHayakStore((s) => s.setReduceMotion);
+  const fontScale = useChikitSahayakStore((s) => s.fontScale);
+  const setFontScale = useChikitSahayakStore((s) => s.setFontScale);
+  const highContrast = useChikitSahayakStore((s) => s.highContrast);
+  const setHighContrast = useChikitSahayakStore((s) => s.setHighContrast);
+  const reduceMotion = useChikitSahayakStore((s) => s.reduceMotion);
+  const setReduceMotion = useChikitSahayakStore((s) => s.setReduceMotion);
   const { t } = useI18n();
 
   const fontOptions = [

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useChikitsaHayakStore } from "@/lib/store";
+import { useChikitSahayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,14 +21,14 @@ import { toast } from "sonner";
  * summary are NOT loaded into this session — only demographics are reused.
  */
 export function LoginStep() {
-  const setPatient = useChikitsaHayakStore((s) => s.setPatient);
-  const setEncounterId = useChikitsaHayakStore((s) => s.setEncounterId);
-  const setPrefaceTab = useChikitsaHayakStore((s) => s.setPrefaceTab);
-  const setStep = useChikitsaHayakStore((s) => s.setStep);
-  const autoAdaptAccessibility = useChikitsaHayakStore((s) => s.autoAdaptAccessibility);
-  const setUiLanguage = useChikitsaHayakStore((s) => s.setUiLanguage);
-  const reset = useChikitsaHayakStore((s) => s.reset);
-  const setConsent = useChikitsaHayakStore((s) => s.setConsent);
+  const setPatient = useChikitSahayakStore((s) => s.setPatient);
+  const setEncounterId = useChikitSahayakStore((s) => s.setEncounterId);
+  const setPrefaceTab = useChikitSahayakStore((s) => s.setPrefaceTab);
+  const setStep = useChikitSahayakStore((s) => s.setStep);
+  const autoAdaptAccessibility = useChikitSahayakStore((s) => s.autoAdaptAccessibility);
+  const setUiLanguage = useChikitSahayakStore((s) => s.setUiLanguage);
+  const reset = useChikitSahayakStore((s) => s.reset);
+  const setConsent = useChikitSahayakStore((s) => s.setConsent);
   const { t } = useI18n();
 
   const [phone, setPhone] = useState("");

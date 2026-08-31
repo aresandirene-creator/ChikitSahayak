@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useChikitsaHayakStore } from "@/lib/store";
+import { useChikitSahayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
 import { useSpeech } from "@/lib/use-speech";
 import { useSpeechRecognition } from "@/lib/use-speech-recognition";
@@ -17,8 +17,8 @@ import {
  * Indian-language voices). Hands-free, conversational loop.
  */
 export function VoiceAssistant({ onClose }: { onClose: () => void }) {
-  const patient = useChikitsaHayakStore((s) => s.patient);
-  const encounterId = useChikitsaHayakStore((s) => s.encounterId);
+  const patient = useChikitSahayakStore((s) => s.patient);
+  const encounterId = useChikitSahayakStore((s) => s.encounterId);
   const { t } = useI18n();
   const { speak, cancel: cancelSpeech, speaking, supported: speechSupported } = useSpeech();
   const {
@@ -310,7 +310,7 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
           {lastReply && (
             <div className="w-full rounded-xl bg-white border border-red-100 p-3 shadow-soft">
               <div className="text-[10px] font-semibold uppercase text-red-600 mb-1 tracking-wide flex items-center gap-1">
-                <Bot className="size-3" /> ChikitsaHayak replied
+                <Bot className="size-3" /> ChikitSahayak replied
               </div>
               <div className="text-sm text-red-900">{lastReply}</div>
             </div>
