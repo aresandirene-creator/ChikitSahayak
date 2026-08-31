@@ -106,7 +106,31 @@ export function IdentifyStep() {
       toast.success(t("identifySaved"));
       nextStep();
     } catch (e) {
-      toast.error((e as Error).message);
+      // A serverless host may not have a writable local SQLite volume. Keep
+      // the kiosk usable for this visit: the record remains only in this
+      // browser session and is never silently sent elsewhere.
+      const temporaryPatient: PatientInfo = {
+        id: crypto.randomUUID(),
+        name: form.name.trim(),
+        age: form.age ? Number(form.age) : undefined,
+        gender: form.gender || undefined,
+        phone: form.phone || undefined,
+        language: form.language as LangCode,
+        ayushMode: form.ayushMode,
+        bloodGroup: form.bloodGroup || undefined,
+        abhaId: form.abhaId || undefined,
+      };
+      setPatient(temporaryPatient);
+      setEncounterId(null);
+      setUiLanguage(form.language as LangCode);
+      autoAdaptAccessibility(temporaryPatient.age);
+      setConsent("demographics", false);
+      setConsent("history", false);
+      setConsent("documents", false);
+      setConsent("summary", false);
+      setConsent("abdm_share", false);
+      toast.info("Continuing in this browser only. Your details will not be saved on the server.");
+      nextStep();
     } finally {
       setSubmitting(false);
     }
