@@ -69,7 +69,7 @@ export function SummaryStep() {
       const res = await fetch("/api/summary/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ patientId: patient.id, encounterId }),
+        body: JSON.stringify({ patientId: patient.id, encounterId, patient, turns, documents, redFlags }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Generation failed");

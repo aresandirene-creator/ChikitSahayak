@@ -62,15 +62,38 @@ export async function POST(req: NextRequest) {
     const { patientId, encounterId } = body;
     if (!patientId) return NextResponse.json({ error: "patientId required" }, { status: 400 });
 
-    const patient = await db.patient.findUnique({ where: { id: patientId } });
+    let patient = null as Awaited<ReturnType<typeof db.patient.findUnique>> | null;
+    let turns: any[] = [];
+    let documents: any[] = [];
+    let redFlags: any[] = [];
+    let canPersist = true;
+    try {
+      patient = await db.patient.findUnique({ where: { id: patientId } });
+      if (patient) {
+        const enc = encounterId ? { encounterId } : {};
+        [turns, documents, redFlags] = await Promise.all([
+          db.chatMessage.findMany({ where: { patientId, ...enc }, orderBy: { createdAt: "asc" } }),
+          db.document.findMany({ where: { patientId, status: "completed", ...enc }, orderBy: { recordDate: "asc" } }),
+          db.redFlagAlert.findMany({ where: { patientId, ...enc }, orderBy: { createdAt: "asc" } }),
+        ]);
+      }
+    } catch {
+      canPersist = false;
+    }
+    if (!patient && body.patient) patient = body.patient;
     if (!patient) return NextResponse.json({ error: "patient not found" }, { status: 404 });
-
-    const enc = encounterId ? { encounterId } : {};
-    const [turns, documents, redFlags] = await Promise.all([
-      db.chatMessage.findMany({ where: { patientId, ...enc }, orderBy: { createdAt: "asc" } }),
-      db.document.findMany({ where: { patientId, status: "completed", ...enc }, orderBy: { recordDate: "asc" } }),
-      db.redFlagAlert.findMany({ where: { patientId, ...enc }, orderBy: { createdAt: "asc" } }),
-    ]);
+    if (!canPersist) {
+      turns = Array.isArray(body.turns) ? body.turns : [];
+      documents = Array.isArray(body.documents)
+        ? body.documents.filter((d: any) => d.status === "completed").map((d: any) => ({
+            fileName: d.fileName,
+            fileType: d.fileType,
+            extractedData: JSON.stringify(d.extracted ?? {}),
+            recordDate: d.recordDate ?? null,
+          }))
+        : [];
+      redFlags = Array.isArray(body.redFlags) ? body.redFlags : [];
+    }
 
     const systemPrompt = buildSummarySystemPrompt({
       patientName: patient.name,
@@ -173,34 +196,16 @@ ${userContext}`);
       sections[k as keyof ClinicalSummarySections] = buffers[k].join("\n").trim();
     }
 
-    // Persist or update summary (scoped to encounter if provided)
-    const existing = await db.clinicalSummary.findFirst({
-      where: { patientId, ...(encounterId ? { encounterId } : {}) },
-    });
-    let summary;
-    if (existing) {
-      summary = await db.clinicalSummary.update({
-        where: { id: existing.id },
-        data: {
-          sections: JSON.stringify(sections),
-          freeText,
-          status: "draft",
-        },
-      });
-    } else {
-      summary = await db.clinicalSummary.create({
-        data: {
-          patientId,
-          encounterId: encounterId ?? null,
-          sections: JSON.stringify(sections),
-          freeText,
-          status: "draft",
-        },
-      });
+    let summary: { id: string; status: string } | null = null;
+    if (canPersist) {
+      const existing = await db.clinicalSummary.findFirst({ where: { patientId, ...(encounterId ? { encounterId } : {}) } });
+      summary = existing
+        ? await db.clinicalSummary.update({ where: { id: existing.id }, data: { sections: JSON.stringify(sections), freeText, status: "draft" } })
+        : await db.clinicalSummary.create({ data: { patientId, encounterId: encounterId ?? null, sections: JSON.stringify(sections), freeText, status: "draft" } });
     }
 
     return NextResponse.json({
-      id: summary.id,
+      id: summary?.id ?? `temporary-summary-${Date.now()}`,
       sections,
       freeText,
       redFlags: redFlags.map((f) => ({
@@ -209,9 +214,9 @@ ${userContext}`);
         severity: f.severity,
         reasoning: f.reasoning,
         acknowledged: f.acknowledged,
-        createdAt: f.createdAt.toISOString(),
+        createdAt: new Date(f.createdAt).toISOString(),
       })),
-      status: summary.status,
+      status: summary?.status ?? "draft",
     });
   } catch (err) {
     console.error("POST /api/summary/generate error:", err);
