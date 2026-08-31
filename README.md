@@ -1,113 +1,76 @@
-# ChikitsaHayak — Source Code
+# ChikitsaHayak — AI-Powered Clinical Intake Kiosk
 
-**AI-powered patient-facing clinical intake kiosk** for Indian hospitals/clinics.
+**ChikitsaHayak** (चिकित्साहायक, "treatment helper") is an AI-powered patient-facing clinical intake kiosk for Indian hospitals/clinics. It collects and organises a patient's medical history **before** the doctor consultation, so the doctor receives a structured, reviewable history immediately.
 
-## What's in this archive
+## Patient workflow
+**Identify → Consent → AI History → Scan Documents → AI Summary → HIS/ABHA → Consultation**
 
-```
-chikitsahayak-source/
-├── src/
-│   ├── app/
-│   │   ├── api/              # Backend API routes (patient, chat, asr, documents, summary, abdm, consent, encounter, redflag)
-│   │   ├── layout.tsx        # Root layout + metadata
-│   │   ├── page.tsx          # The single `/` route — kiosk UI
-│   │   └── globals.css       # Design system (OMNI HD, medical crimson theme)
-│   ├── components/
-│   │   ├── medikiosk/        # 17 kiosk components (PrefaceScreen, IdentifyStep, ConsentStep, HistoryStep, DocumentsStep, SummaryStep, AbdmStep, CompleteStep, VoiceAssistant, AccessibilityPanel, etc.)
-│   │   └── ui/               # shadcn/ui component library
-│   └── lib/
-│       ├── db.ts             # Prisma client
-│       ├── zai.ts            # z-ai-web-dev-sdk singleton (LLM, VLM, ASR)
-│       ├── store.ts          # Zustand store (session state)
-│       ├── i18n.ts           # 12 Indian languages + English translations
-│       ├── use-speech.ts     # Web Speech API hook (Google AI Studio voices)
-│       ├── medical-prompts.ts# AI system prompts (history, summary, document OCR)
-│       ├── use-i18n.ts       # i18n hook
-│       ├── use-ui-mode.ts    # Normal/Graphical mode hook
-│       └── use-continue-handler.ts
-├── prisma/
-│   └── schema.prisma         # 7 models: Patient, Encounter, Consent, ChatMessage, Document, ClinicalSummary, RedFlagAlert, ABDMRecord
-├── public/
-│   └── chikitsahayak-logo.png # Official logo
-├── package.json              # Dependencies + scripts
-├── tsconfig.json
-├── next.config.ts
-├── tailwind.config.ts
-├── postcss.config.mjs
-├── components.json           # shadcn/ui config
-├── eslint.config.mjs
-├── Caddyfile                 # Gateway config
-└── worklog.md                # Full build history
-```
-
-## How to run on another device
-
-### Prerequisites
-- **Node.js 18+** or **Bun** (recommended)
-- An `.env` file in the project root with:
-  ```
-  DATABASE_URL="file:./db/custom.db"
-  ```
-  (a SQLite database — no external DB server needed)
-
-### Steps
+## Quick start
 
 ```bash
-# 1. Extract the archive
-tar xzf chikitsahayak-source.tar.gz
-cd chikitsahayak-source
+# 1. Install dependencies
+bun install        # or: npm install
 
-# 2. Create the .env file
+# 2. Create the .env file (device-specific, NOT included in the repo)
 echo 'DATABASE_URL="file:./db/custom.db"' > .env
 mkdir -p db
 
-# 3. Install dependencies (use bun for speed, or npm/yarn)
-bun install
-# or: npm install
-
-# 4. Generate the Prisma client + push the schema to the DB
+# 3. Generate Prisma client + create the database
 bun run db:generate
 bun run db:push
-# or: npx prisma generate && npx prisma db push
 
-# 5. Start the dev server
+# 4. Start the dev server
 bun run dev
-# or: npm run dev
 
-# 6. Open http://localhost:3000 in your browser
+# 5. Open http://localhost:3000
 ```
 
-### Production build (optional)
-```bash
-bun run build
-bun run start
-```
+> **Note:** The `.env` file and `db/custom.db` are gitignored — each device creates its own. The ZAI SDK auth token (`/etc/.z-ai-config`) is provided by the environment and is also not in the repo.
 
-## Key features
+## Features
 
-- **AI Conversational History** — LLM chat with adaptive questions, red-flag detection, AYUSH mode
+- **AI Conversational History** — LLM chat with adaptive questions, red-flag detection, AYUSH mode, 12 Indian languages
 - **Document Digitization** — VLM reads prescriptions/lab reports in any Indian language
 - **AI Clinical Summary** — structured physician-readable summary (review/edit/confirm)
 - **ABDM/HIS Integration** — consent-based FHIR exchange
-- **12 Indian languages** — full UI translation + multilingual AI
-- **Normal/Graphical mode** — picture-based UI for uneducated users
-- **Web Speech API voices** — Google AI Studio-quality Indian voices (no API key)
-- **Accessibility** — auto-adapts font size to patient age, high-contrast, reduce-motion
-- **Siri-like voice assistant** — hands-free conversational mode
+- **Voice** — browser Web Speech API for both TTS (Google Indian voices) and speech recognition (no Chinese misrecognition)
+- **Accessibility** — auto-adapts font size to patient age, high-contrast, reduce-motion, graphical mode for uneducated users
 - **Privacy auto-reset** — wipes session 30s after completion
 
 ## Tech stack
-
 - Next.js 16 (App Router) + TypeScript 5
 - Prisma + SQLite
-- Tailwind CSS 4 + shadcn/ui
-- Zustand (state) + Web Speech API (TTS)
+- Tailwind CSS 4 + shadcn/ui (9 components)
+- Zustand (state) + Web Speech API (TTS + STT)
 - z-ai-web-dev-sdk (LLM, VLM, ASR)
 
-## Notes
+## Project structure
 
-- The `node_modules` and `.next` folders are NOT included — run `bun install` to regenerate them.
-- The database (`db/custom.db`) is NOT included — `bun run db:push` creates a fresh one.
-- TTS uses the browser's Web Speech API (Google Indian voices on Chrome/Edge) — works offline, no API key.
-- ASR (speech-to-text) uses the z-ai-web-dev-sdk — needs network access.
-- LLM (chat/summary) and VLM (document OCR) use the z-ai-web-dev-sdk.
+```
+prisma/schema.prisma         # 7 models (Patient, Encounter, Consent, ChatMessage, Document, ClinicalSummary, RedFlagAlert, ABDMRecord)
+src/app/
+  api/                       # 8 backend routes (patient, encounter, consent, chat, asr, documents, summary, abdm)
+  layout.tsx                 # Root layout + metadata
+  page.tsx                   # The single `/` route
+  globals.css                # Design system (medical crimson theme)
+src/components/
+  medikiosk/                 # 17 kiosk components
+  ui/                        # 9 shadcn/ui components (badge, button, card, checkbox, input, label, select, switch, textarea)
+src/lib/
+  db.ts                      # Prisma client
+  zai.ts                     # z-ai-web-dev-sdk singleton
+  store.ts                   # Zustand store
+  i18n.ts                    # 12 Indian languages + English translations
+  use-speech.ts              # Web Speech API TTS hook (Google Indian voices)
+  use-speech-recognition.ts  # Web Speech API STT hook (no Chinese misrecognition)
+  medical-prompts.ts         # AI system prompts
+  types.ts                   # Shared TypeScript interfaces
+public/chikitsahayak-logo.png # Official logo
+```
+
+## Scripts
+- `bun run dev` — start dev server on port 3000
+- `bun run lint` — run ESLint
+- `bun run db:push` — push schema to SQLite
+- `bun run db:generate` — regenerate Prisma client
+- `bun run build` — production build
