@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getZai } from "@/lib/zai";
+import { gemini } from "@/lib/gemini";
 import {
   buildHistorySystemPrompt,
   parseAssistantReply,
@@ -90,14 +90,22 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    const zai = await getZai();
-    const completion = await zai.chat.completions.create({
-      messages,
-      thinking: { type: "disabled" },
-    });
+ const prompt = messages
+  .map((m) => `${m.role}: ${m.content}`)
+  .join("\n\n");
 
-    const rawReply = completion.choices[0]?.message?.content ?? "";
-    const parsed = parseAssistantReply(rawReply);
+const response = await gemini.models.generateContent({
+  model: "gemini-3.6-flash",
+  contents: prompt,
+});
+const rawReply = response.text ?? "";;
+
+if (!rawReply) {
+  console.error("Empty Z.AI response:", completion);
+  throw new Error("Z.AI returned no response.");
+}
+
+const parsed = parseAssistantReply(rawReply);
 
     // Persist the assistant reply (clean text only, without internal tags)
     const saved = await db.chatMessage.create({
