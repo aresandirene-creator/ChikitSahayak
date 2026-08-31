@@ -80,8 +80,8 @@ export default function Home() {
             <button
               onClick={() => setShowAccessibility(true)}
               className="flex items-center justify-center rounded-full border border-red-200 bg-white hover:bg-red-50 text-red-700 size-9 transition-all shadow-soft"
-              aria-label="Accessibility settings"
-              title="Accessibility settings"
+              aria-label={t("headerAccessibilityTitle")}
+              title={t("headerAccessibilityTitle")}
             >
               <Accessibility className="size-4" />
             </button>
@@ -90,11 +90,11 @@ export default function Home() {
               <button
                 onClick={() => setShowVoiceAssistant(true)}
                 className="flex items-center gap-1.5 rounded-full bg-red-600 hover:bg-red-700 text-white px-2.5 sm:px-3 py-1.5 text-xs font-semibold transition-all shadow-soft-md hover:shadow-glow-red"
-                aria-label="Voice assistant"
-                title="Talk to ChikitsaHayak"
+                aria-label={t("headerVoiceAssistantTitle")}
+                title={t("headerVoiceAssistantTitle")}
               >
                 <Mic className="size-3.5" />
-                <span className="hidden md:inline">Talk</span>
+                <span className="hidden md:inline">{t("headerVoiceAssistant")}</span>
               </button>
             )}
             <PatientHeader />
