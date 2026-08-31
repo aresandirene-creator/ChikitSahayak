@@ -138,9 +138,16 @@ export function IdentifyStep() {
               <Input
                 id="name"
                 value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                onChange={(e) => {
+                  // Allow letters (incl. Indian scripts), spaces, dots, hyphens, apostrophes.
+                  // Strip digits and other symbols.
+                  const v = e.target.value.replace(/[0-9]/g, "").slice(0, 60);
+                  setForm({ ...form, name: v });
+                }}
                 placeholder={t("identifyNamePlaceholder")}
                 className="h-11"
+                maxLength={60}
+                autoComplete="name"
               />
             </div>
 
@@ -148,13 +155,10 @@ export function IdentifyStep() {
               <Label htmlFor="age" className="text-red-900">{t("identifyAge")}</Label>
               <Input
                 id="age"
-                type="number"
-                min={0}
-                max={120}
-                maxLength={3}
+                type="text"
                 value={form.age}
                 onChange={(e) => {
-                  // Limit to 3 digits and clamp to 0-120
+                  // Strip everything except digits; limit to 3 chars; clamp to 120
                   let v = e.target.value.replace(/[^0-9]/g, "").slice(0, 3);
                   if (v && Number(v) > 120) v = "120";
                   setForm({ ...form, age: v });
@@ -162,6 +166,8 @@ export function IdentifyStep() {
                 placeholder={t("identifyAgePlaceholder")}
                 className="h-11"
                 inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={3}
               />
               {form.age && Number(form.age) > 120 && (
                 <p className="text-xs text-red-600">Age must be between 0 and 120</p>
