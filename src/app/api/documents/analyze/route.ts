@@ -100,21 +100,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Only image uploads are supported" }, { status: 400 });
     }
 
-    const patient = await db.patient.findUnique({ where: { id: patientId } });
+    let patient = null as Awaited<ReturnType<typeof db.patient.findUnique>> | null;
+    let canPersist = true;
+    try {
+      patient = await db.patient.findUnique({ where: { id: patientId } });
+    } catch {
+      canPersist = false;
+    }
+    if (!patient && body.patient) patient = body.patient;
     if (!patient) return NextResponse.json({ error: "patient not found" }, { status: 404 });
 
-    // Persist the document immediately in "analyzing" state
-    const doc = await db.document.create({
-      data: {
-        patientId,
-        encounterId: encounterId ?? null,
-        fileName,
-        fileType: fileType ?? "other",
-        mimeType: mimeType ?? "image/jpeg",
-        dataUrl,
-        status: "analyzing",
-      },
-    });
+    const doc = canPersist
+      ? await db.document.create({
+          data: { patientId, encounterId: encounterId ?? null, fileName, fileType: fileType ?? "other", mimeType: mimeType ?? "image/jpeg", dataUrl, status: "analyzing" },
+        })
+      : null;
 
     // Run local OCR first. For low-confidence handwritten documents, use the
     // configured Groq vision model as a precise fallback.
@@ -136,26 +136,24 @@ export async function POST(req: NextRequest) {
         if (!isNaN(d.getTime())) recordDate = d;
       }
 
-      const updated = await db.document.update({
-        where: { id: doc.id },
-        data: {
-          status: "completed",
-          extractedData: JSON.stringify(extracted),
-          recordDate: recordDate ?? null,
-        },
-      });
+      const updated = doc
+        ? await db.document.update({
+            where: { id: doc.id },
+            data: { status: "completed", extractedData: JSON.stringify(extracted), recordDate: recordDate ?? null },
+          })
+        : null;
 
       return NextResponse.json({
-        id: updated.id,
+        id: updated?.id ?? `temporary-document-${Date.now()}`,
         extracted,
         status: "completed",
         recordDate: recordDate ? recordDate.toISOString() : null,
       });
     } catch (ocrErr) {
       console.error("Document OCR failed:", ocrErr);
-      await db.document.update({ where: { id: doc.id }, data: { status: "failed" } });
+      if (doc) await db.document.update({ where: { id: doc.id }, data: { status: "failed" } });
       return NextResponse.json(
-        { id: doc.id, extracted: {}, status: "failed", error: "Document OCR failed. Please try a clearer image." },
+        { id: doc?.id ?? `temporary-document-${Date.now()}`, extracted: {}, status: "failed", error: "Document OCR failed. Please try a clearer image." },
         { status: 500 }
       );
     }

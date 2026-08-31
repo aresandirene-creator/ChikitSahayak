@@ -79,6 +79,7 @@ export function DocumentsStep() {
           body: JSON.stringify({
             patientId: patient.id,
             encounterId,
+            patient,
             fileName: file.name,
             mimeType: file.type,
             dataUrl,
