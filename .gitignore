@@ -50,6 +50,8 @@ test
 prompt
 
 server.log
+.tesseract-cache/
+.npm-cache/
 # Skills directory
 /skills/
 # ChikitsaHayak project cleanup

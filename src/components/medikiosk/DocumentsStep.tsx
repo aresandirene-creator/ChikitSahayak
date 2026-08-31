@@ -326,6 +326,10 @@ function DocumentCard({
 
           {doc.status === "completed" && (
             <div className="mt-3 space-y-3">
+              <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-2 text-xs text-amber-900">
+                <AlertCircle className="mt-0.5 size-3.5 shrink-0" />
+                <span>OCR extraction — please verify handwritten text, medicines, and dosages with a clinician before use.</span>
+              </div>
               {diagnoses.length > 0 && (
                 <div>
                   <div className="text-xs font-semibold text-red-800 mb-1">{t("documentsExtractedDiagnoses")}</div>

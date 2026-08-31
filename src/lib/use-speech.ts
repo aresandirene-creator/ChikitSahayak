@@ -68,8 +68,10 @@ export function useSpeech() {
     };
   }, []);
 
-  // Find the best voice for a language: prefer Google voices, then any
-  // voice matching the locale, then fall back to en-IN / en-US.
+  // Find the best installed voice for a language. An English voice must not
+  // be assigned to Hindi/Tamil/etc.—doing so makes the browser pronounce the
+  // non-English text as English. The browser can still select a matching
+  // system voice from utter.lang when no explicit voice is available.
   const getBestVoiceForLang = useCallback(
     (lang: string): SpeechSynthesisVoice | null => {
       if (typeof window === "undefined" || !("speechSynthesis" in window)) return null;
@@ -85,12 +87,6 @@ export function useSpeech() {
       if (!v) v = all.find((x) => x.lang === locale);
       // 4. Any voice for the language prefix
       if (!v) v = all.find((x) => x.lang.startsWith(lang + "-"));
-      // 5. Indian English fallback
-      if (!v) v = all.find((x) => x.lang === "en-IN");
-      // 6. Any English
-      if (!v) v = all.find((x) => x.lang.startsWith("en"));
-      // 7. First available
-      if (!v) v = all[0];
       return v ?? null;
     },
     []
@@ -98,18 +94,23 @@ export function useSpeech() {
 
   const speak = useCallback(
     (text: string, lang: string = "en", opts?: { rate?: number; pitch?: number }) => {
-      if (typeof window === "undefined" || !("speechSynthesis" in window) || !text) return;
+      if (typeof window === "undefined" || !("speechSynthesis" in window) || !text) return false;
       // Cancel any ongoing speech
       window.speechSynthesis.cancel();
 
       const utter = new SpeechSynthesisUtterance(text);
+      const requestedLocale = LANG_TO_LOCALE[lang] ?? "en-IN";
       const voice = getBestVoiceForLang(lang);
+      // Without a matching installed voice, some browsers pronounce Telugu
+      // (and other Indian scripts) as English. Do not produce misleading
+      // speech; let the caller show an actionable message instead.
+      if (lang !== "en" && !voice) return false;
       if (voice) {
         utter.voice = voice;
-        utter.lang = voice.lang;
-      } else {
-        utter.lang = LANG_TO_LOCALE[lang] ?? "en-IN";
       }
+      // Always preserve the selected language, even if a matching voice is
+      // not currently exposed by the browser.
+      utter.lang = requestedLocale;
       utter.rate = opts?.rate ?? 0.95; // slightly slower for medical clarity
       utter.pitch = opts?.pitch ?? 1.0;
       utter.volume = 1.0;
@@ -120,6 +121,7 @@ export function useSpeech() {
 
       currentUtteranceRef.current = utter;
       window.speechSynthesis.speak(utter);
+      return true;
     },
     [getBestVoiceForLang]
   );

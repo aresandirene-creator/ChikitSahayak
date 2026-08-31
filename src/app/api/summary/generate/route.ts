@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getZai } from "@/lib/zai";
+import { generateChatText } from "@/lib/gemini";
 import { buildSummarySystemPrompt } from "@/lib/medical-prompts";
 import type { ClinicalSummarySections, ExtractedDocumentData } from "@/lib/types";
 
@@ -90,16 +90,12 @@ export async function POST(req: NextRequest) {
       redFlags.map((f) => ({ symptom: f.symptom, severity: f.severity, reasoning: f.reasoning }))
     );
 
-    const zai = await getZai();
-    const completion = await zai.chat.completions.create({
-      messages: [
-        { role: "assistant", content: systemPrompt },
-        { role: "user", content: userContext },
-      ],
-      thinking: { type: "disabled" },
-    });
+    const freeText = await generateChatText(`${systemPrompt}
 
-    const freeText = completion.choices[0]?.message?.content ?? "";
+${userContext}`);
+    if (!freeText.trim()) {
+      throw new Error("The configured AI provider returned an empty summary");
+    }
 
     // Try to parse the markdown summary into sections (best-effort)
     const sections: ClinicalSummarySections = {};

@@ -1,10 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { gemini } from "@/lib/gemini";
+import { generateChatText } from "@/lib/gemini";
 import {
   buildHistorySystemPrompt,
   parseAssistantReply,
 } from "@/lib/medical-prompts";
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function isProviderBusy(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return /"code"\s*:\s*503|\b503\b|UNAVAILABLE/i.test(message);
+}
+
+function isProviderQuotaExceeded(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return /"code"\s*:\s*429|\b429\b|RESOURCE_EXHAUSTED|quota exceeded/i.test(message);
+}
 
 // POST /api/chat — one turn of the AI history-taking conversation.
 // Body: { patientId, encounterId?, message, language? }
@@ -17,6 +29,12 @@ export async function POST(req: NextRequest) {
     const { patientId, encounterId, message, language } = body;
     if (!patientId || !message) {
       return NextResponse.json({ error: "patientId and message required" }, { status: 400 });
+    }
+    if (!process.env.GEMINI_API_KEY && !process.env.GROQ_API_KEY) {
+      return NextResponse.json(
+        { error: "AI chat is not configured. Set GROQ_API_KEY or GEMINI_API_KEY on the server." },
+        { status: 503 }
+      );
     }
 
     const patient = await db.patient.findUnique({ where: { id: patientId } });
@@ -40,7 +58,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Build completed-sections list
-    const completedSections = Array.from(
+    const completedSections: string[] = Array.from(
       new Set(priorTurns.filter((t) => t.section && t.section !== "general").map((t) => t.section))
     );
 
@@ -90,22 +108,31 @@ export async function POST(req: NextRequest) {
       },
     });
 
- const prompt = messages
-  .map((m) => `${m.role}: ${m.content}`)
-  .join("\n\n");
+    const prompt = messages
+      .map((m) => `${m.role}: ${m.content}`)
+      .join("\n\n");
 
-const response = await gemini.models.generateContent({
-  model: "gemini-3.6-flash",
-  contents: prompt,
-});
-const rawReply = response.text ?? "";;
+    let rawReply: string | undefined;
+    let lastError: unknown;
+    // Gemini occasionally returns a temporary 503 during traffic spikes.
+    // Retry twice before surfacing a friendly, actionable error to the kiosk.
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        rawReply = await generateChatText(prompt);
+        break;
+      } catch (error) {
+        lastError = error;
+        if (!isProviderBusy(error) || attempt === 2) throw error;
+        await sleep(500 * 2 ** attempt);
+      }
+    }
+    if (rawReply === undefined) throw lastError ?? new Error("The AI service did not return a response.");
 
-if (!rawReply) {
-  console.error("Empty Z.AI response:", completion);
-  throw new Error("Z.AI returned no response.");
-}
+    if (!rawReply) {
+      throw new Error("The AI returned an empty response. Please try again.");
+    }
 
-const parsed = parseAssistantReply(rawReply);
+    const parsed = parseAssistantReply(rawReply);
 
     // Persist the assistant reply (clean text only, without internal tags)
     const saved = await db.chatMessage.create({
@@ -158,6 +185,18 @@ const parsed = parseAssistantReply(rawReply);
     });
   } catch (err) {
     console.error("POST /api/chat error:", err);
+    if (isProviderQuotaExceeded(err)) {
+      return NextResponse.json(
+        { error: "The AI chat quota has been reached for this Gemini project. Please wait for the quota to reset or enable billing for this API key's project." },
+        { status: 429 }
+      );
+    }
+    if (isProviderBusy(err)) {
+      return NextResponse.json(
+        { error: "The AI service is temporarily busy. Please try again in a moment." },
+        { status: 503 }
+      );
+    }
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }
 }

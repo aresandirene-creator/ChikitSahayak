@@ -5,6 +5,7 @@ import { useChikitSahayakStore } from "@/lib/store";
 import { useI18n } from "@/lib/use-i18n";
 import { useSpeech } from "@/lib/use-speech";
 import { useSpeechRecognition } from "@/lib/use-speech-recognition";
+import { playOfflineTelugu } from "@/lib/offline-tts";
 import { toast } from "sonner";
 import {
   Mic, X, Loader2, Volume2, Bot,
@@ -21,7 +22,7 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
   const encounterId = useChikitSahayakStore((s) => s.encounterId);
   const uiLanguage = useChikitSahayakStore((s) => s.uiLanguage);
   const { t } = useI18n();
-  const { speak, cancel: cancelSpeech, speaking, supported: speechSupported } = useSpeech();
+  const { speak, cancel: cancelSpeech, speaking } = useSpeech();
   const {
     start: startRecognition,
     stop: stopRecognition,
@@ -38,11 +39,29 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
   const [lastReply, setLastReply] = useState("");
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const forceCloudAsrRef = useRef(false);
 
   useEffect(() => {
     startListening();
     return () => stopAll();
   }, []);
+
+  useEffect(() => {
+    if (!recognitionError) return;
+    setListening(false);
+    if (recognitionError === "network") {
+      // Chromium exposes SpeechRecognition even when its online recognition
+      // service is unavailable. Switch to our multilingual Whisper path.
+      forceCloudAsrRef.current = true;
+      toast.info("Browser voice recognition is unavailable. Switching to cloud transcription.");
+      void startListening();
+      return;
+    }
+    const message = recognitionError === "not-allowed" || recognitionError === "service-not-allowed"
+      ? "Microphone permission was denied. Allow it in your browser site settings and try again."
+      : `Voice input failed: ${recognitionError}`;
+    toast.error(message);
+  }, [recognitionError]);
 
   const stopAll = () => {
     try {
@@ -80,18 +99,22 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
     clearRecognition();
     setLastHeard("");
 
+    if (!window.isSecureContext) {
+      toast.error("Microphone access requires HTTPS (or http://localhost during development).");
+      return;
+    }
+
     // PRIMARY: browser SpeechRecognition — understands all 12 Indian
-    // languages natively (Google-quality on Chrome/Edge). No Chinese
-    // misrecognition. The recognized transcript triggers the chat via
-    // the recognitionTranscript effect below.
-    if (recognitionSupported) {
+    // languages natively (Google-quality on Chrome/Edge). The recognized
+    // transcript triggers the chat via the recognitionTranscript effect below.
+    if (recognitionSupported && !forceCloudAsrRef.current) {
       setListening(true);
       startRecognition(uiLanguage || "en");
       return;
     }
 
-    // FALLBACK: MediaRecorder + server ZAI ASR (Mandarin-focused — may
-    // misrecognize Indian languages as Chinese). Used on Firefox etc.
+    // FALLBACK: MediaRecorder + server Groq Whisper (multilingual). Used on
+    // Firefox and browsers without SpeechRecognition.
     setListening(true);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -124,7 +147,7 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
   };
 
   const stopListening = () => {
-    if (recognitionSupported) {
+    if (recognitionSupported && !forceCloudAsrRef.current) {
       stopRecognition();
     } else if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop();
@@ -149,12 +172,11 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
   }, [recognitionError]);
 
   useEffect(() => {
-    if (recognitionSupported) setListening(recognitionListening);
+    if (recognitionSupported && !forceCloudAsrRef.current) setListening(recognitionListening);
   }, [recognitionListening, recognitionSupported]);
 
   // Send a transcript to the AI chat and speak the reply. Shared by both
-  // the browser-Speech-recognition path (direct transcript) and the server-
-  // ASR fallback path (transcript from the ZAI SDK).
+  // the browser-Speech-recognition path and the Groq Whisper fallback path.
   const sendToChat = async (transcript: string) => {
     if (!patient || !transcript.trim()) return;
     setThinking(true);
@@ -173,15 +195,21 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
           withAudio: false, // we use Web Speech API for TTS
         }),
       });
-      const chatData = await chatRes.json();
+      const contentType = chatRes.headers.get("content-type") ?? "";
+      const chatData = contentType.includes("application/json")
+        ? await chatRes.json()
+        : { error: `The AI service returned an unexpected response (${chatRes.status}).` };
       if (!chatRes.ok) throw new Error(chatData.error || "Chat failed");
       setLastReply(chatData.reply);
 
       // Speak the reply using the browser's Web Speech API
       // (Google-quality Indian-language voices, client-side, no API key)
       setThinking(false);
-      if (speechSupported && chatData.reply) {
-        speak(chatData.reply, chatData.language || uiLanguage || "en");
+      if (chatData.reply) {
+        const replyLanguage = chatData.language || uiLanguage || "en";
+        if (!(await playOfflineTelugu(chatData.reply, replyLanguage)) && !speak(chatData.reply, replyLanguage) && replyLanguage === "te") {
+          toast.error("Telugu speech could not start. Please tap the voice button again.");
+        }
       }
     } catch (e) {
       toast.error((e as Error).message);
@@ -189,17 +217,17 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
     }
   };
 
-  // Fallback path: MediaRecorder → server ZAI ASR → sendToChat
+  // Fallback path: MediaRecorder → Groq Whisper → sendToChat
   const transcribeAndChat = async (blob: Blob) => {
     setThinking(true);
     try {
-      // 1. ASR (speech-to-text via the ZAI SDK — Mandarin-focused fallback)
+      // 1. ASR (speech-to-text via multilingual Groq Whisper)
       const arrayBuffer = await blob.arrayBuffer();
       const base64 = arrayBufferToBase64(arrayBuffer);
       const asrRes = await fetch("/api/asr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ audioBase64: base64, mimeType: blob.type }),
+        body: JSON.stringify({ audioBase64: base64, mimeType: blob.type, language: uiLanguage || "en" }),
       });
       const asrData = await asrRes.json();
       if (!asrRes.ok) throw new Error(asrData.error || "ASR failed");
@@ -321,8 +349,8 @@ export function VoiceAssistant({ onClose }: { onClose: () => void }) {
 
         {/* Footer hint */}
         <div className="bg-red-50/50 border-t border-red-100 px-5 py-3 text-center text-xs text-red-700/80">
-          {!speechSupported
-            ? "Voice output not supported on this browser — you can still speak to me."
+          {!recognitionSupported
+            ? "This browser uses cloud transcription for voice input."
             : "Just talk naturally in your language. I'll listen, think, and reply out loud."}
         </div>
       </div>

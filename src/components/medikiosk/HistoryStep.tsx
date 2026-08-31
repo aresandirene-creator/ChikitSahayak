@@ -7,6 +7,7 @@ import { useI18n } from "@/lib/use-i18n";
 import { useUiMode } from "@/lib/use-ui-mode";
 import { useSpeech } from "@/lib/use-speech";
 import { useSpeechRecognition } from "@/lib/use-speech-recognition";
+import { playOfflineTelugu } from "@/lib/offline-tts";
 import { getLanguageNativeName } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -65,6 +66,7 @@ export function HistoryStep() {
   const [transcribing, setTranscribing] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const forceCloudAsrRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -73,12 +75,33 @@ export function HistoryStep() {
     }
   }, [turns.length, isAiThinking]);
 
+  useEffect(() => {
+    if (!recognitionError) return;
+    setRecording(false);
+    if (recognitionError === "network") {
+      // The browser advertises SpeechRecognition but its online service is
+      // unavailable. Use the multilingual Groq Whisper recorder instead.
+      forceCloudAsrRef.current = true;
+      toast.info("Browser voice recognition is unavailable. Switching to cloud transcription.");
+      void startRecording();
+      return;
+    }
+    const message = recognitionError === "not-allowed" || recognitionError === "service-not-allowed"
+      ? "Microphone permission was denied. Allow it in your browser site settings and try again."
+      : `Voice input failed: ${recognitionError}`;
+    toast.error(message);
+  }, [recognitionError]);
+
   // Play AI reply via the browser's Web Speech API — Google AI Studio-quality
   // Indian-language voices (Google हिन्दी, Google தமிழ், etc.) on Chrome/Edge.
   // Server TTS has been removed entirely; this is the only voice output path.
-  const playAudio = (replyText: string, lang: string) => {
+  const playAudio = async (replyText: string, lang: string) => {
     if (!voiceEnabled || !replyText) return;
-    speak(replyText, lang || patient?.language || "en");
+    const selectedLanguage = lang || patient?.language || "en";
+    if (await playOfflineTelugu(replyText, selectedLanguage)) return;
+    if (!speak(replyText, selectedLanguage) && selectedLanguage === "te") {
+      toast.error("Telugu speech could not start. Please tap the voice button again.");
+    }
   };
 
   const stopAudio = () => {
@@ -121,7 +144,10 @@ export function HistoryStep() {
           // TTS is client-side via the Web Speech API — no server audio needed
         }),
       });
-      const data = await res.json();
+      const contentType = res.headers.get("content-type") ?? "";
+      const data = contentType.includes("application/json")
+        ? await res.json()
+        : { error: `The AI service returned an unexpected response (${res.status}).` };
       if (!res.ok) throw new Error(data.error || "Chat failed");
 
       const aiTurn: ChatTurn = {
@@ -153,7 +179,7 @@ export function HistoryStep() {
       }
       // Speak the AI reply via the browser's Web Speech API (Google AI Studio voices)
       if (voiceEnabled && data.reply) {
-        playAudio(data.reply, data.language || patient.language);
+        void playAudio(data.reply, data.language || patient.language);
       }
     } catch (e) {
       toast.error((e as Error).message);
@@ -216,19 +242,22 @@ export function HistoryStep() {
     stopAudio();
     clearRecognition();
 
+    if (!window.isSecureContext) {
+      toast.error("Microphone access requires HTTPS (or http://localhost during development).");
+      return;
+    }
+
     // PRIMARY: use the browser's SpeechRecognition API — it natively
-    // understands all 12 Indian languages (hi-IN, ta-IN, etc.) with Google's
-    // recognition quality on Chrome/Edge. The server ZAI ASR is Mandarin-
-    // focused and misrecognizes Indian speech as Chinese, so we only fall
-    // back to it when the browser doesn't support SpeechRecognition.
-    if (recognitionSupported) {
+    // understands all 12 Indian languages (hi-IN, ta-IN, te-IN, etc.) with
+    // Google-quality recognition on Chrome/Edge. Other browsers fall back to
+    // Groq Whisper, which supports multilingual transcription.
+    if (recognitionSupported && !forceCloudAsrRef.current) {
       setRecording(true);
       startRecognition(uiLanguage || "en");
       return;
     }
 
-    // FALLBACK: MediaRecorder + server ZAI ASR (Mandarin-focused — may
-    // misrecognize non-English/Chinese speech). Used on Firefox etc.
+    // FALLBACK: MediaRecorder + server Groq Whisper. Used on Firefox etc.
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -266,7 +295,7 @@ export function HistoryStep() {
   };
 
   const stopRecording = () => {
-    if (recognitionSupported) {
+    if (recognitionSupported && !forceCloudAsrRef.current) {
       stopRecognition();
     } else if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop();
@@ -274,13 +303,15 @@ export function HistoryStep() {
     setRecording(false);
   };
 
-  // When the browser SpeechRecognition produces a transcript, prefill the
-  // input box (the user reviews then taps Send).
+  // Send a completed browser-SpeechRecognition transcript directly to the
+  // AI. Previously this only prefilled the input, leaving voice users stuck
+  // unless they manually pressed Send after recording.
   useEffect(() => {
     if (recognitionTranscript) {
       setText(recognitionTranscript);
       setRecording(false);
-      toast.success("Transcribed");
+      toast.success("Voice message sent");
+      void sendMessage(recognitionTranscript);
     }
   }, [recognitionTranscript]);
 
@@ -294,7 +325,7 @@ export function HistoryStep() {
 
   // Sync recognition listening state with the recording flag
   useEffect(() => {
-    if (recognitionSupported) setRecording(recognitionListening);
+    if (recognitionSupported && !forceCloudAsrRef.current) setRecording(recognitionListening);
   }, [recognitionListening, recognitionSupported]);
 
   const transcribeBlob = async (blob: Blob) => {
@@ -305,7 +336,7 @@ export function HistoryStep() {
       const res = await fetch("/api/asr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ audioBase64: base64, mimeType: blob.type }),
+        body: JSON.stringify({ audioBase64: base64, mimeType: blob.type, language: uiLanguage || "en" }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "ASR failed");

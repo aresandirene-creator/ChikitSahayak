@@ -1,8 +1,91 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getZai } from "@/lib/zai";
-import { buildDocumentAnalysisPrompt } from "@/lib/medical-prompts";
+import { recognizeDocument } from "@/lib/local-ocr";
 import type { ExtractedDocumentData } from "@/lib/types";
+
+function firstJsonObject(text: string): string | null {
+  const start = text.indexOf("{");
+  if (start < 0) return null;
+  let depth = 0;
+  let quoted = false;
+  let escaped = false;
+  for (let index = start; index < text.length; index += 1) {
+    const char = text[index];
+    if (quoted) {
+      if (escaped) escaped = false;
+      else if (char === "\\\\") escaped = true;
+      else if (char === '"') quoted = false;
+      continue;
+    }
+    if (char === '"') quoted = true;
+    else if (char === "{") depth += 1;
+    else if (char === "}" && --depth === 0) return text.slice(start, index + 1);
+  }
+  return null;
+}
+
+function normalizeRecordDate(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  const parts = value.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2}|\d{4})$/);
+  if (!parts) return undefined;
+  const [, day, month, year] = parts;
+  const fullYear = year.length === 2 ? `20${year}` : year;
+  return `${fullYear}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+}
+
+function normalizeExtractedDocument(data: ExtractedDocumentData): ExtractedDocumentData {
+  const recordDate = normalizeRecordDate(data.recordDate);
+  return { ...data, ...(recordDate ? { recordDate } : {}) };
+}
+
+async function recognizeHandwritingWithGroq(
+  dataUrl: string,
+  fileType: string,
+  ayushMode: boolean
+): Promise<ExtractedDocumentData> {
+  const key = process.env.GROQ_API_KEY;
+  if (!key) throw new Error("GROQ_API_KEY is not configured");
+
+  const prompt = `Extract this ${fileType} image into one JSON object only. Do not explain your work.
+Use exactly these keys: documentType, recordDate, facility, physician, diagnoses, medicines, tests, procedures, vitalSigns, rawText.
+Use null for absent scalar values and [] for absent arrays. medicines must be an array of {name,dosage,frequency,duration}; vitalSigns must be an array of {name,value}.
+Transcribe only visually supported text. Mark unclear text in rawText as [unclear], and omit uncertain structured medical values. This extraction is for clinician review.${ayushMode ? " The document may use AYUSH terminology." : ""}`;
+
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+    body: JSON.stringify({
+      model: process.env.GROQ_VISION_MODEL ?? "qwen/qwen3.6-27b",
+      messages: [{
+        role: "user",
+        content: [
+          { type: "text", text: prompt },
+          { type: "image_url", image_url: { url: dataUrl } },
+        ],
+      }],
+      temperature: 0,
+      max_completion_tokens: 1800,
+      reasoning_effort: "none",
+    }),
+  });
+  const result = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(JSON.stringify(result ?? { status: response.status }));
+  const content = result?.choices?.[0]?.message?.content;
+  if (typeof content !== "string") throw new Error("Groq Vision returned an empty response");
+  const json = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/i)?.[1] ?? content;
+  try {
+    return normalizeExtractedDocument(JSON.parse(json.trim()) as ExtractedDocumentData);
+  } catch {
+    // Vision models occasionally add a short introduction despite the prompt.
+    // Recover the first JSON object instead of showing a generic OCR failure.
+    const object = firstJsonObject(json);
+    if (object) {
+      return normalizeExtractedDocument(JSON.parse(object) as ExtractedDocumentData);
+    }
+    throw new Error("Groq Vision returned non-JSON OCR output");
+  }
+}
 
 // POST /api/documents/analyze — VLM-powered document digitization.
 // Body: { patientId, encounterId?, fileName, mimeType, dataUrl, fileType? }
@@ -12,6 +95,9 @@ export async function POST(req: NextRequest) {
     const { patientId, encounterId, fileName, mimeType, dataUrl, fileType } = body;
     if (!patientId || !fileName || !dataUrl) {
       return NextResponse.json({ error: "patientId, fileName, dataUrl required" }, { status: 400 });
+    }
+    if (typeof dataUrl !== "string" || !dataUrl.startsWith("data:image/")) {
+      return NextResponse.json({ error: "Only image uploads are supported" }, { status: 400 });
     }
 
     const patient = await db.patient.findUnique({ where: { id: patientId } });
@@ -30,45 +116,17 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Run VLM analysis
+    // Run local OCR first. For low-confidence handwritten documents, use the
+    // configured Groq vision model as a precise fallback.
     try {
-      const zai = await getZai();
-      const prompt = buildDocumentAnalysisPrompt({
-        fileType: fileType ?? "other",
-        ayushMode: patient.ayushMode,
-      });
-
-      const response = await zai.chat.completions.createVision({
-        messages: [
-          {
-            role: "user",
-            content: [
-              { type: "text", text: prompt },
-              { type: "image_url", image_url: { url: dataUrl } },
-            ],
-          },
-        ],
-        thinking: { type: "disabled" },
-      });
-
-      const raw = response.choices[0]?.message?.content ?? "";
-      // Parse JSON (strip code fences if any)
-      let jsonStr = raw.trim();
-      const fenceMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/i);
-      if (fenceMatch) jsonStr = fenceMatch[1].trim();
-      // Find first { ... }
-      const firstBrace = jsonStr.indexOf("{");
-      const lastBrace = jsonStr.lastIndexOf("}");
-      if (firstBrace >= 0 && lastBrace > firstBrace) {
-        jsonStr = jsonStr.slice(firstBrace, lastBrace + 1);
-      }
-
-      let extracted: ExtractedDocumentData = {};
-      try {
-        extracted = JSON.parse(jsonStr);
-      } catch {
-        // Fallback: keep raw text
-        extracted = { rawText: raw };
+      const ocr = await recognizeDocument(dataUrl, patient.language);
+      let extracted: ExtractedDocumentData = { rawText: ocr.rawText };
+      if (ocr.confidence < 70 && process.env.GROQ_API_KEY) {
+        extracted = await recognizeHandwritingWithGroq(
+          dataUrl,
+          fileType ?? "other",
+          patient.ayushMode
+        );
       }
 
       // Parse record date
@@ -93,12 +151,12 @@ export async function POST(req: NextRequest) {
         status: "completed",
         recordDate: recordDate ? recordDate.toISOString() : null,
       });
-    } catch (vlmErr) {
-      console.error("VLM analysis failed:", vlmErr);
+    } catch (ocrErr) {
+      console.error("Document OCR failed:", ocrErr);
       await db.document.update({ where: { id: doc.id }, data: { status: "failed" } });
       return NextResponse.json(
-        { id: doc.id, extracted: {}, status: "failed", error: (vlmErr as Error).message },
-        { status: 200 }
+        { id: doc.id, extracted: {}, status: "failed", error: "Document OCR failed. Please try a clearer image." },
+        { status: 500 }
       );
     }
   } catch (err) {

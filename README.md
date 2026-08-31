@@ -12,8 +12,11 @@
 bun install        # or: npm install
 
 # 2. Create the .env file (device-specific, NOT included in the repo)
-echo 'DATABASE_URL="file:./db/custom.db"' > .env
-mkdir -p db
+echo 'DATABASE_URL="file:./dev.db"' > .env
+# Add one AI-chat provider key (Groq is preferred; Gemini is a fallback):
+# GROQ_API_KEY="your-key"
+# GEMINI_API_KEY="your-key"
+mkdir -p prisma
 
 # 3. Generate Prisma client + create the database
 bun run db:generate
@@ -25,12 +28,12 @@ bun run dev
 # 5. Open http://localhost:3000
 ```
 
-> **Note:** The `.env` file and `db/custom.db` are gitignored — each device creates its own. The ZAI SDK auth token (`/etc/.z-ai-config`) is provided by the environment and is also not in the repo.
+> **Note:** The `.env` file and SQLite database are gitignored — each device creates its own. AI History uses `GROQ_API_KEY` when available, otherwise `GEMINI_API_KEY`; never expose either key with a `NEXT_PUBLIC_` prefix. Document OCR uses local Tesseract and needs no API key. Its language data is downloaded once and cached in `.tesseract-cache/`.
 
 ## Features
 
 - **AI Conversational History** — LLM chat with adaptive questions, red-flag detection, AYUSH mode, 12 Indian languages
-- **Document Digitization** — VLM reads prescriptions/lab reports in any Indian language
+- **Document Digitization** — local Tesseract OCR reads prescription/lab-report text without paid API quotas
 - **AI Clinical Summary** — structured physician-readable summary (review/edit/confirm)
 - **ABDM/HIS Integration** — consent-based FHIR exchange
 - **Voice** — browser Web Speech API for both TTS (Google Indian voices) and speech recognition (no Chinese misrecognition)
@@ -42,7 +45,7 @@ bun run dev
 - Prisma + SQLite
 - Tailwind CSS 4 + shadcn/ui (9 components)
 - Zustand (state) + Web Speech API (TTS + STT)
-- z-ai-web-dev-sdk (LLM, VLM, ASR)
+- Groq/Gemini API (AI history assistant) and local Tesseract OCR (document text extraction)
 
 ## Project structure
 
