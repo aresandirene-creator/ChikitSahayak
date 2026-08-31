@@ -48,6 +48,22 @@ export function IdentifyStep() {
       toast.error(t("identifyName") + " " + t("required").toLowerCase());
       return;
     }
+    // Age validation: 0-120
+    if (form.age && (Number(form.age) < 0 || Number(form.age) > 120)) {
+      toast.error("Age must be between 0 and 120");
+      return;
+    }
+    // Indian phone validation: if provided, must be 10 digits starting 6-9
+    if (form.phone) {
+      if (form.phone.length !== 10) {
+        toast.error("Phone number must be exactly 10 digits");
+        return;
+      }
+      if (!/^[6-9]\d{9}$/.test(form.phone)) {
+        toast.error("Indian mobile numbers start with 6, 7, 8 or 9");
+        return;
+      }
+    }
     setSubmitting(true);
     try {
       const res = await fetch("/api/patient", {
@@ -135,11 +151,21 @@ export function IdentifyStep() {
                 type="number"
                 min={0}
                 max={120}
+                maxLength={3}
                 value={form.age}
-                onChange={(e) => setForm({ ...form, age: e.target.value })}
+                onChange={(e) => {
+                  // Limit to 3 digits and clamp to 0-120
+                  let v = e.target.value.replace(/[^0-9]/g, "").slice(0, 3);
+                  if (v && Number(v) > 120) v = "120";
+                  setForm({ ...form, age: v });
+                }}
                 placeholder={t("identifyAgePlaceholder")}
                 className="h-11"
+                inputMode="numeric"
               />
+              {form.age && Number(form.age) > 120 && (
+                <p className="text-xs text-red-600">Age must be between 0 and 120</p>
+              )}
             </div>
 
             <div className="space-y-1.5">
@@ -192,10 +218,23 @@ export function IdentifyStep() {
               <Input
                 id="phone"
                 value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                onChange={(e) => {
+                  // Indian mobile numbers: exactly 10 digits, starting 6-9
+                  let v = e.target.value.replace(/[^0-9]/g, "").slice(0, 10);
+                  setForm({ ...form, phone: v });
+                }}
                 placeholder={t("identifyPhonePlaceholder")}
                 className="h-11"
+                inputMode="numeric"
+                maxLength={10}
+                pattern="[6-9][0-9]{9}"
               />
+              {form.phone.length > 0 && form.phone.length < 10 && (
+                <p className="text-xs text-red-600">Indian mobile number must be 10 digits (starts 6-9)</p>
+              )}
+              {form.phone.length === 10 && form.phone[0] && !/[6-9]/.test(form.phone[0]) && (
+                <p className="text-xs text-red-600">Indian mobile numbers start with 6, 7, 8 or 9</p>
+              )}
             </div>
 
             <div className="space-y-1.5">

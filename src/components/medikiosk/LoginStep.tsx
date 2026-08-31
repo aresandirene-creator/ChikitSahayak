@@ -159,11 +159,20 @@ export function LoginStep() {
                   <Input
                     id="login-phone"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={(e) => {
+                      // Indian mobile: 10 digits, starting 6-9
+                      const v = e.target.value.replace(/[^0-9]/g, "").slice(0, 10);
+                      setPhone(v);
+                    }}
                     placeholder={t("loginFieldPhonePlaceholder")}
                     className="h-11 border-red-200"
-                    inputMode="tel"
+                    inputMode="numeric"
+                    maxLength={10}
+                    pattern="[6-9][0-9]{9}"
                   />
+                  {phone.length > 0 && phone.length < 10 && (
+                    <p className="text-xs text-red-600">Indian mobile number must be 10 digits (starts 6-9)</p>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-3">
